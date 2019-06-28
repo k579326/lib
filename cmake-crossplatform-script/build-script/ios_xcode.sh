@@ -1,0 +1,1 @@
+cmake -GXcode -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain-file/mac\&ios-cmake-toochain/ios_64.cmake -DCMAKE_OSX_ARCHITECTURES=arm64  -DDOE_ENV_RUNNING=1 -DIOS=TRUE -DENABLE_BITCODE=FALSE ..
