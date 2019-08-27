@@ -1,0 +1,36 @@
+
+#ifndef _CP_ERROR_H_
+#define _CP_ERROR_H_
+
+#define  CP_ERROR_OK                        0x00000000
+#define  CP_ERROR_INVALID_PARAM             0x00001000
+
+#define  CP_ERROR_FILE_NOT_EXIST            0x00002000                  // 文件或者目录不存在
+#define  CP_ERROR_FILE_OPEN_FAILED          0x00002001
+#define  CP_ERROR_FILE_CLOSE_FAILED         0x00002002
+#define  CP_ERROR_FILE_SEEK_FAILED          0x00002003
+#define  CP_ERROR_FILE_TELL_FAILED          0x00002004
+#define  CP_ERROR_FILE_RENAME_FAILED        0x00002005
+#define  CP_ERROR_FILE_REMOVE_FAILED        0x00002006
+#define  CP_ERROR_FILE_READ_FAILED          0x00002007
+#define  CP_ERROR_FILE_WRITE_FAILED         0x00002008
+#define  CP_ERROR_FILE_FLUSH_FAILED         0x00002009
+#define  CP_ERROR_FILE_CHECKEXIST_FAILED    0x0000200A
+#define  CP_ERROR_PATH_GETLIBPATH_FAILED    0x0000200B
+#define  CP_ERROR_PATH_GETEXEPATH_FAILED    0x0000200C
+#define  CP_ERROR_DIR_ENTER_FAILED          0x0000200D                  // 进入目录失败，可能路径中某一级已经存在，但它不是一个目录
+#define  CP_ERROR_DIR_CREATE_FAILED         0x0000200E
+#define  CP_ERROR_DIR_GETSPECIALDIR_FAILED  0x0000200F
+#define  CP_ERROR_DIR_OPEN_FAILED           0x00002010
+#define  CP_ERROR_DIR_READ_FAILED           0x00002011
+#define  CP_ERROR_DIR_CLOSE_FAILED          0x00002012
+#define  CP_ERROR_FILE_EOF                  0x00002013
+
+#define  CP_ERROR_BUFFLEN_NOT_ENOUGH        0x00002100                  
+#define  CP_ERROR_PATH_PARSE_FAILED         0x00002101
+
+#endif
+
+
+
+
