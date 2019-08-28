@@ -28,9 +28,9 @@ public:
 private:
 
     std::mutex mutex_;
-    LogInitInfo logInfo_;
+    LogInitInfo loginfo_;
     std::string version_{""};
-    std::string logPath_{""};
+    std::string logpath_{""};
 
 private:
     static bool isInited_;
@@ -53,7 +53,7 @@ bool Logger::IsInited()
 
 Logger::Logger()
 {
-    memset(&logInfo_, 0, sizeof(logInfo_));
+    memset(&loginfo_, 0, sizeof(loginfo_));
 }
 
 void Logger::init(const LogInitInfo& info, const std::string& version, const std::string& path)
@@ -63,9 +63,9 @@ void Logger::init(const LogInitInfo& info, const std::string& version, const std
         return;
     }
 
-    logInfo_ = info;
+    loginfo_ = info;
     version_ = version;
-    logPath_ = path;
+    logpath_ = path;
 
     isInited_ = true;
 }
