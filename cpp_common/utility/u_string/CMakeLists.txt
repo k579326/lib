@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.8)
 
 project(stringutil)
 
+set(CMAKE_CXX_STANDARD 11)
 add_library(stringutil util_string.h util_string.cc)
 
 if (DEFINED RUNTEST)

@@ -37,8 +37,10 @@ int ListDir(const char* path)
         if (info->d_type == DT_DIR)
         {
             strcat(curpath, path);
-            strcat(curpath, "\\");
+            strcat(curpath, "/");
             strcat(curpath, info->d_name);
+            
+            
             ListDir(curpath);
         }
 
@@ -56,5 +58,5 @@ int main()
 	
     err = CommRemoveDir("E:\\testRemove\\remove", true);
 	
-    return 0;
+    return err;
 }

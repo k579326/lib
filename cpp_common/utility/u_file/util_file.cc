@@ -6,8 +6,11 @@
 #ifndef WIN32
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #else
 #include <windows.h>
+#include <io.h>
+
 #ifndef F_OK
 #define F_OK 0
 #endif
@@ -15,7 +18,6 @@
 #endif
 
 
-#include <io.h>
 #include <stdio.h>
 #include <memory>
 #include <algorithm>
@@ -239,12 +241,10 @@ namespace fileutil
         return path_;
     }
 
-
     bool File::IsOpened(void) const
     {
         return file_ != nullptr && !path_.empty();
     }
-
 
     /* ============= static function =============== */
     int File::Remove(const std::string& filepath)
@@ -309,7 +309,7 @@ namespace fileutil
 #ifdef WIN32
         HANDLE filehandle = CreateFileA(filename.c_str(), 
             GENERIC_WRITE | GENERIC_READ, 
-            0, 
+            0,
             NULL, 
             OPEN_EXISTING, 
             FILE_ATTRIBUTE_NORMAL,
@@ -320,8 +320,7 @@ namespace fileutil
         }
 
         LARGE_INTEGER li;
-        li.HighPart = length;
-        li.LowPart = 0;
+        li.QuadPart = length;
 
         if (SetFilePointerEx(filehandle, li, NULL, FILE_BEGIN) == FALSE) {
             CloseHandle(filehandle);
@@ -329,6 +328,8 @@ namespace fileutil
         }
 
         if (SetEndOfFile(filehandle) == FALSE) {
+            DWORD dwerr = GetLastError();
+
             CloseHandle(filehandle);
             return false;
         }

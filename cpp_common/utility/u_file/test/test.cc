@@ -9,6 +9,7 @@ static int testrw()
     int err;
     fileutil::File f("E:\\Test\\testrwfile");
 
+
     err = f.Open("wb");
     if (err != 0) {
 
@@ -24,6 +25,11 @@ static int testrw()
     }
 
     f.Close();
+
+    if (fileutil::File::Size("E:\\Test\\testrwfile") != sizeof(testdata))
+    {
+        return -1;
+    }
 
     std::string readdata;
     err = f.Open("rb");
@@ -46,26 +52,56 @@ static int testcopy()
 {
     
     int err;
-    fileutil::File f("E:\\Test\\testrwfile");
-
 
     fileutil::File::Copy("E:\\Test\\testrwfile", "E:\\Test\\testrwfile1", false);
     fileutil::File::Copy("E:\\Test\\testrwfile1", "E:\\Test\\testrwfile2", false);
     fileutil::File::Copy("E:\\Test\\testrwfile2", "E:\\Test\\testrwfile", false);
 
-
     fileutil::File::Remove("E:\\Test\\testrwfile");
     fileutil::File::Remove("E:\\Test\\testrwfile1");
     fileutil::File::Remove("E:\\Test\\testrwfile2");
+
+    if (fileutil::File::IsExist("E:\\Test\\testrwfile") ||
+        !fileutil::File::IsExist("E:\\Test\\testrwfile1") ||
+        !fileutil::File::IsExist("E:\\Test\\testrwfile2")
+        )
+    {
+        return -1;
+    }
 
     return 0;
 }
 
 
+static int TestTruncate()
+{ 
+    
+    fileutil::File f("E:\\Test\\empty");
+
+    f.Open("wb");
+    f.Close();
+
+    if (!fileutil::File::Truncate("E:\\Test\\empty", 1024 * 1024 * 100)) {
+        return -1;
+    }
+    if (!fileutil::File::Truncate("E:\\Test\\empty", 1024 * 1024 * 10)) {
+        reutrn -1;
+    }
+
+    return 0;
+}
+
 int main()
 {
-    testrw();
-    testcopy();
+    if (testrw()) {
+        return -1
+    }
+    if (testcopy()) {
+        return -1;
+    }
+    if (TestTruncate()) {
+        return -1;
+    }
 
     return 0;
 }
