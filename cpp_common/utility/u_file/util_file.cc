@@ -328,8 +328,6 @@ namespace fileutil
         }
 
         if (SetEndOfFile(filehandle) == FALSE) {
-            DWORD dwerr = GetLastError();
-
             CloseHandle(filehandle);
             return false;
         }
