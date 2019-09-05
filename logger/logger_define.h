@@ -23,13 +23,14 @@ enum RunModel
 
 enum LogColumns
 {
-    kDateTime = 0x01,
-    kThreadId = 0x02,
-    kLogLevel = 0x04,
-    kFileName = 0x08,
-    kLineNum = 0x10,
-    kErrorNum = 0x20,
-    kVersion = 0x40
+    kDateTime = 0x01,        // 全等级有效
+    kThreadId = 0x02,        // 全等级有效
+    kLogLevel = 0x04,        // 全等级有效
+    kFileName = 0x08,        // 低于kErrorLevel等级有效
+    kLineNum = kFileName,    // 与kFileName共存
+    kFunction = 0x20,        // 低于kFatalLevel等级有效
+    kErrorNum = 0x40,        // 全等级有效
+    kVersion = 0x80          // 全等级有效
 };
 
 enum LogOutput

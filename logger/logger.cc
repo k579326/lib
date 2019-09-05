@@ -1,16 +1,18 @@
 
 #include "logger.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 
 #include <string>
 #include <thread>
 #include <mutex>
 
+#include "core/printer.h"
 
+using Printer = std::shared_ptr<PrinterInterface>;
 
 class Logger
 {
@@ -25,12 +27,15 @@ public:
     void init(const LogInitInfo& info, const std::string& version, const std::string& path);
     void uninit();
 
+    void print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...);
+
 private:
 
     std::mutex mutex_;
     LogInitInfo loginfo_;
-    std::string version_{""};
-    std::string logpath_{""};
+    std::string version_ = "";
+    std::string logpath_ = "";
+    Printer printer_ = nullptr;
 
 private:
     static bool isInited_;
@@ -55,6 +60,11 @@ Logger::Logger()
 {
     memset(&loginfo_, 0, sizeof(loginfo_));
 }
+Logger::~Logger()
+{
+
+}
+
 
 void Logger::init(const LogInitInfo& info, const std::string& version, const std::string& path)
 {
@@ -67,13 +77,49 @@ void Logger::init(const LogInitInfo& info, const std::string& version, const std
     version_ = version;
     logpath_ = path;
 
+    // init printer
+    if (info.runModel == RunModel::kAsync) { 
+        printer_.reset(new ThreadPrinter());
+    }
+    else
+    {
+        printer_.reset(new SyncPrinter());
+    }
+
     isInited_ = true;
 }
 
 void Logger::uninit()
 {
+    memset(&loginfo_, 0, sizeof(loginfo_));
+    logpath_ = "";
+    version_ = "";
+}
+
+void Logger::print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...)
+{
+    if (level < loginfo_.level) { 
+        return ;
+    }
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -81,7 +127,18 @@ void Logger::uninit()
 
 int LogInit(const LogInitInfo& info, const char* version, const char* path)
 {
-    
+    std::string local_version;
+
+    if (!path) {
+        return -1;
+    }
+    if (!version) { 
+        local_version = "";
+    }
+
+    Logger::GetInstance()->init(info, local_version, path);
+
+    return 0;
 }
             
 void _log_print_(LogLevels level, 
@@ -90,9 +147,11 @@ void _log_print_(LogLevels level,
                 int linenum, 
                 const char* format, ...)
 {
+    if (!Logger::GetInstance()->IsInited()) {
+        return;
+    }
 
-
-
+    assert(filename && function);
 
 
 }
