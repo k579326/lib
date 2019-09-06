@@ -107,6 +107,16 @@ namespace fileutil
 
         return 0;
     }
+
+    int File::Seek(int32_t off, int where)
+    {
+        if (file_) { 
+            return -1;
+        }
+
+        return fseek(file_, off, where);
+    }
+
     int File::Close()
     {
         if (file_) {
@@ -170,7 +180,7 @@ namespace fileutil
         return 0;
     }
 
-    int File::Write(const unsigned char* indata, uint32_t& insize)
+    int File::Write(const unsigned char* indata, uint32_t insize)
     {
         int ret = 0;
         uint32_t writesize = 0;
@@ -187,7 +197,6 @@ namespace fileutil
             ret = 0;
         }
 
-        insize = writesize;
         return ret;
     }
 

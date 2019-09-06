@@ -32,12 +32,12 @@ namespace fileutil
         */
         int Open(const std::string& mode);
         int Close();
-
+        int Seek(int32_t off, int where);
         int Read(std::string* out, uint32_t expected_size);
         int ReadLine(std::string* out, uint32_t expected_size);
         bool IsEOF();
 
-        int Write(const unsigned char* indata, uint32_t& insize);
+        int Write(const unsigned char* indata, uint32_t insize);
         
         int Flush();
 

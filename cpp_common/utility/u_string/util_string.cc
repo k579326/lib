@@ -5,6 +5,7 @@
 #include <cctype>
 #include <algorithm>
 
+#include "md5.h"
 
 namespace stringutil
 {
@@ -173,5 +174,57 @@ namespace stringutil
     std::string Base64Decode(const std::string& base64)
     {
         return "";
+    }
+    
+    // md5
+    std::string Md5OfBlock(const string& content)
+    {
+        std::string byte_md5;
+        MD5_CTX ctx;
+        unsigned char digest[16];
+        MD5Init(&ctx);
+        MD5Update(&ctx, (unsigned char*)content.c_str(), content.size());
+        MD5Final(&ctx, digest);
+        
+        byte_md5.assign((char*)digest, 16);
+        return BinToHexstr(byte_md5, false);
+    }
+    std::string Md5OfFile(const string& filepath
+    {
+        const int kBlockSize = 1024 * 1024;
+   
+        FILE* fp = fopen(filepath.c_str(), "rb");
+        if (!fp) {
+            return "";
+        }
+        
+        std::string byte_md5;
+        MD5_CTX ctx;
+        unsigned char digest[16];
+        unsigned char buf[kBlockSize];
+        int actulsize;
+        
+        MD5Init(&ctx);
+        while (1)
+        {
+            actulsize = fread(buf, 1, kBlockSize, fp);
+            if (actulsize != kBlockSize && !feof(fp)) 
+            {
+                fclose(fp);
+                return "";
+            }
+            
+            MD5Update(&ctx, buf, actulsize);
+            
+            if (feof(fp)) {
+                break;
+            }
+        }
+        
+        MD5Final(&ctx, digest);
+        fclose(fp);
+        
+        byte_md5.assign((char*)digest, 16);
+        return BinToHexstr(byte_md5, false);
     }
 };

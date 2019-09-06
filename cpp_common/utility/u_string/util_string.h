@@ -31,6 +31,9 @@ namespace stringutil
 	// 字节数组与base64转换
     std::string Base64Encode(const std::string& src);
     std::string Base64Decode(const std::string& base64);
+    
+    std::string Md5OfBlock(const string& content);
+    std::string Md5OfFile(const string& filepath);
 };
 
 
