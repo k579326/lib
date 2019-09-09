@@ -24,10 +24,10 @@ public:
     static Logger* GetInstance();
     static bool IsInited();
 
-    void init(const LogInitInfo& info, const std::string& version, const std::string& path);
-    void uninit();
+    void Init(const LogInitInfo& info, const std::string& version, const std::string& path);
+    void Uninit();
 
-    void print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...);
+    void Print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...);
 
 private:
 
@@ -66,7 +66,7 @@ Logger::~Logger()
 }
 
 
-void Logger::init(const LogInitInfo& info, const std::string& version, const std::string& path)
+void Logger::Init(const LogInitInfo& info, const std::string& version, const std::string& path)
 {
     if (isInited_)
     {
@@ -89,14 +89,14 @@ void Logger::init(const LogInitInfo& info, const std::string& version, const std
     isInited_ = true;
 }
 
-void Logger::uninit()
+void Logger::Uninit()
 {
     memset(&loginfo_, 0, sizeof(loginfo_));
     logpath_ = "";
     version_ = "";
 }
 
-void Logger::print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...)
+void Logger::Print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...)
 {
     if (level < loginfo_.level) { 
         return ;

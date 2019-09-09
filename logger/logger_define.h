@@ -3,14 +3,14 @@
 #define _LOGGER_DEFINE_H_
 
 
-// Ğ¡ÓÚµ±Ç°ÈÕÖ¾µÈ¼¶µÄ´òÓ¡²»»áÊä³öµ½ÈÕÖ¾
+// å°äºå½“å‰æ—¥å¿—ç­‰çº§çš„æ‰“å°ä¸ä¼šè¾“å‡ºåˆ°æ—¥å¿—
 enum LogLevels
 {
-	kDebugLevel	= 0,	    // µ÷ÊÔÈÕÖ¾,
-	kInforLevel,			// ÆÕÍ¨
-	kWarningLevel,			// ¾¯¸æĞÅÏ¢
-	kErrorLevel,			// ³ö´íµ«²»Ó°Ïì³ÌĞò¼ÌĞøÔËĞĞµÄĞÅÏ¢
-	kFatalLevel,			// µ¼ÖÂ³ÌĞòÒì³£ÖĞÖ¹µÄ´íÎóĞÅÏ¢
+	kDebugLevel	= 0,	    // è°ƒè¯•æ—¥å¿—,
+	kInforLevel,			// æ™®é€š
+	kWarningLevel,			// è­¦å‘Šä¿¡æ¯
+	kErrorLevel,			// å‡ºé”™ä½†ä¸å½±å“ç¨‹åºç»§ç»­è¿è¡Œçš„ä¿¡æ¯
+	kFatalLevel,			// å¯¼è‡´ç¨‹åºå¼‚å¸¸ä¸­æ­¢çš„é”™è¯¯ä¿¡æ¯
 };
 
 
@@ -23,14 +23,13 @@ enum RunModel
 
 enum LogColumns
 {
-    kDateTime = 0x01,        // È«µÈ¼¶ÓĞĞ§
-    kThreadId = 0x02,        // È«µÈ¼¶ÓĞĞ§
-    kLogLevel = 0x04,        // È«µÈ¼¶ÓĞĞ§
-    kFileName = 0x08,        // µÍÓÚkErrorLevelµÈ¼¶ÓĞĞ§
-    kLineNum = kFileName,    // ÓëkFileName¹²´æ
-    kFunction = 0x20,        // µÍÓÚkFatalLevelµÈ¼¶ÓĞĞ§
-    kErrorNum = 0x40,        // È«µÈ¼¶ÓĞĞ§
-    kVersion = 0x80          // È«µÈ¼¶ÓĞĞ§
+    kDateTime = 0x01,        // å…¨ç­‰çº§æœ‰æ•ˆ
+    kThreadId = 0x02,        // å…¨ç­‰çº§æœ‰æ•ˆ
+    kLogLevel = 0x04,        // å…¨ç­‰çº§æœ‰æ•ˆ
+    kFileInfo = 0x08,        // ä½äºkErrorLevelç­‰çº§æœ‰æ•ˆ
+    kFunction = 0x20,        // ä½äºkFatalLevelç­‰çº§æœ‰æ•ˆ
+    kErrorNum = 0x40,        // å…¨ç­‰çº§æœ‰æ•ˆ
+    kVersion = 0x80          // å…¨ç­‰çº§æœ‰æ•ˆ
 };
 
 enum LogOutput

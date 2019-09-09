@@ -13,6 +13,9 @@ public:
     ~Formatter();
 
     std::string Format(LogLevels level, const std::string& filename, const std::string& function, int linenum);
+private:
+
+    void AdjustOutputColumn(LogLevels level);
 
 private:
     int column_;
