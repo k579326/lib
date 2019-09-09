@@ -28,7 +28,6 @@ enum LogColumns
     kLogLevel = 0x04,        // 全等级有效
     kFileInfo = 0x08,        // 低于kErrorLevel等级有效
     kFunction = 0x20,        // 低于kFatalLevel等级有效
-    kErrorNum = 0x40,        // 全等级有效
     kVersion = 0x80          // 全等级有效
 };
 
