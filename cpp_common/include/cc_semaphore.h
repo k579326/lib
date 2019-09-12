@@ -1,7 +1,7 @@
 
-/* 
+/*
 * c++11 信号量
-* 
+*
 * author: guok
 */
 
@@ -21,19 +21,24 @@ namespace std
     class semaphore
     {
     public:
-        semaphore(int size) : max_(size), idle_(size)
-        {
-        }
-        ~semaphore()
-        {
-        }
-        
+        semaphore() : max_(0), idle_(0) {}
+        semaphore(int size) : max_(size), idle_(size) {}
+        ~semaphore() {}
+
         semaphore(const semaphore&) = delete;
         semaphore(semaphore&&) = delete;
         semaphore& operator=(const semaphore&) = delete;
         semaphore& operator==(semaphore&&) = delete;
-        
-        /* 占用一个资源，最多等待ms毫秒, 如果为-1则不返回 */
+
+        /* 重置信号量, 用于延迟初始化，不要在使用信号量过程中进行重置 */
+        void reset(int size)
+        {
+            max_ = size;
+            idle_ = size;
+        }
+
+
+        /* 占用一个资源，最多等待ms毫秒, 如果参数ms为0则不返回 */
         bool wait(std::chrono::milliseconds ms)
         {
             std::unique_lock<std::mutex> auto_lock(lock_);
@@ -54,7 +59,7 @@ namespace std
 
             return true;
         }
-        
+
         /* 获取到了信号量则返回true, 否则返回false */
         bool try_wait()
         {
@@ -70,7 +75,7 @@ namespace std
 
             return true;
         }
-        
+
         /* 释放信号量一个资源 */
         void post()
         {
@@ -85,19 +90,19 @@ namespace std
             idle_++;
             return;
         }
-        
+
     private:
-        
+
         int idle_;
         int max_;
-        
+
         std::mutex lock_;
         std::condition_variable cond_;
-        
-    };
-    
 
-    
+    };
+
+
+
 };
 
 
