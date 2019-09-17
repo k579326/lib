@@ -25,16 +25,6 @@ ThreadPool::~ThreadPool()
     std::for_each(pool_.begin(), pool_.end(), [](std::thread& t)->void {  t.join(); });
 }
 
-void ThreadPool::PushWorkQueue(ThreadProc f)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    queue_.push(f);
-    cond_.notify_one();
-}
-
-
-
 void ThreadPool::_ThreadProcess()
 {
     while (true)
@@ -44,7 +34,7 @@ void ThreadPool::_ThreadProcess()
             break;
         }
 
-        ThreadProc f;
+        std::pair<_ThreadProc, _FinCallBack> f;
 
         {
             std::unique_lock<std::mutex> lock(mutex_);
@@ -60,7 +50,8 @@ void ThreadPool::_ThreadProcess()
             queue_.pop();
         }
 
-        f();
+        if (f.first != nullptr) f.first();
+        if (f.second != nullptr) f.second();
     }
 
 }
