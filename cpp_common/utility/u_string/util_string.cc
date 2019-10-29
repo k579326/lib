@@ -5,8 +5,6 @@
 #include <cctype>
 #include <algorithm>
 
-#include "md5.h"
-
 namespace stringutil
 {
     static char _HexchOfNum(uint8_t num, bool upper)
@@ -101,6 +99,10 @@ namespace stringutil
         std::vector<std::string> container;
         size_t s_pos = 0, e_pos = 0;
 
+        if (str.empty()) {
+            return std::vector<std::string>();
+        }
+
         while (true)
         {
             e_pos = str.find(separator, s_pos);
@@ -156,6 +158,34 @@ namespace stringutil
         return;
     }
     
+    bool IsNumber(const std::string& str)
+    {
+        // 处理空串
+        if (str.empty()) {
+            return false;
+        }
+
+        // 先将这个字符串 "-" 处理掉
+        if (str[0] == '-' && str.size() == 1) {
+            return false;
+        }
+
+        for (int i = 0; i < str.size(); i++)
+        {
+            if (i == 0 && str[i] == '-') {
+                continue;
+            }
+
+            if (str[i] > '9' || str[i] < '0') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
 	// 大小写转换
     void ToLower(std::string& str)
     {
@@ -175,56 +205,16 @@ namespace stringutil
     {
         return "";
     }
-    
-    // md5
-    std::string Md5OfBlock(const string& content)
-    {
-        std::string byte_md5;
-        MD5_CTX ctx;
-        unsigned char digest[16];
-        MD5Init(&ctx);
-        MD5Update(&ctx, (unsigned char*)content.c_str(), content.size());
-        MD5Final(&ctx, digest);
-        
-        byte_md5.assign((char*)digest, 16);
-        return BinToHexstr(byte_md5, false);
-    }
-    std::string Md5OfFile(const string& filepath
-    {
-        const int kBlockSize = 1024 * 1024;
    
-        FILE* fp = fopen(filepath.c_str(), "rb");
-        if (!fp) {
-            return "";
-        }
-        
-        std::string byte_md5;
-        MD5_CTX ctx;
-        unsigned char digest[16];
-        unsigned char buf[kBlockSize];
-        int actulsize;
-        
-        MD5Init(&ctx);
-        while (1)
-        {
-            actulsize = fread(buf, 1, kBlockSize, fp);
-            if (actulsize != kBlockSize && !feof(fp)) 
-            {
-                fclose(fp);
-                return "";
-            }
-            
-            MD5Update(&ctx, buf, actulsize);
-            
-            if (feof(fp)) {
-                break;
-            }
-        }
-        
-        MD5Final(&ctx, digest);
-        fclose(fp);
-        
-        byte_md5.assign((char*)digest, 16);
-        return BinToHexstr(byte_md5, false);
-    }
 };
+
+
+
+
+
+
+
+
+
+
+

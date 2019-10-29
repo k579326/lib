@@ -34,7 +34,9 @@ namespace fileutil
         int Close();
         int Seek(int32_t off, int where);
         int Read(std::string* out, uint32_t expected_size);
-        int ReadLine(std::string* out, uint32_t expected_size);
+
+        /* 仅用于处理文本文件 */
+        int ReadLine(std::string* out);
         bool IsEOF();
 
         int Write(const unsigned char* indata, uint32_t insize);

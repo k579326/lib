@@ -14,9 +14,6 @@ public:
     }
 };
 
-
-
-
 void func(std::shared_ptr<float> a)
 {
     printf("%s\n", __FUNCTION__);

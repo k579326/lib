@@ -110,7 +110,7 @@ namespace fileutil
 
     int File::Seek(int32_t off, int where)
     {
-        if (file_) { 
+        if (!file_) { 
             return -1;
         }
 
@@ -151,7 +151,7 @@ namespace fileutil
                 out->assign(str_array.get(), readsize);
                 ret = 0;
             }
-            else {  /* 读取发生异常，读的数据长度不等于期望长度，也没有到达文件位 */
+            else {  /* 读取发生异常，读的数据长度不等于期望长度，也没有到达文件尾 */
                 ret = ferror(file_);
             }
         }
@@ -162,20 +162,29 @@ namespace fileutil
         return ret;
     }
 
-    int File::ReadLine(std::string* out, uint32_t expected_size)
+    int File::ReadLine(std::string* out)
     {
         if (!file_) {
             return -1;
         }
 
-        std::shared_ptr<char> strptr(new char[expected_size], [](char* p) { delete[] p; });
+        while (true)
+        {
+            std::shared_ptr<char> strptr(new char[256], [](char* p) { delete[] p; });
 
-        if (!fgets(strptr.get(), expected_size, file_)) {
+            if (!fgets(strptr.get(), 256, file_)) {
 
-            return ferror(file_);
+                return ferror(file_);
+            }
+
+            *out += strptr.get();
+
+            if (*(out->end() - 1) == '\n')
+            {
+                break;
+            }
         }
-
-        *out = strptr.get();
+        
 
         return 0;
     }

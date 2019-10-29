@@ -14,7 +14,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace util_threadpool
+namespace threads
 {
 
 template<class T>
@@ -28,15 +28,22 @@ using _FinCallBack = std::function<void(void)>;
 
 class ThreadPool
 {
-public:    
-    ThreadPool(size_t size);
+protected:
+    ThreadPool();
+public:
     ~ThreadPool();
     
+    static ThreadPool* CreateInstance(size_t size);
+    static ThreadPool* GetInstance();
+
+    int init(size_t size);
+
     template<class T>
     void PushWorkQueue(ThreadProc<T> proc, std::shared_ptr<T> param, FinCallback<T> fin);
 
-    template<class T>
-    void PushWorkQueue(ThreadProc<T> proc);
+    void PushWorkQueue(std::function<void(void)> proc);
+
+    void CancelAll();
 
 private:
 
@@ -53,11 +60,13 @@ private:
     std::atomic<bool>           exit_ = true;
     std::mutex                  mutex_;
     std::condition_variable     cond_;
+
+    static ThreadPool* ptr_;
 };
 
 
 template<class T>
-void ThreadPool::PushWorkQueue(ThreadProc<T> proc, std::shared_ptr<T> param, FinCallback<T> fin)
+inline void ThreadPool::PushWorkQueue(ThreadProc<T> proc, std::shared_ptr<T> param, FinCallback<T> fin)
 {
     assert(proc);
     _ThreadProc tf = std::bind(proc, param);
@@ -67,49 +76,26 @@ void ThreadPool::PushWorkQueue(ThreadProc<T> proc, std::shared_ptr<T> param, Fin
     {
         ff = std::bind(fin, param);
     }
-
-
     std::lock_guard<std::mutex> lock(mutex_);
 
     queue_.push(std::make_pair(tf, ff));
     cond_.notify_one();
 }
 
-template<class T>
-void ThreadPool::PushWorkQueue(ThreadProc<T> proc)
+inline void ThreadPool::PushWorkQueue(std::function<void(void)> proc)
 {
-    PushWorkQueue<T>(proc, nullptr, nullptr);
+    assert(proc);
+    
+    _FinCallBack ff = []()->void {}; 
+
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    queue_.push(std::make_pair(proc, ff));
+    cond_.notify_one();
 }
 
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

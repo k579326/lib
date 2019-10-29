@@ -81,6 +81,20 @@ namespace pathutil
         return std::string(ret_str.begin(), it.base());
     }
   
+    std::string GetShortNameOfPath(const std::string& path)
+    {
+        std::string tmp = path;
+
+        PathStyleConvert(tmp, kUnix);
+
+        size_t pos = path.rfind("/");
+        if (pos == std::string::npos) {
+            return path;
+        }
+        return path.substr(pos + 1);
+    }
+
+
 };
 
     

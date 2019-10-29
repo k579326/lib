@@ -21,6 +21,7 @@ namespace pathutil
     // 获取父目录
     std::string GetDirOfPathName(const std::string& path);
     
+    std::string GetShortNameOfPath(const std::string& path);
 };
 
 

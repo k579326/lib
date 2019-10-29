@@ -24,6 +24,8 @@ namespace stringutil
 	// 字符串替换
     void ReplaceAll(std::string& str, const std::string& target, const std::string& replacement);
     
+    bool IsNumber(const std::string& str);
+
 	// 大小写转换
     void ToLower(std::string& str);
     void ToUpper(std::string& str);
@@ -32,8 +34,6 @@ namespace stringutil
     std::string Base64Encode(const std::string& src);
     std::string Base64Decode(const std::string& base64);
     
-    std::string Md5OfBlock(const string& content);
-    std::string Md5OfFile(const string& filepath);
 };
 
 
