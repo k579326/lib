@@ -58,7 +58,10 @@ namespace fileutil
         static int Copy(const std::string& srcpath, const std::string& dstpath, bool overlay);
         static int Rename(const std::string& oldname, const std::string& newname);
 
-        /* 快速设置文件大小（扩大容量或者截断文件，扩大的空间的内容随机） */
+        /* @function 快速设置文件大小（扩大容量或者截断文件，扩大的空间的内容随机）
+           @param filename  文件名
+           @param length    期望的文件大小
+        */
         static bool Truncate(const std::string& filename, uint32_t length);
         static bool IsExist(const std::string& path);
 
