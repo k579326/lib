@@ -9,16 +9,17 @@ class Formatter
 {
 public:
 
-    Formatter(int columon);
+    Formatter(int columon, std::string version);
     ~Formatter();
 
     std::string Format(LogLevels level, const std::string& filename, const std::string& function, int linenum);
 private:
 
-    void AdjustOutputColumn(LogLevels level);
+    int AdjustOutputColumn(LogLevels level);
 
 private:
-    int column_;
+    int         column_;
+    std::string version_;
 };
 
 

@@ -1,47 +1,22 @@
 
 #include "logger.h"
 
+#include <stdarg.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <string>
-#include <thread>
-#include <mutex>
 
-#include "core/printer.h"
-
-using Printer = std::shared_ptr<PrinterInterface>;
-
-class Logger
-{
-protected:
-    Logger();
-public:    
-    ~Logger();
-    
-    static Logger* GetInstance();
-    static bool IsInited();
-
-    void Init(const LogInitInfo& info, const std::string& version, const std::string& path);
-    void Uninit();
-
-    void Print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...);
-
-private:
-
-    std::mutex mutex_;
-    LogInitInfo loginfo_;
-    std::string version_ = "";
-    std::string logpath_ = "";
-    Printer printer_ = nullptr;
-
-private:
-    static bool isInited_;
-};
+static const char* g_log_start = "\n\
+**********************************************************\n\
+**** Logger Header                                    \n\
+**** Time: %4d-%02d-%02d %02d:%02d:%02d               \n\
+**********************************************************\n\
+\n";
 
 
+bool Logger::isInited_ = false;
 
 Logger* Logger::GetInstance()
 {
@@ -76,24 +51,45 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
     loginfo_ = info;
     version_ = version;
     logpath_ = path;
-
     // init printer
     if (info.runModel == RunModel::kAsync) { 
-        printer_.reset(new ThreadPrinter());
+        printer_.reset(new ThreadPrinter(info.outputModel));
     }
     else
     {
-        printer_.reset(new SyncPrinter());
+        printer_.reset(new SyncPrinter(info.outputModel));
     }
+
+    fmt_ = std::make_shared<Formatter>(info.columns, version);
+    lnm_.SetLabel(info.label);
+    lnm_.SetPath(path);
+
+    printer_->SetIO(lnm_.GetLogName());
+    SetLoggerHeader();
 
     isInited_ = true;
 }
+
+void Logger::SetLoggerHeader()
+{
+    char buf[2048];
+
+    time_t timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    tm* tp = localtime(&timestamp);
+    sprintf(buf, g_log_start, tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday,
+        tp->tm_hour, tp->tm_min, tp->tm_sec);
+
+    printer_->Output(buf);
+}
+
 
 void Logger::Uninit()
 {
     memset(&loginfo_, 0, sizeof(loginfo_));
     logpath_ = "";
     version_ = "";
+
+    isInited_ = false;
 }
 
 void Logger::Print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...)
@@ -102,59 +98,20 @@ void Logger::Print(LogLevels level, const std::string& filename, const std::stri
         return ;
     }
 
+    std::string column_str = fmt_->Format(level, filename, function, linenum);
 
-}
+    char buf[4096] = { 0 };
+    va_list varArgs;
+    va_start(varArgs, format);
+    std::vsnprintf(buf, 4096, format, varArgs);
+    va_end(varArgs);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int LogInit(const LogInitInfo& info, const char* version, const char* path)
-{
-    std::string local_version;
-
-    if (!path) {
-        return -1;
-    }
-    if (!version) { 
-        local_version = "";
+    if (lnm_.NeedUpdate()) {
+        printer_->SetIO(lnm_.GetLogName());
     }
 
-    Logger::GetInstance()->init(info, local_version, path);
-
-    return 0;
+    printer_->Output(column_str + "###  " + buf + "\n");
 }
-            
-void _log_print_(LogLevels level, 
-                const char* filename, 
-                const char* function, 
-                int linenum, 
-                const char* format, ...)
-{
-    if (!Logger::GetInstance()->IsInited()) {
-        return;
-    }
 
-    assert(filename && function);
-
-
-}
-                
-                
+          
                 
