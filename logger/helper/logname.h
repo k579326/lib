@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _LOG_NAME_H_
 #define _LOG_NAME_H_
 

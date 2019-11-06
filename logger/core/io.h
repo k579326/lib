@@ -1,4 +1,4 @@
-#ifndef _LOG_IO_H_
+﻿#ifndef _LOG_IO_H_
 #define _LOG_IO_H_
 
 #include <map>

@@ -1,5 +1,4 @@
-
-
+ï»¿
 #include "formatter.h"
 
 #include <ctime>
@@ -10,7 +9,10 @@
 #include <thread>
 #include <map>
 
-/* µ±Ç°Êä³öµÄÈÕÖ¾µÄµÈ¼¶µÍÓÚLogLevelsÊ±£¬¶ÔÓ¦µÄ×Ö¶ÎLogColumns½«±»Êä³ö£¬·ñÔò½«±»ºöÂÔ */
+#include "u_path/util_path.h"
+#include "stringdef/stringdef.h"
+
+/* å½“å‰è¾“å‡ºçš„æ—¥å¿—çš„ç­‰çº§ä½äºLogLevelsæ—¶ï¼Œå¯¹åº”çš„å­—æ®µLogColumnså°†è¢«è¾“å‡ºï¼Œå¦åˆ™å°†è¢«å¿½ç•¥ */
 const static std::map<LogColumns, LogLevels> g_column_config = 
 {
     {kDateTime, kLevelEnd},
@@ -20,16 +22,6 @@ const static std::map<LogColumns, LogLevels> g_column_config =
     {kFunction, kFatalLevel},
     {kVersion,  kLevelEnd}
 };
-
-const static std::map<LogLevels, std::string> g_loglevel_str =
-{
-    {kDebugLevel, "DEBUG"},
-    {kInforLevel, "INFO "},
-    {kWarningLevel, "WARN "},
-    {kErrorLevel, "ERROR"},
-    {kFatalLevel, "FATAL"},
-};
-
 
 
 Formatter::Formatter(int column, std::string version) : column_(column), version_(version)
@@ -82,8 +74,9 @@ std::string Formatter::Format(LogLevels level, const std::string& filename, cons
     if (mask & kFileInfo)
     {
         std::string fileinfo;
+        std::string shortname = pathutil::GetShortNameOfPath(filename);
 
-        fileinfo = filename + "(" + std::to_string(linenum) + ")";
+        fileinfo = shortname + "(" + std::to_string(linenum) + ")";
         buf.append(fileinfo);
         buf.append(" ");
     }

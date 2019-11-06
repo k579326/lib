@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _LOGGER_DEFINE_H_
 #define _LOGGER_DEFINE_H_
 

@@ -1,4 +1,4 @@
-
+﻿
 #include "logger.h"
 
 #include <stdarg.h>
@@ -8,10 +8,14 @@
 #include <string.h>
 
 
+#include "stringdef/stringdef.h"
+
 static const char* g_log_start = "\n\
 **********************************************************\n\
-**** Logger Header                                    \n\
+**** Logger Startup Header                            \n\
 **** Time: %4d-%02d-%02d %02d:%02d:%02d               \n\
+**** LogLevel: %s                                     \n\
+**** RunModel: %s                                     \n\
 **********************************************************\n\
 \n";
 
@@ -77,7 +81,10 @@ void Logger::SetLoggerHeader()
     time_t timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     tm* tp = localtime(&timestamp);
     sprintf(buf, g_log_start, tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday,
-        tp->tm_hour, tp->tm_min, tp->tm_sec);
+        tp->tm_hour, tp->tm_min, tp->tm_sec, 
+        g_loglevel_str.find(loginfo_.level)->second.c_str(), 
+        g_runmodel_str.find(loginfo_.runModel)->second.c_str()
+    );
 
     printer_->Output(buf);
 }
