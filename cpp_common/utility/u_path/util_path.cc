@@ -87,11 +87,11 @@ namespace pathutil
 
         PathStyleConvert(tmp, kUnix);
 
-        size_t pos = path.rfind("/");
+        size_t pos = tmp.rfind("/");
         if (pos == std::string::npos) {
-            return path;
+            return tmp;
         }
-        return path.substr(pos + 1);
+        return tmp.substr(pos + 1);
     }
 
 

@@ -1,4 +1,4 @@
-#ifndef _UTIL_FILE_H_
+ï»¿#ifndef _UTIL_FILE_H_
 #define _UTIL_FILE_H_
 
 #include <stdint.h>
@@ -24,18 +24,18 @@ namespace fileutil
         File& operator=(const File& f) = delete;
         File& operator=(const File&& f) = delete;
 
-    public:     /* ´ò¿ª×´Ì¬ÏÂ·½·¨ */
+    public:     /* æ‰“å¼€çŠ¶æ€ä¸‹æ–¹æ³• */
         /**
         * notice:
-        *   1. Èç¹ûµ±Ç°´ò¿ªµÄÂ·¾¶µÄ¸¸Ä¿Â¼²»´æÔÚ£¬Ôò²»ÔÊĞíÎÄ¼ş´ò¿ª¡£¸ÃÀà²»¸ºÔğ´´½¨Ä¿Â¼£¬Ê¹ÓÃÕßÒª×Ô¼ºÈ·±£²Ù×÷µÄÎÄ¼şµÄÄ¿Â¼ÒÑ´æÔÚ£»
-        *   2. ²»½ÓÊÜÏà¶ÔÂ·¾¶£¬Èç¹ûÀà¹¹ÔìÊ±Ê¹ÓÃÁËÏà¶ÔÂ·¾¶£¬Open·½·¨»áÊ§°Ü¡£
+        *   1. å¦‚æœå½“å‰æ‰“å¼€çš„è·¯å¾„çš„çˆ¶ç›®å½•ä¸å­˜åœ¨ï¼Œåˆ™ä¸å…è®¸æ–‡ä»¶æ‰“å¼€ã€‚è¯¥ç±»ä¸è´Ÿè´£åˆ›å»ºç›®å½•ï¼Œä½¿ç”¨è€…è¦è‡ªå·±ç¡®ä¿æ“ä½œçš„æ–‡ä»¶çš„ç›®å½•å·²å­˜åœ¨ï¼›
+        *   2. ä¸æ¥å—ç›¸å¯¹è·¯å¾„ï¼Œå¦‚æœç±»æ„é€ æ—¶ä½¿ç”¨äº†ç›¸å¯¹è·¯å¾„ï¼ŒOpenæ–¹æ³•ä¼šå¤±è´¥ã€‚
         */
         int Open(const std::string& mode);
         int Close();
         int Seek(int32_t off, int where);
         int Read(std::string* out, uint32_t expected_size);
 
-        /* ½öÓÃÓÚ´¦ÀíÎÄ±¾ÎÄ¼ş */
+        /* ä»…ç”¨äºå¤„ç†æ–‡æœ¬æ–‡ä»¶ */
         int ReadLine(std::string* out);
         bool IsEOF();
 
@@ -44,23 +44,23 @@ namespace fileutil
         int Flush();
 
 
-    public: /* ¹Ø±Õ×´Ì¬ÏÂ¿Éµ÷ÓÃ·½·¨ */
+    public: /* å…³é—­çŠ¶æ€ä¸‹å¯è°ƒç”¨æ–¹æ³• */
 
-        /* ÖØĞÂÉèÖÃÎÄ¼şÂ·¾¶£¬µ÷ÓÃ¸Ã·½·¨ºó£¬ÎÄ¼ş¶ÔÏó´¦ÓÚ¹Ø±Õ×´Ì¬ */
+        /* é‡æ–°è®¾ç½®æ–‡ä»¶è·¯å¾„ï¼Œè°ƒç”¨è¯¥æ–¹æ³•åï¼Œæ–‡ä»¶å¯¹è±¡å¤„äºå…³é—­çŠ¶æ€ */
         void Reset(const char* path);
         std::string Name() const;
         bool IsOpened(void) const;
 
 
-    public: /* ¾²Ì¬·½·¨ */
+    public: /* é™æ€æ–¹æ³• */
         static uint32_t Size(const std::string& filepath);
         static int Remove(const std::string& filepath);
         static int Copy(const std::string& srcpath, const std::string& dstpath, bool overlay);
         static int Rename(const std::string& oldname, const std::string& newname);
 
-        /* @function ¿ìËÙÉèÖÃÎÄ¼ş´óĞ¡£¨À©´óÈİÁ¿»òÕß½Ø¶ÏÎÄ¼ş£¬À©´óµÄ¿Õ¼äµÄÄÚÈİËæ»ú£©
-           @param filename  ÎÄ¼şÃû
-           @param length    ÆÚÍûµÄÎÄ¼ş´óĞ¡
+        /* @function å¿«é€Ÿè®¾ç½®æ–‡ä»¶å¤§å°ï¼ˆæ‰©å¤§å®¹é‡æˆ–è€…æˆªæ–­æ–‡ä»¶ï¼Œæ‰©å¤§çš„ç©ºé—´çš„å†…å®¹éšæœºï¼‰
+           @param filename  æ–‡ä»¶å
+           @param length    æœŸæœ›çš„æ–‡ä»¶å¤§å°
         */
         static bool Truncate(const std::string& filename, uint32_t length);
         static bool IsExist(const std::string& path);
