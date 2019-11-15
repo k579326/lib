@@ -4,8 +4,6 @@
 
 #include <assert.h>
 
-
-#include <functional>
 #include <thread>
 #include <atomic>
 #include <memory>
@@ -13,6 +11,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 namespace threads
 {
@@ -53,11 +52,11 @@ private:
 private:    
     const int max_size_ = 16;
     
-    std::queue<std::pair<_ThreadProc, _FinCallBack>> queue_;
+    std::queue<std::pair<_ThreadProc, _FinCallBack> > queue_;
     std::vector<std::thread>    pool_;
 
 
-    std::atomic<bool>           exit_ = true;
+    std::atomic<bool>           exit_;
     std::mutex                  mutex_;
     std::condition_variable     cond_;
 

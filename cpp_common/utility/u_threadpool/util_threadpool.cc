@@ -23,6 +23,7 @@ ThreadPool* ThreadPool::GetInstance()
 
 ThreadPool::ThreadPool()
 {
+    exit_ = true;
 }
 
 ThreadPool::~ThreadPool() 

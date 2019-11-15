@@ -1,7 +1,10 @@
 
-#include <assert.h>
 #include "util_dir.h"
 
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifndef WIN32
 #include <dirent.h>

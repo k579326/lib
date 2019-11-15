@@ -1,12 +1,10 @@
-
-
 #include "util_file.h"
-
 
 #ifndef WIN32
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 #else
 #include <windows.h>
 #include <io.h>
@@ -87,7 +85,7 @@ namespace fileutil
     {
         std::string dir = _ParentDirOfPath(path_.c_str());
 
-        /* ÏÈÅĞ¶ÏÎÄ¼şµÄÄ¿Â¼ÊÇ·ñ´æÔÚ£¬ ²»´æÔÚÔò²»ÔÊĞíÖ±½Ó´´½¨Ä¿Â¼*/
+        /* å…ˆåˆ¤æ–­æ–‡ä»¶çš„ç›®å½•æ˜¯å¦å­˜åœ¨,ä¸å­˜åœ¨åˆ™ä¸å…è®¸ç›´æ¥åˆ›å»ºç›®å½• */
         if (access(dir.c_str(), F_OK)) {
             return -1;
         }
@@ -131,13 +129,13 @@ namespace fileutil
     {
         int ret = 0;
         uint32_t readsize = 0;
-
+        
         if (!IsOpened()) {
             return -1;
         }
-
+        
         std::shared_ptr<char> str_array(new char[expected_size], [](char* ptr) { delete[] ptr; });
-
+        
         readsize = fread(str_array.get(), 1, expected_size, file_);
         if (expected_size == readsize)
         {
@@ -151,14 +149,14 @@ namespace fileutil
                 out->assign(str_array.get(), readsize);
                 ret = 0;
             }
-            else {  /* ¶ÁÈ¡·¢ÉúÒì³££¬¶ÁµÄÊı¾İ³¤¶È²»µÈÓÚÆÚÍû³¤¶È£¬Ò²Ã»ÓĞµ½´ïÎÄ¼şÎ² */
+            else { /* è¯»å–å‘ç”Ÿå¼‚å¸¸ï¼Œè¯»çš„æ•°æ®é•¿åº¦ä¸ç­‰äºæœŸæœ›é•¿åº¦ï¼Œä¹Ÿæ²¡æœ‰åˆ°è¾¾æ–‡ä»¶å°¾ */
                 ret = ferror(file_);
             }
         }
         else {
             ret = ferror(file_);
         }
-
+        
         return ret;
     }
 
@@ -375,5 +373,8 @@ namespace fileutil
         return S_ISREG(filestat.st_mode);
     }
 };
+
+
+
 
 
