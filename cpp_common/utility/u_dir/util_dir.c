@@ -25,13 +25,20 @@ static int _create_path(const char* path)
 	
 	while (1)
 	{
+        if (strlen(path) <= i || path[i] == '\0') {
+            break;
+        }
+
 		while (path[i] != '/' && path[i] != '\0')
 		{
 			i++;
 		}
 		
+        // 再向前移动一个位置
+        i++;
+
 		// 注意以根目录开始的路径
-		strncpy(cur_path, path, i == 0 ? 1 : i);
+		strncpy(cur_path, path, i);
 		
 		if (access(cur_path, F_OK) == 0)
 		{
