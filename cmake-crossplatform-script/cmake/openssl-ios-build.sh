@@ -15,7 +15,7 @@
 
 
 # 3. $ ./configure iphoneos-cross
-#    if variable CC been set to 'gcc -arch arm64', this command will equal to ./configure ios64-cross
+#    if variable CC been set to 'gcc -arch arm64', this command will be same to ./configure ios64-cross
 #    you can change ios sdk min version by setting CC to "gcc -mios-version-min=8.0"
 
 VERSION_MIN=9.0
