@@ -60,6 +60,8 @@ bool 	CommIsDir(const char* path);
 
 int 	CommRemoveDir(const char* path, bool force);
 
+int     CommClearDir(const char* path, bool force);
+
 bool 	CommIsEmptyDir(const char* path);
 
 

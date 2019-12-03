@@ -2,6 +2,8 @@
 
 #include "util_threadpool.h"
 
+#include <algorithm>
+
 namespace threads
 {
 

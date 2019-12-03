@@ -7,6 +7,8 @@ project(udir)
 set(CMAKE_CXX_STANDARD 11)
 add_library(udir STATIC util_dir.c util_dir.h)
 
+set_target_properties(udir PROPERTIES FOLDER "common/")
+
 if (DEFINED RUNTEST)
 	add_subdirectory(test)
 endif()

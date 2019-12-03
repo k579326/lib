@@ -301,16 +301,15 @@ bool CommIsEmptyDir(const char* path)
 	return empty;
 }
 
-
-int CommRemoveDir(const char* path, bool force)
+int CommClearDir(const char* path, bool force)
 {
-	int ret = 0;
+    int ret = 0;
     struct dirent* info = NULL;
-	bool empty = false;
-	
+    bool empty = false;
+
     DIR* dir = opendir(path);
 
-    if (!dir){
+    if (!dir) {
         return -1;
     }
 
@@ -318,8 +317,8 @@ int CommRemoveDir(const char* path, bool force)
     {
         info = readdir(dir);
         if (info == NULL)
-		{
-			empty = true;
+        {
+            empty = true;
             break;
         }
 
@@ -327,36 +326,47 @@ int CommRemoveDir(const char* path, bool force)
             continue;
         }
 
-		if (!force)
-		{// 非强制删除模式
-			empty = false;
-			break;
-		}
-		
-		int err = 0;
-		char path_will_remove[1024];
-		strcpy(path_will_remove, path);
-		strcat(path_will_remove, "/");
-		strcat(path_will_remove, info->d_name);
-		
-		if (info->d_type == DT_REG)
-		{
-			err = remove(path_will_remove);
-		}
-		else
-		{// DIR
-			err = CommRemoveDir(path_will_remove, force);
-		}
-		
-		if (err != 0)
-		{
-			empty = false;
-			break;
-		}
+        if (!force)
+        {// 非强制删除模式
+            empty = false;
+            break;
+        }
+
+        int err = 0;
+        char path_will_remove[1024];
+        strcpy(path_will_remove, path);
+        strcat(path_will_remove, "/");
+        strcat(path_will_remove, info->d_name);
+
+        if (info->d_type == DT_REG)
+        {
+            err = remove(path_will_remove);
+        }
+        else
+        {// DIR
+            err = CommRemoveDir(path_will_remove, force);
+        }
+
+        if (err != 0)
+        {
+            empty = false;
+            break;
+        }
     }
-	
+
     closedir(dir);
-	if (empty) 
+
+    return empty == true ? 0 : -1;
+}
+
+
+int CommRemoveDir(const char* path, bool force)
+{
+	int ret = 0;
+	
+    ret = CommClearDir(path, force);
+    
+	if (ret == 0)
 	{
 #ifdef WIN32
 		ret = (RemoveDirectoryA(path) == TRUE ? 0 : -1);
