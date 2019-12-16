@@ -30,7 +30,7 @@ Formatter::Formatter(int column, std::string version) : column_(column), version
 
 Formatter::~Formatter() { }
 
-std::string Formatter::Format(LogLevels level, const std::string& filename, const std::string& function, int linenum)
+std::string Formatter::Format(LogLevels level, const std::string& filename, const std::string& function, int linenum) const
 {
     std::string buf;
 
@@ -88,7 +88,7 @@ std::string Formatter::Format(LogLevels level, const std::string& filename, cons
     return buf;
 }
 
-int Formatter::AdjustOutputColumn(LogLevels level)
+int Formatter::AdjustOutputColumn(LogLevels level) const
 {
     int column_mask = column_;
     for (auto& e : g_column_config)

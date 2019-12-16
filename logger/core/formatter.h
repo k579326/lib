@@ -14,10 +14,10 @@ public:
     Formatter(int columon, std::string version);
     ~Formatter();
 
-    std::string Format(LogLevels level, const std::string& filename, const std::string& function, int linenum);
+    std::string Format(LogLevels level, const std::string& filename, const std::string& function, int linenum) const;
 private:
 
-    int AdjustOutputColumn(LogLevels level);
+    int AdjustOutputColumn(LogLevels level) const;
 
 private:
     int         column_;

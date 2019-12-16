@@ -33,9 +33,8 @@ void ThreadPrinter::Output(const std::string& str)
 
 void ThreadPrinter::SetIO(const std::string& path)
 {
+    std::unique_lock<std::mutex> autolock(protector_);
     Stop();
-    // 等一秒应该能让一条日志写完了吧
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     io_->Close();
     io_->Open(path);
     Start();
@@ -47,16 +46,14 @@ void ThreadPrinter::log_handler()
     {
         std::string logstr;
 
+        std::unique_lock<std::mutex> autolock(protector_);
+        cond_.wait(autolock, [this]()->bool
         {
-            std::unique_lock<std::mutex> autolock(protector_);
-            cond_.wait(autolock, [this]()->bool 
-            { 
-                return is_exit_ || (!log_queue_.empty() && !is_stop_);
-            });
+            return is_exit_ || (!log_queue_.empty() && !is_stop_);
+        });
 
-            logstr = log_queue_.front();
-            log_queue_.pop();
-        }
+        logstr = log_queue_.front();
+        log_queue_.pop();
 
         if (is_exit_ || logstr.empty()) {
             continue;
@@ -77,15 +74,13 @@ void ThreadPrinter::Start()
 
 
 
-
-
-
 SyncPrinter::SyncPrinter(LogOutput mode)
 {
     io_ = UniversalFactory::GetInstance()->CreateIO(mode);
 }
 SyncPrinter::~SyncPrinter()
 {
+    std::unique_lock<std::mutex> autolock(io_lock_);
     io_->Close();
 }
 void SyncPrinter::Output(const std::string& str)

@@ -7,15 +7,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "core/formatter.h"
+#include "core/printer.h"
 
 #include "stringdef/stringdef.h"
 
 static const char* g_log_start = "\n\
 **********************************************************\n\
-**** Logger Startup Header                            \n\
-**** Time: %4d-%02d-%02d %02d:%02d:%02d               \n\
-**** LogLevel: %s                                     \n\
-**** RunModel: %s                                     \n\
+**** Logger Startup Header                             \n\
+**** Time:      %4d-%02d-%02d %02d:%02d:%02d           \n\
+**** LogLevel:  %s                                     \n\
+**** RunModel:  %s                                     \n\
 **********************************************************\n\
 \n";
 

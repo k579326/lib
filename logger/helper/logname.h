@@ -15,11 +15,11 @@ public:
     void SetPath(const std::string& path);
     void SetLabel(const std::string& label);
 
-    std::string GetLogName();
-    bool NeedUpdate();
+    std::string GetLogName() const;
+    bool NeedUpdate() const;
 
 private:   
-    std::string GetLogName(const std::chrono::system_clock::time_point& timepoint);
+    std::string GetLogName(const std::chrono::system_clock::time_point& timepoint) const;
 private:
 
     std::string path_;

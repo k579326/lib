@@ -11,8 +11,6 @@
 
 #include "logger_define.h"
 
-#include "core/formatter.h"
-#include "core/printer.h"
 #include "helper/logname.h"
 
 typedef struct
@@ -24,6 +22,8 @@ typedef struct
     LogOutput   outputModel;
 }LogInitInfo;
 
+class Formatter;
+class PrinterInterface;
 
 using Printer = std::shared_ptr<PrinterInterface>;
 using Fmter = std::shared_ptr<Formatter>;
@@ -59,11 +59,11 @@ private:
 };
 
 
-#define LOG_Debug(format, ...)      Logger::GetInstance()->Print(kDebugLevel, __FILE__, __FUNCTION__, __LINE__, format, __VA_ARGS__)
-#define LOG_Infor(format, ...)      Logger::GetInstance()->Print(kInforLevel, __FILE__, __FUNCTION__, __LINE__, format, __VA_ARGS__)
-#define LOG_Warning(format, ...)    Logger::GetInstance()->Print(kWarningLevel, __FILE__, __FUNCTION__, __LINE__, format, __VA_ARGS__)
-#define LOG_Error(format, ...)      Logger::GetInstance()->Print(kErrorLevel, __FILE__, __FUNCTION__, __LINE__, format, __VA_ARGS__)
-#define LOG_Fatal(format, ...)      Logger::GetInstance()->Print(kFatalLevel, __FILE__, __FUNCTION__, __LINE__, format, __VA_ARGS__)
+#define LOG_Debug(format, ...)      Logger::GetInstance()->Print(kDebugLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_Infor(format, ...)      Logger::GetInstance()->Print(kInforLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_Warning(format, ...)    Logger::GetInstance()->Print(kWarningLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_Error(format, ...)      Logger::GetInstance()->Print(kErrorLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_Fatal(format, ...)      Logger::GetInstance()->Print(kFatalLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 
 
 

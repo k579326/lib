@@ -22,17 +22,17 @@ void LogNameManager::SetLabel(const std::string& label)
 }
 
 
-std::string LogNameManager::GetLogName()
+std::string LogNameManager::GetLogName() const
 {
     return GetLogName(std::chrono::system_clock::now());
 }
 
-bool LogNameManager::NeedUpdate()
+bool LogNameManager::NeedUpdate() const
 {
     return !fileutil::File::IsExist(GetLogName());
 }
 
-std::string LogNameManager::GetLogName(const std::chrono::system_clock::time_point& timepoint)
+std::string LogNameManager::GetLogName(const std::chrono::system_clock::time_point& timepoint) const
 {
     time_t timestamp = std::chrono::system_clock::to_time_t(timepoint);
 
