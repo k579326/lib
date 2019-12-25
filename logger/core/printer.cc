@@ -23,11 +23,11 @@ ThreadPrinter::~ThreadPrinter()
 }
 
 
-void ThreadPrinter::Output(const std::string& str)
+void ThreadPrinter::Output(const std::string& str, LogLevels loglevel)
 {
     std::unique_lock<std::mutex> autolock(protector_);
 
-    log_queue_.push(str);
+    log_queue_.push(std::tuple<std::string, LogLevels>(str, loglevel));
     cond_.notify_one();
 }
 
@@ -44,7 +44,7 @@ void ThreadPrinter::log_handler()
 {
     while (is_exit_)
     {
-        std::string logstr;
+        std::tuple<std::string, LogLevels> logstr;
 
         std::unique_lock<std::mutex> autolock(protector_);
         cond_.wait(autolock, [this]()->bool
@@ -55,12 +55,12 @@ void ThreadPrinter::log_handler()
         logstr = log_queue_.front();
         log_queue_.pop();
 
-        if (is_exit_ || logstr.empty()) {
+        if (is_exit_ ) {
             continue;
         }
 
         if (io_)
-            io_->Write(logstr);
+            io_->Write(std::get<0>(logstr), GetColor(std::get<1>(logstr)));
     }
 }
 void ThreadPrinter::Stop()
@@ -83,10 +83,10 @@ SyncPrinter::~SyncPrinter()
     std::unique_lock<std::mutex> autolock(io_lock_);
     io_->Close();
 }
-void SyncPrinter::Output(const std::string& str)
+void SyncPrinter::Output(const std::string& str, LogLevels loglevel)
 {
     std::unique_lock<std::mutex> autolock(io_lock_);
-    io_->Write(str);
+    io_->Write(str, GetColor(loglevel));
 }
 void SyncPrinter::SetIO(const std::string& path)
 {

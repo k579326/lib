@@ -7,19 +7,40 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <map>
 
 #include "logger_define.h"
 #include <u_log/core/io.h>
 
 class PrinterInterface
 {
+    using LogColorMap = std::map<LogLevels, Color>;
+
 protected:
-    PrinterInterface() {}
+    PrinterInterface() {
+        color_map_.insert(std::make_pair(kDebugLevel, White));
+        color_map_.insert(std::make_pair(kInforLevel, Green));
+        color_map_.insert(std::make_pair(kWarningLevel, Yellow));
+        color_map_.insert(std::make_pair(kErrorLevel, Purple));
+        color_map_.insert(std::make_pair(kFatalLevel, Red));
+    }
 public:
     virtual ~PrinterInterface() {}
     
     virtual void SetIO(const std::string& filename) = 0;
-    virtual void Output(const std::string& str) = 0;
+    virtual void Output(const std::string& str, LogLevels loglevel) = 0;
+
+    Color GetColor(LogLevels loglevel) 
+    {
+        auto it = color_map_.find(loglevel);
+        if (it == color_map_.end()) {
+            return InvalidColor;
+        }
+        return it->second;
+    }
+
+private:
+    LogColorMap color_map_;
 };
 
 
@@ -30,7 +51,7 @@ public:
     ~ThreadPrinter();
     
     virtual void SetIO(const std::string& filename) override;
-    virtual void Output(const std::string& str) override;
+    virtual void Output(const std::string& str, LogLevels loglevel) override;
 private:
 
     void Stop();
@@ -40,7 +61,7 @@ private:
 private:
     std::condition_variable cond_;
     std::mutex protector_;
-    std::queue<std::string> log_queue_;
+    std::queue<std::tuple<std::string, LogLevels>> log_queue_;
     std::thread log_thread_;
 
     bool is_stop_ = false;
@@ -58,7 +79,7 @@ public:
     virtual void SetIO(const std::string& filename) override;
 
     /* 同步写入，内部有锁，控制外部多线程调用时的时序 */
-    virtual void Output(const std::string& str) override;
+    virtual void Output(const std::string& str, LogLevels loglevel) override;
 
 private:
     std::shared_ptr<IOInterface> io_ = nullptr;

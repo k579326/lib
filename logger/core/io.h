@@ -8,6 +8,7 @@
 #include "u_file/util_file.h"
 
 #include "logger_define.h"
+#include "console/console_extern.h"
 
 
 class IOInterface
@@ -18,7 +19,7 @@ public:
     
     virtual int Open(const std::string& path) = 0;
     
-    virtual int Write(const std::string& content) = 0;
+    virtual int Write(const std::string& content, Color textcolor) = 0;
     
     virtual void Close() = 0;
     
@@ -31,7 +32,7 @@ public:
     ~FileIO() {}
 
     virtual int Open(const std::string& path) override;
-    virtual int Write(const std::string& content) override;
+    virtual int Write(const std::string& content, Color textcolor) override;
     virtual void Close() override;
 
 private:
@@ -41,19 +42,15 @@ private:
 class ConsoleIO : public IOInterface
 {
 public:
-    ConsoleIO() {}
-    ~ConsoleIO() {}
+    ConsoleIO();
+    ~ConsoleIO();
 
-    virtual int Open(const std::string& path) override {
-        return -1;
-    }
-    virtual int Write(const std::string& content) override {
-        return -1;
-    }
-    virtual void Close() override
-    {
-        return;
-    }
+    virtual int Open(const std::string& path) override;
+    virtual int Write(const std::string& content, Color textcolor) override;
+    virtual void Close() override;
+
+private:
+    ConsoleID console_;
 };
 
 

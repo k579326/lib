@@ -4,6 +4,7 @@
 #include "u_path/util_path.h"
 #include "u_dir/util_dir.h"
 
+
 UniversalFactory::UniversalFactory()
 {
     fm_.insert(std::make_pair(LogOutput::kFileModel, std::make_shared<FileIOFactory>()));
@@ -47,7 +48,7 @@ int FileIO::Open(const std::string& path)
     return f_->Open("ab+");
 }
 
-int FileIO::Write(const std::string& content)
+int FileIO::Write(const std::string& content, Color textcolor)
 {
     if (!f_) {
         return -1;
@@ -62,3 +63,52 @@ void FileIO::Close()
 {
     if (f_) f_->Close();
 }
+
+
+
+/* console io */
+
+ConsoleIO::ConsoleIO()
+{
+
+}
+
+
+ConsoleIO::~ConsoleIO()
+{
+
+}
+
+int ConsoleIO::Open(const std::string& path)
+{
+    console_ = GetConsole();
+    return (int)console_ == -1 ? -1 : 0;
+}
+
+int ConsoleIO::Write(const std::string& content, Color textcolor)
+{
+    int ret;
+    if ((int)console_ == -1)
+        return -1;
+
+    SetConsoleTextColor(console_, textcolor, true);
+    ret = WriteConsole_(console_, content.c_str(), content.size());
+    RestoreConsole(console_);
+    return ret;
+}
+
+void ConsoleIO::Close()
+{
+    console_ = (ConsoleID)-1;
+    return;
+}
+
+
+
+
+
+
+
+
+
+

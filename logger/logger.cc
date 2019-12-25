@@ -88,7 +88,7 @@ void Logger::SetLoggerHeader()
         g_runmodel_str.find(loginfo_.runModel)->second.c_str()
     );
 
-    printer_->Output(buf);
+    printer_->Output(buf, kInforLevel);
 }
 
 
@@ -119,7 +119,7 @@ void Logger::Print(LogLevels level, const std::string& filename, const std::stri
         printer_->SetIO(lnm_.GetLogName());
     }
 
-    printer_->Output(column_str + "###  " + buf + "\n");
+    printer_->Output(column_str + "###  " + buf + "\n", level);
 }
 
           
