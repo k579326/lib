@@ -55,7 +55,16 @@ int WriteConsole_(ConsoleID console, const void* ptr, int len)
 {
     unused(console);
     
-    if (1 != isatty(fileno(stdout)))
+    const char* term = getenv("TERM");
+    
+    bool term_supported = term != nullptr &&
+        strcmp(term, "xterm") == 0 &&
+        strcmp(term, "xterm-color") == 0 &&
+        strcmp(term, "xterm-256color") == 0 &&
+        strcmp(term, "linux") == 0 &&
+        strcmp(term, "cygwin") == 0;
+    
+    if (1 != isatty(fileno(stdout)) || !term_supported)
     {
         write(STDOUT_FILENO, ptr, len);
         return 0;
