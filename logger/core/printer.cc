@@ -42,7 +42,7 @@ void ThreadPrinter::SetIO(const std::string& path)
 
 void ThreadPrinter::log_handler()
 {
-    while (is_exit_)
+    while (!is_exit_)
     {
         std::tuple<std::string, LogLevels> logstr;
 
