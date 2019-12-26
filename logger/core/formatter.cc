@@ -39,10 +39,14 @@ std::string Formatter::Format(LogLevels level, const std::string& filename, cons
     if (mask & kDateTime)
     {
         char timestr[256];
-        time_t timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+        std::chrono::milliseconds chrono_ms = 
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        time_t timestamp = chrono_ms.count() / 1000;
+        const uint16_t ms = chrono_ms.count() % 1000;
         tm* tp = localtime(&timestamp);
-        sprintf(timestr, "%4d-%02d-%02d %02d:%02d:%02d", tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday,
-            tp->tm_hour, tp->tm_min, tp->tm_sec);
+        sprintf(timestr, "%4d-%02d-%02d %02d:%02d:%02d.%03d", tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday,
+            tp->tm_hour, tp->tm_min, tp->tm_sec, ms);
 
         buf.append(timestr);
         buf.append(" ");
