@@ -1,4 +1,4 @@
-﻿
+
 #include "logger.h"
 
 #include <stdarg.h>
@@ -9,6 +9,7 @@
 
 #include "core/formatter.h"
 #include "core/printer.h"
+#include "autoclear/logclear.h"
 
 #include "stringdef/stringdef.h"
 
@@ -69,6 +70,9 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
     fmt_ = std::make_shared<Formatter>(info.columns, version);
     lnm_.SetLabel(info.label);
     lnm_.SetPath(path);
+
+    clr_ = std::make_shared<LogClr>(path, info.keep_days, &lnm_);
+    clr_->Start(5); // 5秒检查一次
 
     printer_->SetIO(lnm_.GetLogName());
     SetLoggerHeader();

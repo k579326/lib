@@ -75,10 +75,10 @@ public:
     SyncPrinter(LogOutput mode);
     ~SyncPrinter();
     
-    /* ÖØĞÂÉèÖÃIO£¬ÄÚ²¿ÓĞËø */
+    /* é‡æ–°è®¾ç½®IOï¼Œå†…éƒ¨æœ‰é” */
     virtual void SetIO(const std::string& filename) override;
 
-    /* Í¬²½Ğ´Èë£¬ÄÚ²¿ÓĞËø£¬¿ØÖÆÍâ²¿¶àÏß³Ìµ÷ÓÃÊ±µÄÊ±Ğò */
+    /* åŒæ­¥å†™å…¥ï¼Œå†…éƒ¨æœ‰é”ï¼Œæ§åˆ¶å¤–éƒ¨å¤šçº¿ç¨‹è°ƒç”¨æ—¶çš„æ—¶åº */
     virtual void Output(const std::string& str, LogLevels loglevel) override;
 
 private:

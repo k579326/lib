@@ -1,4 +1,4 @@
-﻿#ifndef _STRING_DEFINE_H_
+#ifndef _STRING_DEFINE_H_
 #define _STRING_DEFINE_H_
 
 

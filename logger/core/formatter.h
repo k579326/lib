@@ -1,4 +1,4 @@
-﻿#ifndef _LOGGER_FORMATTER_H_
+#ifndef _LOGGER_FORMATTER_H_
 #define _LOGGER_FORMATTER_H_
 
 #include <string>

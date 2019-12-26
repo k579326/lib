@@ -18,12 +18,16 @@ public:
     std::string GetLogName() const;
     bool NeedUpdate() const;
 
+    std::chrono::system_clock::time_point
+    GetDateOfLogName(const std::string& logname) const;
+
 private:   
     std::string GetLogName(const std::chrono::system_clock::time_point& timepoint) const;
 private:
 
     std::string path_;
     std::string label_;
+    const char  separator_;
 };
 
 

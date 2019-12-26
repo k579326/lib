@@ -15,18 +15,21 @@
 
 typedef struct
 {
-    char        label[256];             // ÓÃÓÚ×ö±êÊ¶£¬¿ÉÖ¸¶¨ÎªÈÎÒâ×Ö·û´®£¬´Ë×Ö·û´®½«ÌåÏÖÔÚÈÕÖ¾µÄÎÄ¼şÃûÉÏ
-    LogLevels   level;                  // Ğ¡ÓÚlevelµÄÈÕÖ¾½«²»»á±»´òÓ¡
+    char        label[256];             // ç”¨äºåšæ ‡è¯†ï¼Œå¯æŒ‡å®šä¸ºä»»æ„å­—ç¬¦ä¸²ï¼Œæ­¤å­—ç¬¦ä¸²å°†ä½“ç°åœ¨æ—¥å¿—çš„æ–‡ä»¶åä¸Š
+    LogLevels   level;                  // å°äºlevelçš„æ—¥å¿—å°†ä¸ä¼šè¢«æ‰“å°
     RunModel    runModel;
     int         columns;
     LogOutput   outputModel;
+    uint8_t      keep_days;              // æ—¥å¿—ä¿å­˜æ—¶é—´ï¼ˆå³éšæ—¶æ¸…ç†ä»å½“å¤©ç®—ï¼Œkeep_dayså¤©å‰çš„æ‰€æœ‰æ—¥å¿—ã€‚å¦‚æœä¸º0ï¼Œåˆ™ä¸æ¸…ç†ä»»ä½•æ—¥å¿—ï¼‰
 }LogInitInfo;
 
 class Formatter;
 class PrinterInterface;
+class LogClr;
 
 using Printer = std::shared_ptr<PrinterInterface>;
 using Fmter = std::shared_ptr<Formatter>;
+using AutoCleaner = std::shared_ptr<LogClr>;
 
 class Logger
 {
@@ -53,6 +56,7 @@ private:
     std::string logpath_ = "";
     Printer printer_ = nullptr;
     Fmter   fmt_ = nullptr;
+    AutoCleaner clr_ = nullptr;
     LogNameManager lnm_;
 private:
     static bool isInited_;
