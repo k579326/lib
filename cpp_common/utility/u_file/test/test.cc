@@ -85,7 +85,7 @@ static int TestTruncate()
         return -1;
     }
     if (!fileutil::File::Truncate("E:\\Test\\empty", 1024 * 1024 * 10)) {
-        reutrn -1;
+        return -1;
     }
 
     return 0;
@@ -94,7 +94,7 @@ static int TestTruncate()
 int main()
 {
     if (testrw()) {
-        return -1
+        return -1;
     }
     if (testcopy()) {
         return -1;

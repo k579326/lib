@@ -9,7 +9,3 @@ add_library(md5util util_md5.h util_md5.cc)
 
 target_link_libraries(md5util md5 stringutil)
 set_target_properties(md5util PROPERTIES FOLDER "common")
-
-if (DEFINED RUNTEST)
-    add_subdirectory(test)
-endif()
