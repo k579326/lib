@@ -49,6 +49,16 @@ int ThreadPool::init(size_t size)
     return 0;
 }
 
+bool ThreadPool::AddThreads(int count)
+{
+    if (count == 0)
+        return true;
+    if (count < 0)
+        return DelThreads(-count);
+
+    return AddThreads((size_t)count);
+}
+
 
 bool ThreadPool::AddThreads(size_t count)
 {
@@ -124,6 +134,13 @@ bool ThreadPool::DelThreads(size_t count)
 
     return true;
 }
+
+size_t ThreadPool::GetThreadCount()
+{
+    std::lock_guard<std::mutex> autolock(mutex_);
+    return pool_.size();
+}
+
 
 
 void ThreadPool::_ThreadProcess(std::shared_ptr<Thread> thread_ctx)

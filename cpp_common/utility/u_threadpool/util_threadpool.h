@@ -62,8 +62,8 @@ private:
         }
 
         std::thread thread_;
-        bool        is_working_;        // ÊÇ·ñÕıÔÚÖ´ĞĞÈÎÎñ
-        bool        is_del_;            // ±»É¾³ı±êÖ¾£¬ÓÃÓÚ¶¯Ì¬µ÷ÕûÏß³ÌÊı
+        bool        is_working_;        // æ˜¯å¦æ­£åœ¨æ‰§è¡Œä»»åŠ¡
+        bool        is_del_;            // è¢«åˆ é™¤æ ‡å¿—ï¼Œç”¨äºåŠ¨æ€è°ƒæ•´çº¿ç¨‹æ•°
     };
 
 protected:
@@ -81,10 +81,16 @@ public:
 
     void PushWorkQueue(std::function<void(void)> proc);
 
-    // Ìí¼ÓÏß³Ì£¬Èç¹ûÌí¼ÓµÄÏß³ÌÊı´óÓÚ¿ÕÏĞÏß³ÌÊı£¬Ôò·µ»Øfalse£¬Ö´ĞĞÊ§°Ü
+    // è·å–çº¿ç¨‹æ± çº¿ç¨‹æ€»æ•°
+    size_t GetThreadCount();
+
+    // æ·»åŠ çº¿ç¨‹ï¼Œæ”¯æŒè´Ÿæ•°
+    bool AddThreads(int count);
+
+    // æ·»åŠ çº¿ç¨‹ï¼Œå¦‚æœæ·»åŠ çš„çº¿ç¨‹æ•°å¤§äºç©ºé—²çº¿ç¨‹æ•°ï¼Œåˆ™è¿”å›falseï¼Œæ‰§è¡Œå¤±è´¥
     bool AddThreads(size_t count);
 
-    // ¼õÉÙÏß³Ì£¬¼õÉÙµÄÏß³ÌÊıÈç¹û´óÓÚ¿ÕÏĞÏß³ÌÊı£¬Ôò·µ»Øfalse£¬Ö´ĞĞÊ§°Ü¡£
+    // å‡å°‘çº¿ç¨‹ï¼Œå‡å°‘çš„çº¿ç¨‹æ•°å¦‚æœå¤§äºç©ºé—²çº¿ç¨‹æ•°ï¼Œåˆ™è¿”å›falseï¼Œæ‰§è¡Œå¤±è´¥ã€‚
     bool DelThreads(size_t count);
 
     void CancelAll();
@@ -94,12 +100,12 @@ private:
     void _ThreadProcess(std::shared_ptr<Thread> thread_ctx);
 
 private:    
-    const int max_size_ = 16;                    // Ïß³ÌÊıÀ©Õ¹ÉÏÏŞ
+    const int max_size_ = 16;                    // çº¿ç¨‹æ•°æ‰©å±•ä¸Šé™
     
     std::queue<std::pair<_ThreadProc, _FinCallBack> > queue_;
     std::list<std::shared_ptr<Thread>>    pool_;
 
-    size_t idle_count_ = 0;                          // ¿ÕÏĞ×´Ì¬µÄÏß³ÌÊı
+    size_t idle_count_ = 0;                          // ç©ºé—²çŠ¶æ€çš„çº¿ç¨‹æ•°
 
     std::atomic<bool>           exit_;
     std::mutex                  mutex_;
