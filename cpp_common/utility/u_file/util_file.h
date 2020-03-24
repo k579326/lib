@@ -35,7 +35,7 @@ namespace fileutil
         int Seek(int32_t off, int where);
         int Read(std::string* out, uint32_t expected_size);
 
-        /* 仅用于处理文本文件 */
+        /* 仅用于处理文本文件, 如果成功返回正整数，读到文件尾返回0，失败返回-1*/
         int ReadLine(std::string* out);
         bool IsEOF();
 

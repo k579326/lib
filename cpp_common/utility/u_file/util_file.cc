@@ -171,20 +171,22 @@ namespace fileutil
             std::shared_ptr<char> strptr(new char[256], [](char* p) { delete[] p; });
 
             if (!fgets(strptr.get(), 256, file_)) {
-
-                return ferror(file_);
+                if (feof(file_))
+                    return 0;
+                else
+                    return -1;
             }
 
             *out += strptr.get();
 
-            if (*(out->end() - 1) == '\n')
+            if (!out->empty() && *(out->end() - 1) == '\n')
             {
+                out->erase(out->end() - 1);
                 break;
             }
         }
         
-
-        return 0;
+        return out->size();
     }
 
     int File::Write(const unsigned char* indata, uint32_t insize)

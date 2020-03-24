@@ -1,5 +1,8 @@
 
 #include <iostream>
+#include <vector>
+#include <string>
+
 #include "util_file.h"
 
 
@@ -9,10 +12,8 @@ static int testrw()
     int err;
     fileutil::File f("E:\\Test\\testrwfile");
 
-
     err = f.Open("wb");
     if (err != 0) {
-
         return err;
     }
 
@@ -20,7 +21,6 @@ static int testrw()
     uint32_t size = sizeof(testdata);
     err = f.Write(testdata, size);
     if (err != 0 || size != sizeof(testdata)) {
-
         return -1;
     }
 
@@ -91,17 +91,70 @@ static int TestTruncate()
     return 0;
 }
 
+static int TestReadLine()
+{
+    std::vector<std::string> lines = {
+        "112erwerweq", "12312312", "545423sda", "63r54gsx3f4", "459dpksf;sdlkf", "=6-7023=-3432432", "%%&#*&$$*(#@%%(", "|GPER::P*&&$#", "²âÊÔ"
+    };
+    fileutil::File f("./test");
+
+    f.Open("wb");
+
+    for (auto it = lines.begin(); it != lines.end(); it++) {
+        f.Write((unsigned char*)it->c_str(), it->size());
+        f.Write((unsigned char*)"\n", 1);
+    }
+    
+    f.Close();
+
+    f.Open("ab+");
+
+
+    std::vector<std::string> lines_copy;
+    while (1)
+    {
+        std::string tmp;
+        int ret = f.ReadLine(&tmp);
+        if (ret == -1 || ret == 0)
+            break;
+
+        lines_copy.push_back(tmp);
+    }
+
+    if (lines != lines_copy) {
+        return -1;
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main()
 {
-    if (testrw()) {
+    if (TestReadLine()) {
         return -1;
     }
-    if (testcopy()) {
-        return -1;
-    }
-    if (TestTruncate()) {
-        return -1;
-    }
+
+    //if (testrw()) {
+    //    return -1;
+    //}
+    //if (testcopy()) {
+    //    return -1;
+    //}
+    //if (TestTruncate()) {
+    //    return -1;
+    //}
 
     return 0;
 }
