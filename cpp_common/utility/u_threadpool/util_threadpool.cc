@@ -42,7 +42,9 @@ int ThreadPool::init(size_t size)
     for (int i = 0; i < size && pool_.size() < size; i++) {
         std::shared_ptr<Thread> trd_ctx = std::make_shared<Thread>();
         pool_.push_back(trd_ctx);
-        (*pool_.rbegin())->thread_.swap(std::thread(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx)));
+		
+		std::thread trd(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx));
+        (*pool_.rbegin())->thread_ = std::move(trd);
     }
 
     idle_count_ = size;
@@ -70,7 +72,8 @@ bool ThreadPool::AddThreads(size_t count)
     for (size_t i = 0; i < count; i++) {
         std::shared_ptr<Thread> trd_ctx = std::make_shared<Thread>();
         pool_.push_back(trd_ctx);
-        (*pool_.rbegin())->thread_.swap(std::thread(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx)));
+		std::thread trd(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx));
+        (*pool_.rbegin())->thread_ = std::move(trd);
     }
     idle_count_ += count;
 
@@ -122,7 +125,8 @@ bool ThreadPool::DelThreads(size_t count)
         for (; delsize != 0; delsize--) {
             std::shared_ptr<Thread> trd_ctx = std::make_shared<Thread>();
             pool_.push_back(trd_ctx);
-            (*pool_.rbegin())->thread_.swap(std::thread(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx)));
+            std::thread trd(std::bind(&ThreadPool::_ThreadProcess, this, trd_ctx));
+			(*pool_.rbegin())->thread_ = std::move(trd);
         }
 
         return false;
