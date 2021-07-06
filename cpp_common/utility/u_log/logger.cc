@@ -66,12 +66,12 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
         printer_.reset(new SyncPrinter(info.outputModel));
     }
 
-    fmt_ = std::make_shared<Formatter>(info.columns, version);
-    lnm_.SetLabel(info.label);
-    lnm_.SetPath(path);
-
     std::string logpath = pathutil::PathCombines(path, "logs");
     CommCreateDir(logpath.c_str());
+
+    fmt_ = std::make_shared<Formatter>(info.columns, version);
+    lnm_.SetLabel(info.label);
+    lnm_.SetPath(logpath);
 
     loginfo_ = info;
     version_ = version;
