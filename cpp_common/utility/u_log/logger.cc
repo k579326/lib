@@ -7,10 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "u_path/util_path.h"
+#include "u_dir/util_dir.h"
+
 #include "core/formatter.h"
 #include "core/printer.h"
 #include "autoclear/logclear.h"
-
 #include "stringdef/stringdef.h"
 
 static const char* g_log_start = "\n\
@@ -55,9 +57,6 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
         return;
     }
 
-    loginfo_ = info;
-    version_ = version;
-    logpath_ = path;
     // init printer
     if (info.runModel == RunModel::kAsync) { 
         printer_.reset(new ThreadPrinter(info.outputModel));
@@ -71,7 +70,14 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
     lnm_.SetLabel(info.label);
     lnm_.SetPath(path);
 
-    clr_ = std::make_shared<LogClr>(path, info.keep_days, &lnm_);
+    std::string logpath = pathutil::PathCombines(path, "logs");
+    CommCreateDir(logpath.c_str());
+
+    loginfo_ = info;
+    version_ = version;
+    logpath_ = logpath;
+
+    clr_ = std::make_shared<LogClr>(logpath_, info.keep_days, &lnm_);
     clr_->Start(5); // 5秒检查一次
 
     printer_->SetIO(lnm_.GetLogName());

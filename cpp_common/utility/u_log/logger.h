@@ -3,6 +3,9 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <string>
 #include <thread>
@@ -64,18 +67,23 @@ private:
 
 
 /* some setting for struct LogInitInfo*/
-const LogInitInfo g_logfile_info_ = {
+static LogInitInfo g_logfile_info_ = {
 	"DefaultNameOfLog", kDebugLevel, kSync, kAllColumn, kFileModel, 0
 };
-const LogInitInfo g_logconsole_info = {
+static LogInitInfo g_logconsole_info = {
 	"DefaultNameOfLog", kDebugLevel, kSync, kAllColumn, kConsoleModel, 0
 };
 
 
 #ifdef _ENABLE_LOGGER_
 
-#define LOG_InitWithFileMode(ver, logdir)		Logger::GetInstance()->Init(g_logfile_info_, (ver), (logdir));
-#define LOG_InitWithConsoleMode(ver, logdir) 	Logger::GetInstance()->Init(g_logconsole_info, (ver), (logdir));
+#define LOG_InitAsFileMode(label_str, ver, logdir)		\
+	strcpy(g_logfile_info_.label, label_str);					\
+	Logger::GetInstance()->Init(g_logfile_info_, (ver), (logdir))
+	
+#define LOG_InitAsConsoleMode(label_str, ver, logdir) 	\
+	strcpy(g_logconsole_info.label, label_str);	\
+	Logger::GetInstance()->Init(g_logconsole_info, (ver), (logdir))
 
 #define LOG_Debug(format, ...)      		Logger::GetInstance()->Print(kDebugLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 #define LOG_Infor(format, ...)      		Logger::GetInstance()->Print(kInforLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
@@ -85,8 +93,8 @@ const LogInitInfo g_logconsole_info = {
 
 #else
 
-#define LOG_InitWithFileMode(ver, logdir)
-#define LOG_InitWithConsoleMode(ver, logdir)
+#define LOG_InitAsFileMode(label_str, ver, logdir)
+#define LOG_InitAsConsoleMode(label_str, ver, logdir)
 
 #define LOG_Debug(format, ...)
 #define LOG_Infor(format, ...)
