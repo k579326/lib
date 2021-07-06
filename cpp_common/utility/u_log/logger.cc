@@ -113,10 +113,10 @@ void Logger::Print(LogLevels level, const std::string& filename, const std::stri
 
     std::string column_str = fmt_->Format(level, filename, function, linenum);
 
-    char buf[4096] = { 0 };
+    char buf[640] = { 0 };
     va_list varArgs;
     va_start(varArgs, format);
-    std::vsnprintf(buf, 4096, format, varArgs);
+    std::vsnprintf(buf, 640, format, varArgs);
     va_end(varArgs);
 
     if (lnm_.NeedUpdate()) {

@@ -13,7 +13,7 @@ add_subdirectory(core)
 add_library(logger STATIC logger.cc logger.h logger_define.h stringdef/stringdef.cc stringdef/stringdef.h)
 set_target_properties(logger PROPERTIES FOLDER "common/log")
 
-target_link_libraries(logger logcore loghelper logclr)
+target_link_libraries(logger logcore loghelper logclr udir fileutil pathutil)
 target_include_directories(logger PRIVATE .)
 
 
