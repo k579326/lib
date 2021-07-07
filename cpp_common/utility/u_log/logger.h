@@ -35,6 +35,9 @@ using AutoCleaner = std::shared_ptr<LogClr>;
 
 class Logger
 {
+// 输出内存数据时，每行显示的内存字节数
+#define MEMORY_WIDTH_EACHLEN    16
+
 protected:
     Logger();
 public:
@@ -46,10 +49,18 @@ public:
     void Init(const LogInitInfo& info, const std::string& version, const std::string& path);
     void Uninit();
 
-    void Print(LogLevels level, const std::string& filename, const std::string& function, int linenum, const char* format, ...);
+    void Print(LogLevels level, const std::string& filename, 
+        const std::string& function, int linenum, const char* format, ...);
+    void PrintMemory(LogLevels level, const std::string& filename, 
+        const std::string& function, int linenum, const std::string& memory_name, 
+        const void* memory, size_t len);
 
 private:
+
     void SetLoggerHeader();
+    char ConvertCharacter(const char& c);
+    std::string BuildMemoryVisualData(const void* memory, size_t len);
+
 private:
 
     std::mutex mutex_;
@@ -91,6 +102,12 @@ static LogInitInfo g_logconsole_info = {
 #define LOG_Error(format, ...)      		Logger::GetInstance()->Print(kErrorLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 #define LOG_Fatal(format, ...)      		Logger::GetInstance()->Print(kFatalLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 
+#define LOGM_Debug(name, addr, len)      		Logger::GetInstance()->PrintMemory(kDebugLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
+#define LOGM_Infor(name, addr, len)      		Logger::GetInstance()->PrintMemory(kInforLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
+#define LOGM_Warning(name, addr, len)    		Logger::GetInstance()->PrintMemory(kWarningLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
+#define LOGM_Error(name, addr, len)      		Logger::GetInstance()->PrintMemory(kErrorLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
+#define LOGM_Fatal(name, addr, len)      		Logger::GetInstance()->PrintMemory(kFatalLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
+
 #else
 
 #define LOG_InitAsFileMode(label_str, ver, logdir)
@@ -102,6 +119,11 @@ static LogInitInfo g_logconsole_info = {
 #define LOG_Error(format, ...)
 #define LOG_Fatal(format, ...)
 
+#define LOGM_Debug(name, addr, len)    
+#define LOGM_Infor(name, addr, len)    
+#define LOGM_Warning(name, addr, len)  
+#define LOGM_Error(name, addr, len)    
+#define LOGM_Fatal(name, addr, len)    
 
 #endif // _ENABLE_LOGGER_
 

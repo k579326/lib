@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_library(fileutil util_file.cc util_file.h)
 set_target_properties(fileutil PROPERTIES FOLDER "common/")
+target_include_directories(fileutil INTERFACE ../)
 
 if (DEFINED RUNTEST)
     add_subdirectory(test)

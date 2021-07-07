@@ -22,7 +22,7 @@ if (OPENLOG)
 endif()
 
 target_link_libraries(logger logcore loghelper logclr udir fileutil pathutil)
-target_include_directories(logger PRIVATE .)
+target_include_directories(logger PUBLIC .)
 
 
 
