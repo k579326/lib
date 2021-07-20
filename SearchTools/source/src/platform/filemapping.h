@@ -8,6 +8,7 @@ class MappingID;
 
 class FileMapping
 {
+public:
     struct MapInfo
     {
         std::string filepath;

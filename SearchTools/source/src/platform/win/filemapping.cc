@@ -7,7 +7,7 @@
 
 #include <sys/stat.h>
 
-#include "file/util_dir.h"
+#include "u_dir/util_dir.h"
 #include "search_err.h"
 
 
@@ -43,7 +43,7 @@ public:
             PAGE_READONLY,
             0, 
             0,
-            "SearchTools"
+            NULL
             );
         if (HandleOfMapping_ == INVALID_HANDLE_VALUE) {
             return SRH_FILEOPR;

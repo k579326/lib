@@ -4,9 +4,9 @@
 #include <string.h>
 
 #include "search_def.h"
-#include "file/util_dir.h"
+#include "u_dir/util_dir.h"
 #include "search_err.h"
-#include "win/convert/character_convert.h"
+
 
 FetchFile::FetchFile(const CPTString& directory)
 {
@@ -81,7 +81,7 @@ int FetchFile::GetFileFullPathFromDir(CPTString& filepath)
         filename = info->d_name;
 #endif
         tmppath = curdir_ + CPT('/') + filename;
-        if (info->d_type == DT_DIR)
+        if (S_ISDIR(info->d_type))
         {
             //printf("fetch find directory: %s", tmppath.c_str());
             childdirs_.push(tmppath);

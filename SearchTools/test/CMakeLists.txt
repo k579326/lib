@@ -4,7 +4,7 @@ include_directories(../source/src)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(st_test test.cc)
-target_link_libraries(st_test StringFinder)
+add_executable(grep test.cc)
+target_link_libraries(grep StringFinder)
 
 

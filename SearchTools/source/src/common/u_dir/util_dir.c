@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h>
 
 #ifndef WIN32
 #include <dirent.h>
@@ -174,11 +173,11 @@ DIR* opendir(const char* path)
 	
     if (wd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
     {
-        dir->curDir->d_type = DT_DIR;
+        dir->curDir->d_type = S_IFDIR;
     }
     else
     {
-        dir->curDir->d_type = DT_REG;                  // 不是目录就是普通文件，暂时先这样。
+        dir->curDir->d_type = S_IFREG;                  // 不是目录就是普通文件，暂时先这样。
     }
 	
 	dir->isFirst = true;
@@ -210,11 +209,11 @@ struct dirent* readdir(DIR* dir)
 	strcpy(dir->curDir->d_name, wd.cFileName);
     if (wd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
     {
-        dir->curDir->d_type = DT_DIR;
+        dir->curDir->d_type = S_IFDIR;
     }
     else
     {
-        dir->curDir->d_type = DT_REG;                  // 不是目录就是普通文件，暂时先这样。
+        dir->curDir->d_type = S_IFREG;                  // 不是目录就是普通文件，暂时先这样。
     }
 	
 	return dir->curDir;
@@ -339,7 +338,7 @@ int CommClearDir(const char* path, bool force)
         strcat(path_will_remove, "/");
         strcat(path_will_remove, info->d_name);
 
-        if (info->d_type == DT_REG)
+        if (S_ISREG(info->d_type))
         {
             err = remove(path_will_remove);
         }

@@ -29,7 +29,7 @@ private:
 
 private:
     Elm* next_begin_;
-    std::shared_ptr<int> next_;
+    std::shared_ptr<int[]> next_;
     const std::pair<const Elm*, size_t> source_;
     const std::pair<const Elm*, size_t> pattern_;
 };
@@ -42,7 +42,7 @@ KMP<Elm>::KMP(const Elm* source, size_t slen, const Elm* pattern, size_t plen) :
     next_(nullptr)
 {
     next_begin_ = nullptr;
-    next_.reset(new int[plen], [](int* p)->void { if (p) delete[] p; });
+    next_.reset(new int[plen]);
     memset(next_.get(), 0, plen * sizeof(Elm));
 
     genPatternTable();

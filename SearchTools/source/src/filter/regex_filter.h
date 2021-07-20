@@ -64,10 +64,10 @@ public:
     using regex = typename TT::regex;
 public:
 
-    void SetFilters(std::vector<_ST> filters);
+    void SetFilters(std::vector<_ST> filters, bool is_easy);
 
-    RegexFilter(bool is_easy, bool reverse) : 
-        InterfaceFilter(reverse, kRegex), is_easy_(is_easy) {}
+    RegexFilter(bool reverse) : 
+        InterfaceFilter(reverse, kRegex), is_easy_(true) {}
     ~RegexFilter() = default;
 
     bool Check(const _ST& filepath) const override;
@@ -82,15 +82,19 @@ private:
 
 
 template<class _ST, class TT>
-void RegexFilter<_ST, TT>::SetFilters(std::vector<_ST> filters)
+void RegexFilter<_ST, TT>::SetFilters(std::vector<_ST> filters, bool is_easy)
 {
     filters_ = filters;
+    is_easy_ = is_easy;
 }
 
 
 template<class _ST, class TT>
 bool RegexFilter<_ST, TT>::Check(const _ST& str) const
 {
+    if (filters_.empty())
+        return true;
+
     bool ret = !is_easy_ ? CheckAsNormalRegex(str) : 
         CheckAsEasyMatch(str);
     
