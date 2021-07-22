@@ -11,15 +11,15 @@
 #include "search_err.h"
 
 
-class MappingID
+class FileMapping::MappingImpl
 {
 public:
-    MappingID() = default;
-    ~MappingID() 
+    MappingImpl() = default;
+    ~MappingImpl()
     {
         if (address_ != NULL)
             UnmapViewOfFile(address_);
-        if (HandleOfMapping_ != INVALID_HANDLE_VALUE)
+        if (HandleOfMapping_ != 0)
             CloseHandle(HandleOfMapping_);
         if (HandleOfFile_ != INVALID_HANDLE_VALUE)
             CloseHandle(HandleOfFile_);
@@ -27,6 +27,10 @@ public:
 
     int OpenMapping(const std::string& file, size_t size)
     {
+        // 暂时不分段处理大文件，后续再说
+        if (size > maxbytes_eachmap_)
+            return SRH_INVAL;
+
         HandleOfFile_ = CreateFileA(file.c_str(),
             GENERIC_READ,
             FILE_SHARE_READ,
@@ -81,13 +85,13 @@ private:
     size_t offset_ = 0;
     size_t filesize_ = 0;
     HANDLE HandleOfFile_ = INVALID_HANDLE_VALUE;
-    HANDLE HandleOfMapping_ = INVALID_HANDLE_VALUE;
-    const size_t maxbytes_eachmap_ = 1024 * 1024 * 10;   // 10M
+    HANDLE HandleOfMapping_ = 0;
+    const size_t maxbytes_eachmap_ = kFileSizeLimit;   
 };
 
 FileMapping::FileMapping()
 {
-    pID_ = new MappingID;
+    mapper_ = new MappingImpl;
     filepath_ = "";
     filesize_ = 0;
 }
@@ -95,8 +99,8 @@ FileMapping::FileMapping()
 
 FileMapping::~FileMapping()
 {
-    if (pID_ != NULL)
-        delete pID_;
+    if (mapper_ != NULL)
+        delete mapper_;
 }
 
 void FileMapping::SetFile(const std::string& filepath)
@@ -119,7 +123,7 @@ void FileMapping::SetFile(const std::string& filepath)
 
 int FileMapping::OpenMapping()
 {
-    return pID_->OpenMapping(filepath_, filesize_);
+    return mapper_->OpenMapping(filepath_, filesize_);
 }
 
 int FileMapping::Mapping(MapInfo& info)
@@ -128,11 +132,11 @@ int FileMapping::Mapping(MapInfo& info)
     info.filepath = "";
     info.addr = NULL;
 
-    int ret = pID_->DoMapping(&info.len);
+    int ret = mapper_->DoMapping(&info.len);
     if (ret != SRH_OK)
         return ret;
 
-    info.addr = pID_->GetAddress();
+    info.addr = mapper_->GetAddress();
     info.filepath = filepath_;
 
     return SRH_OK;
@@ -140,8 +144,8 @@ int FileMapping::Mapping(MapInfo& info)
 
 int FileMapping::CloseMapping()
 {
-    delete pID_;
-    pID_ = NULL;
+    delete mapper_;
+    mapper_ = NULL;
     return SRH_OK;
 }
 

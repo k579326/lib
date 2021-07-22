@@ -538,22 +538,26 @@ typename Encodetraits<_ET>::Elm* KMPExtention<_ET>::doMatch(const Elm* begin)
     {
         // printf("\n%d, %d", is, ip);
         bool eq = _Helper::char_equel(start, x[ip].first, icase_);
-        if (eq && start)
+        Elm* nextptr = _Helper::char_next(start);
+        if (eq)
         {
+            if (nextptr > source_.first + source_.second) {
+                break;
+            }
             if (ip == x.size() - 1) {
-                next_begin_ = _Helper::char_next(start);
+                next_begin_ = nextptr;
                 hit = true;
                 break;
             }
             else {
-                start = _Helper::char_next(start);
+                start = nextptr;
                 ip++;
             }
         }
         else
         {
             if (next[ip] < 0) {
-                start = _Helper::char_next(start);
+                start = nextptr;
                 ip = 0;
             }
             else {

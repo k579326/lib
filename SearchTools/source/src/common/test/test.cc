@@ -48,11 +48,11 @@ static void CheckFiles(std::queue<std::string>& dirlist)
         strcpy(filepath, dirpath);
         strcat(filepath, "\\");
         strcat(filepath, file->d_name);
-        if ((file->d_type & DT_DIR) == DT_DIR) {
+        if (S_ISDIR(file->d_type)) {
             dirlist.push(filepath);
             continue;
         }
-        else if ((file->d_type & DT_REG) != DT_REG)
+        else if (S_ISREG(file->d_type))
             continue;
 
         FILE* fp = fopen(filepath, "rb");

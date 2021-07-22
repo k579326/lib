@@ -4,11 +4,13 @@
 
 #include <string>
 
-class MappingID;
-
 class FileMapping
 {
 public:
+    static const size_t kFileSizeLimit = 1024 * 1024 * 512;  // 512M
+
+public:
+
     struct MapInfo
     {
         std::string filepath;
@@ -27,8 +29,10 @@ public:
     int CloseMapping();
 
 private:
+    class MappingImpl;
+
     std::string filepath_;
     size_t filesize_;
-    MappingID* pID_;
+    MappingImpl* mapper_;
 };
 

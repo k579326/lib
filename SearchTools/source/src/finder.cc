@@ -123,6 +123,7 @@ bool StringFinder::RegistFilter(std::shared_ptr<InterfaceFilter> filter)
      EncodeType et;
      fmap->SetFile(file);
      if (fmap->OpenMapping() != SRH_OK) {
+         LOG_Error("file %s have been skipped, may be it is too large or not exist!", file.c_str());
          goto _EXIT_;
      }
 

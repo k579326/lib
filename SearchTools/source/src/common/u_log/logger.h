@@ -22,7 +22,7 @@ typedef struct
     RunModel    runModel;				// 同步输出或者异步输出
     int         columns;				// 选择输出哪些列，参考 enum LogColumns
     LogOutput   outputModel;			// 输出至文件或者终端
-    uint8_t		keep_days;              // 日志保存时间（即随时清理从当天算，keep_days天前的所有日志。如果为0，则不清理任何日志）
+    uint8_t		keep_days;              // 日志保存时间（即随时清理->从当天算keep_days天前的所有日志。如果为0，则不清理任何日志）
 }LogInitInfo;
 
 class Formatter;
