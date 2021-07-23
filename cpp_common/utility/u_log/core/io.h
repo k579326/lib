@@ -50,7 +50,7 @@ public:
     virtual void Close() override;
 
 private:
-    ConsoleID console_;
+    ConsoleID console_ = (ConsoleID)-1;
 };
 
 

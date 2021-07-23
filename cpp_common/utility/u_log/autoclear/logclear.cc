@@ -106,7 +106,7 @@ void LogClr::RemoveLogTimeout()
         }
         
         std::string fullname = pathutil::PathCombines(log_dir_, e->d_name);
-        if (e->d_type == DT_DIR) {
+        if (S_ISDIR(e->d_type)) {
             // 日志目录下不应该有子目录
             CommRemoveDir(fullname.c_str(), true);
             continue;

@@ -70,13 +70,10 @@ void FileIO::Close()
 
 ConsoleIO::ConsoleIO()
 {
-
 }
-
 
 ConsoleIO::~ConsoleIO()
 {
-
 }
 
 int ConsoleIO::Open(const std::string& path)

@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD "11")
 
-include_directories(.)
+include_directories(../)
+include_directories(./)
 
 add_subdirectory(helper)
 add_subdirectory(autoclear)
@@ -21,8 +22,8 @@ if (OPENLOG)
 	message("[module-logger] logger is being opened!")
 endif()
 
-target_link_libraries(logger logcore loghelper logclr udir fileutil pathutil)
-target_include_directories(logger PUBLIC .)
+target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil)
+target_include_directories(logger PUBLIC ./)
 
 
 
