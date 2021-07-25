@@ -8,7 +8,7 @@
 	#define PW_OS_WIN		1
 #elif defined __ANDROID__
 	#define PW_OS_ANDROID 	1
-#elif defined __LINUX__
+#elif defined __linux__ || defined __linux
 	#define PW_OS_LINUX 	1
 #elif defined __APPLE__
 	#include <TargetConditionals.h>
