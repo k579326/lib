@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 #include "encode_def.h"
 
 namespace CheckEncode

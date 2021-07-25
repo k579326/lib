@@ -48,11 +48,11 @@ static void CheckFiles(std::queue<std::string>& dirlist)
         strcpy(filepath, dirpath);
         strcat(filepath, "\\");
         strcat(filepath, file->d_name);
-        if (S_ISDIR(file->d_type)) {
+        if (DT_DIR == file->d_type) {
             dirlist.push(filepath);
             continue;
         }
-        else if (S_ISREG(file->d_type))
+        else if (DT_REG != file->d_type)
             continue;
 
         FILE* fp = fopen(filepath, "rb");
@@ -69,7 +69,7 @@ static void CheckFiles(std::queue<std::string>& dirlist)
 
 int main()
 {
-    char dirpath[] = "C:\\Users\\K\\Desktop\\KMP";
+    char dirpath[] = "F:\\work\\sanguo_game\\helper";
 
     std::queue<std::string> dirlist;
     dirlist.push(dirpath);
