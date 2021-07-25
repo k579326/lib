@@ -1,6 +1,5 @@
 #pragma once
 
-
 /*
 扩展的KMP，支持主流的GBK, UTF8, UTF16编码的字符串匹配
 */
@@ -183,8 +182,6 @@ public:
     virtual ~Pattern() {
         delete[] sourestring_;
     }
-    
-
     void ProcessSourceString() 
     {
         realstring_.clear();
@@ -275,7 +272,24 @@ public:
 
         return;
     }
-    void OptimizStepTable() { }
+    void OptimizStepTable() {
+        size_t tablesize = realstring_.size();
+
+        int* c_next = steptable_.get();
+
+        for (int i = tablesize - 1; i > 0; i--)
+        {
+            int steps = c_next[i];
+            if (realstring_[steps].second != realstring_[i].second)
+                continue;
+            if (memcmp(realstring_[steps].first,
+                realstring_[i].first,
+                realstring_[steps].second) != 0)
+                continue;
+
+            c_next[i] = (c_next[i] == 0 ? -1 : c_next[steps]);
+        }
+    }
 
     int* GetStepTable() { return steptable_.get(); }
     size_t GetTableSize() { return realstring_.size(); }
@@ -307,7 +321,7 @@ public:
         if (type == UTF8_BOM) type = UTF8;
         return Patterns[type];
     }
-    
+
     template<EncodeType _ET, class _Traits = Encodetraits<_ET>>
     bool InputPattern(const typename _Traits::Elm* string, size_t length, bool icase)
     {
@@ -325,6 +339,7 @@ public:
         for (auto& e: Patterns) {
             e.second->ProcessSourceString();
             e.second->GenStepTable(icase);
+            e.second->OptimizStepTable();
         }
 
         return true;
