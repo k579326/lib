@@ -49,7 +49,13 @@ public:
     void Init(const LogInitInfo& info, const std::string& version, const std::string& path);
     void Uninit();
 
-    void Print(LogLevels level, const std::string& filename, 
+    /* 
+    *   floor:  means indent，hierarchically log have no indent default.
+        tc:     valid for console model only 
+    */
+    void Print(uint8_t floor, TextColor tc, const char* format, ...);
+
+    void Print(LogLevels level, const std::string& filename,
         const std::string& function, int linenum, const char* format, ...);
     void PrintMemory(LogLevels level, const std::string& filename, 
         const std::string& function, int linenum, const std::string& memory_name, 
@@ -108,6 +114,9 @@ static LogInitInfo g_logconsole_info = {
 #define LOGM_Error(name, addr, len)      		Logger::GetInstance()->PrintMemory(kErrorLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
 #define LOGM_Fatal(name, addr, len)      		Logger::GetInstance()->PrintMemory(kFatalLevel, __FILE__, __FUNCTION__, __LINE__, (name), (addr), (len))
 
+// color: enum type
+#define LOG_FREE(floor, color, format, ...)     Logger::GetInstance()->Print(floor, color, format, ##__VA_ARGS__)
+
 #else
 
 #define LOG_InitAsFileMode(label_str, ver, logdir)
@@ -124,6 +133,8 @@ static LogInitInfo g_logconsole_info = {
 #define LOGM_Warning(name, addr, len)  
 #define LOGM_Error(name, addr, len)    
 #define LOGM_Fatal(name, addr, len)    
+
+#define LOG_FREE(floor, color, format, ...) 
 
 #endif // _ENABLE_LOGGER_
 

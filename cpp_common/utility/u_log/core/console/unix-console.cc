@@ -34,7 +34,7 @@ ConsoleID GetConsole()
     return 0;
 }
 
-bool SetConsoleTextColor(ConsoleID console, Color color, bool intensity)
+bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity)
 {
     unused(console);
     

@@ -12,9 +12,24 @@
 #include "logger_define.h"
 #include <core/io.h>
 
+
+struct _LOGPROPERTY
+{
+    _LOGPROPERTY() {
+        logstr = "";
+        level = kLevelEnd;
+        color = TC_White;
+    }
+    std::string logstr;
+    LogLevels   level;
+    TextColor   color;  // valid only level is kLevelEnd
+};
+
+
 class PrinterInterface
 {
-    using LogColorMap = std::map<LogLevels, Color>;
+    using LogColorMap = std::map<LogLevels, __LogTextColor>;
+    using LogColorMapFormOut = std::map<TextColor, __LogTextColor>;
 
 protected:
     PrinterInterface() {
@@ -23,24 +38,46 @@ protected:
         color_map_.insert(std::make_pair(kWarningLevel, Yellow));
         color_map_.insert(std::make_pair(kErrorLevel, Purple));
         color_map_.insert(std::make_pair(kFatalLevel, Red));
+
+        out_color_map_.insert(std::make_pair(TC_White, White));
+        out_color_map_.insert(std::make_pair(TC_Green, Green));
+        out_color_map_.insert(std::make_pair(TC_Yellow, Yellow));
+        out_color_map_.insert(std::make_pair(TC_Purple, Purple));
+        out_color_map_.insert(std::make_pair(TC_Black, Black));
+        out_color_map_.insert(std::make_pair(TC_Red, Red));
+        out_color_map_.insert(std::make_pair(TC_Cyan, Cyan));
+        out_color_map_.insert(std::make_pair(TC_Blue, Blue));
     }
 public:
     virtual ~PrinterInterface() {}
     
     virtual void SetIO(const std::string& filename) = 0;
-    virtual void Output(const std::string& str, LogLevels loglevel) = 0;
+    virtual void Output(_LOGPROPERTY& properties) = 0;
 
-    Color GetColor(LogLevels loglevel) 
+    __LogTextColor GetColor(const _LOGPROPERTY& log)
     {
-        auto it = color_map_.find(loglevel);
-        if (it == color_map_.end()) {
-            return InvalidColor;
+        __LogTextColor c;
+        if (log.level == kLevelEnd) {
+            auto it = out_color_map_.find(log.color);
+            if (it == out_color_map_.end()) {
+                return InvalidColor;
+            }
+            c = it->second;
         }
-        return it->second;
+        else {
+            auto it = color_map_.find(log.level);
+            if (it == color_map_.end()) {
+                return InvalidColor;
+            }
+            c = it->second;
+        }
+             
+        return c;
     }
 
 private:
     LogColorMap color_map_;
+    LogColorMapFormOut out_color_map_;
 };
 
 
@@ -51,7 +88,7 @@ public:
     ~ThreadPrinter();
     
     virtual void SetIO(const std::string& filename) override;
-    virtual void Output(const std::string& str, LogLevels loglevel) override;
+    virtual void Output(_LOGPROPERTY& property) override;
 private:
 
     void Stop();
@@ -61,7 +98,7 @@ private:
 private:
     std::condition_variable cond_;
     std::mutex protector_;
-    std::queue<std::tuple<std::string, LogLevels>> log_queue_;
+    std::queue<_LOGPROPERTY> log_queue_;
     std::thread log_thread_;
 
     bool is_stop_ = false;
@@ -79,7 +116,7 @@ public:
     virtual void SetIO(const std::string& filename) override;
 
     /* 同步写入，内部有锁，控制外部多线程调用时的时序 */
-    virtual void Output(const std::string& str, LogLevels loglevel) override;
+    virtual void Output(_LOGPROPERTY& property) override;
 
 private:
     std::shared_ptr<IOInterface> io_ = nullptr;

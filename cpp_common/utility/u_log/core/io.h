@@ -19,7 +19,7 @@ public:
     
     virtual int Open(const std::string& path) = 0;
     
-    virtual int Write(const std::string& content, Color textcolor) = 0;
+    virtual int Write(const std::string& content, __LogTextColor textcolor) = 0;
     
     virtual void Close() = 0;
     
@@ -32,7 +32,7 @@ public:
     ~FileIO() {}
 
     virtual int Open(const std::string& path) override;
-    virtual int Write(const std::string& content, Color textcolor) override;
+    virtual int Write(const std::string& content, __LogTextColor textcolor) override;
     virtual void Close() override;
 
 private:
@@ -46,7 +46,7 @@ public:
     ~ConsoleIO();
 
     virtual int Open(const std::string& path) override;
-    virtual int Write(const std::string& content, Color textcolor) override;
+    virtual int Write(const std::string& content, __LogTextColor textcolor) override;
     virtual void Close() override;
 
 private:

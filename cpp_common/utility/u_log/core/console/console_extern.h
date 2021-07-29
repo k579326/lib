@@ -11,7 +11,7 @@
     typedef int ConsoleID;
 #endif
 
-enum Color
+enum __LogTextColor
 {
     Black = 0x00000000,             // 黑
     Red = 0x00FF0000,               // 红
@@ -31,7 +31,7 @@ extern "C" {
 
 ConsoleID GetConsole();
 
-bool SetConsoleTextColor(ConsoleID console, Color color, bool intensity);
+bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity);
 
 int WriteConsole_(ConsoleID console, const void* ptr, int len);
 

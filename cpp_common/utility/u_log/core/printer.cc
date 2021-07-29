@@ -26,11 +26,11 @@ ThreadPrinter::~ThreadPrinter()
 }
 
 
-void ThreadPrinter::Output(const std::string& str, LogLevels loglevel)
+void ThreadPrinter::Output(_LOGPROPERTY& property)
 {
     std::unique_lock<std::mutex> autolock(protector_);
-
-    log_queue_.push(std::tuple<std::string, LogLevels>(str, loglevel));
+    property.logstr += "\n";
+    log_queue_.push(property);
     cond_.notify_one();
 }
 
@@ -47,7 +47,7 @@ void ThreadPrinter::log_handler()
 {
     while (!is_exit_)
     {
-        std::tuple<std::string, LogLevels> logstr;
+        _LOGPROPERTY log;
 
         std::unique_lock<std::mutex> autolock(protector_);
         cond_.wait(autolock, [this]()->bool
@@ -60,12 +60,13 @@ void ThreadPrinter::log_handler()
         }
 
         if (!log_queue_.empty()) {
-            logstr = log_queue_.front();
+            log = log_queue_.front();
             log_queue_.pop();
         }
 
-        if (io_)
-            io_->Write(std::get<0>(logstr), GetColor(std::get<1>(logstr)));
+        if (io_) {
+            io_->Write(log.logstr, GetColor(log));
+        }
     }
 }
 void ThreadPrinter::Stop()
@@ -88,10 +89,11 @@ SyncPrinter::~SyncPrinter()
     std::unique_lock<std::mutex> autolock(io_lock_);
     io_->Close();
 }
-void SyncPrinter::Output(const std::string& str, LogLevels loglevel)
+void SyncPrinter::Output(_LOGPROPERTY& property)
 {
     std::unique_lock<std::mutex> autolock(io_lock_);
-    io_->Write(str, GetColor(loglevel));
+    property.logstr += "\n";
+    io_->Write(property.logstr, GetColor(property));
 }
 void SyncPrinter::SetIO(const std::string& path)
 {

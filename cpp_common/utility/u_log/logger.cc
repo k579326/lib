@@ -22,7 +22,7 @@ static const char* g_log_start = "\n\
 **** LogLevel:  %s                                     \n\
 **** RunModel:  %s                                     \n\
 **********************************************************\n\
-\n";
+";
 
 
 bool Logger::isInited_ = false;
@@ -103,7 +103,10 @@ void Logger::SetLoggerHeader()
         g_runmodel_str.find(loginfo_.runModel)->second.c_str()
     );
 
-    printer_->Output(buf, kInforLevel);
+    _LOGPROPERTY log;
+    log.logstr = buf;
+    log.level = kInforLevel;
+    printer_->Output(log);
 }
 
 
@@ -114,6 +117,32 @@ void Logger::Uninit()
     version_ = "";
 
     isInited_ = false;
+}
+
+void Logger::Print(uint8_t floor, TextColor tc, const char* format, ...)
+{
+    if (tc > TC_NOUSE) {
+        tc = TextColor::TC_White;
+    }
+
+    char buf[256] = { 0 };
+    va_list varArgs;
+    va_start(varArgs, format);
+    std::vsnprintf(buf, 256, format, varArgs);
+    va_end(varArgs);
+
+    if (lnm_.NeedUpdate()) {
+        printer_->SetIO(lnm_.GetLogName());
+    }
+    
+    std::string logstr((size_t)floor * 2, '\x20');
+    logstr += buf;
+
+    _LOGPROPERTY log;
+    log.logstr = logstr;
+    log.level = kLevelEnd;
+    log.color = tc;
+    printer_->Output(log);
 }
 
 void Logger::Print(LogLevels level, const std::string& filename, 
@@ -135,7 +164,10 @@ void Logger::Print(LogLevels level, const std::string& filename,
         printer_->SetIO(lnm_.GetLogName());
     }
 
-    printer_->Output(column_str + "###  " + buf + "\n", level);
+    _LOGPROPERTY log;
+    log.logstr = column_str + "###  " + buf;
+    log.level = level;
+    printer_->Output(log);
 }
 
 char Logger::ConvertCharacter(const char& c)
@@ -218,9 +250,11 @@ void Logger::PrintMemory(LogLevels level, const std::string& filename,
         printer_->SetIO(lnm_.GetLogName());
     }
 
-    std::string finalstring = column_str + "###  Memory of " + memory_name + ":\n" + visualdata;
+    _LOGPROPERTY log;
+    log.logstr = column_str + "###  Memory of " + memory_name + ":\n" + visualdata;
+    log.level = level;
 
-    printer_->Output(finalstring + "\n", level);
+    printer_->Output(log);
 }
 
 

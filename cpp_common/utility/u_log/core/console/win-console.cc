@@ -7,8 +7,8 @@ static BOOL s_alloced = FALSE;
 
 typedef struct 
 {
-    Color   value;
-    int     wcolor;
+    __LogTextColor   value;
+    int             wcolor;
 }_ColorPair;
 
 const static _ColorPair cs_colormap[] = 
@@ -41,7 +41,7 @@ ConsoleID GetConsole()
     return cid;
 }
 
-bool SetConsoleTextColor(ConsoleID console, Color color, bool intensity)
+bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity)
 {
     int i = 0;
     WORD color_attr;

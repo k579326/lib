@@ -48,7 +48,7 @@ int FileIO::Open(const std::string& path)
     return f_->Open("ab+");
 }
 
-int FileIO::Write(const std::string& content, Color textcolor)
+int FileIO::Write(const std::string& content, __LogTextColor textcolor)
 {
     if (!f_) {
         return -1;
@@ -82,7 +82,7 @@ int ConsoleIO::Open(const std::string& path)
     return (int)console_ == -1 ? -1 : 0;
 }
 
-int ConsoleIO::Write(const std::string& content, Color textcolor)
+int ConsoleIO::Write(const std::string& content, __LogTextColor textcolor)
 {
     int ret;
     if ((int)console_ == -1)

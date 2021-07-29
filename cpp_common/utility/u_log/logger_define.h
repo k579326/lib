@@ -42,5 +42,20 @@ enum LogOutput
 };
 
 
+enum TextColor : uint8_t
+{
+    TC_White = 0,         // 白
+    TC_Black,             // 黑
+    TC_Red,               // 红
+    TC_Green,             // 绿
+    TC_Blue,              // 蓝
+    TC_Yellow,            // 黄
+    TC_Purple,            // 紫
+    TC_Cyan,              // 青
+
+    TC_NOUSE,
+};
+
+
 #endif
 
