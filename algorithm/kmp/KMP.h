@@ -1,11 +1,6 @@
 #ifndef _KMP_ALGORITHM_H_
 #define _KMP_ALGORITHM_H_
 
-/*
-原始的KMP算法，仅支持英文
-*/
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
