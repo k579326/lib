@@ -67,18 +67,23 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
     }
 
     std::string logpath = pathutil::PathCombines(path, "logs");
-    CommCreateDir(logpath.c_str());
-
+    
     fmt_ = std::make_shared<Formatter>(info.columns, version);
     lnm_.SetLabel(info.label);
     lnm_.SetPath(logpath);
 
+    if (info.outputModel == kFileModel) {
+        CommCreateDir(logpath.c_str());
+        logpath_ = logpath;
+        clr_ = std::make_shared<LogClr>(logpath_, info.keep_days, &lnm_);
+        clr_->Start(5); // 5秒检查一次
+    }
+    else {
+        logpath_ = "";
+    }
+
     loginfo_ = info;
     version_ = version;
-    logpath_ = logpath;
-
-    clr_ = std::make_shared<LogClr>(logpath_, info.keep_days, &lnm_);
-    clr_->Start(5); // 5秒检查一次
 
     printer_->SetIO(lnm_.GetLogName());
     SetLoggerHeader();
