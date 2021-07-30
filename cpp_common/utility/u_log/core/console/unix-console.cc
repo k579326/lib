@@ -12,7 +12,7 @@
 
 static std::string s_color = "\e[0m";
 
-static const std::map<Color, std::string> color_map = 
+static const std::map<__LogTextColor, std::string> color_map = 
 {
     {Black, "\e[%d;30m"},
     {Red,   "\e[%d;31m"},
