@@ -238,20 +238,28 @@ namespace fileutil
         return 0;
     }
 
-    uint32_t File::Size(const std::string& filepath)
+    uint64_t File::Size(const std::string& filepath)
     {
-        struct stat filestat;
-
+        uint64_t size;
         if (filepath.empty()) {
             return 0;
         }
-
+#ifdef __unix__
+        struct stat filestat;
         if (stat(filepath.c_str(), &filestat) != 0)
         {
             return 0;
         }
-
-        return filestat.st_size;
+        size = filestat.st_size;
+#else // windows, 不要再使用stat函数，有失败的情况发生
+        WIN32_FILE_ATTRIBUTE_DATA wfa;
+        if (!GetFileAttributesExA(filepath.c_str(), GetFileExInfoStandard, &wfa))
+        {
+            return 0;
+        }
+        size = ((uint64_t)wfa.nFileSizeHigh << 32) + wfa.nFileSizeLow;
+#endif
+        return size;
     }
 
     std::string File::Name() const

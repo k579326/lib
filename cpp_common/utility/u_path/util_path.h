@@ -12,8 +12,8 @@ namespace pathutil
         kAuto
     };
     
-    // 风格转换（unix与windows路径风格自适应）
-    void PathStyleConvert(std::string& path, PathStyle to_style);
+    // 风格转换（unix与windows路径风格自适应），并移除重复的斜杠
+    void PathStyleConvert(std::string& path, PathStyle to_style = kAuto);
     
     // 路径拼接
     std::string PathCombines(const std::string& dir, const std::string& filename);

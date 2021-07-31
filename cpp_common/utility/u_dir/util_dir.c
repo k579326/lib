@@ -87,11 +87,7 @@ static bool _is_dir(const char* dirpath)
 		return false;
 	}
 	
-	if (0 == (dwAttr & FILE_ATTRIBUTE_DIRECTORY)){
-		return false;
-	}
-	
-	return true;
+	return dwAttr & FILE_ATTRIBUTE_DIRECTORY;
 }
 
 

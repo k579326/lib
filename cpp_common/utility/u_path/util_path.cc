@@ -11,8 +11,9 @@ namespace pathutil
     static void _PathStyleConvert(std::string& path, bool to_forward)
     {
         char src_style, replace_style;
-        size_t pos = 0, off = 0;
-        
+        size_t pos = 0, offset = 0;
+        bool repeat = false;
+
         if (to_forward)
         {
             src_style = '\\', replace_style = '/';
@@ -22,16 +23,26 @@ namespace pathutil
             src_style = '/', replace_style = '\\';
         }
 
-        while (off != std::string::npos)
+        while (offset != std::string::npos)
         {
-            pos = path.find(src_style, off);
+            pos = path.find(src_style, offset);
             if (pos == std::string::npos) {
                 break;
             }
             path.replace(pos, 1, 1, replace_style);
-            off = pos + 1;
+            offset = pos + 1;
         }
 
+        std::string target(2, replace_style);
+        pos = 0, offset = 0;
+        while (offset != std::string::npos)
+        {
+            pos = path.find(target, offset);
+            if (pos != std::string::npos) {
+                path.erase(pos + 1, 1);
+            }
+            offset = pos;
+        }
         return;
     }
     
@@ -61,10 +72,13 @@ namespace pathutil
     // 路径拼接
     std::string PathCombines(const std::string& dir, const std::string& filename)
     {
-        if (dir[dir.size() - 1] == '/' || dir[dir.size() - 1] == '\\')
-            return dir + filename;
-        
-        return dir + "/" + filename;
+        if (dir.empty()) {
+            return filename;
+        }
+
+        std::string ret = dir + "/" + filename;
+        PathStyleConvert(ret);
+        return ret;
     }
     
     // 获取父目录

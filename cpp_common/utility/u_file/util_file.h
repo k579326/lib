@@ -53,7 +53,7 @@ namespace fileutil
 
 
     public: /* 静态方法 */
-        static uint32_t Size(const std::string& filepath);
+        static uint64_t Size(const std::string& filepath);
         static int Remove(const std::string& filepath);
         static int Copy(const std::string& srcpath, const std::string& dstpath, bool overlay);
         static int Rename(const std::string& oldname, const std::string& newname);
