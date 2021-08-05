@@ -251,7 +251,7 @@ namespace fileutil
             return 0;
         }
         size = filestat.st_size;
-#else // windows, 不要再使用stat函数，有失败的情况发生
+#else 
         WIN32_FILE_ATTRIBUTE_DATA wfa;
         if (!GetFileAttributesExA(filepath.c_str(), GetFileExInfoStandard, &wfa))
         {
@@ -269,7 +269,7 @@ namespace fileutil
 
     bool File::IsOpened(void) const
     {
-        return file_ != nullptr && !path_.empty();
+        return file_ != nullptr && ;
     }
 
     /* ============= static function =============== */

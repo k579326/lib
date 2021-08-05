@@ -11,6 +11,23 @@
 namespace fileutil
 {
 
+    enum OpenModel {
+        kCreate,
+        kOpenExist,
+        kOpenAlways,
+    };
+    enum AccessModel {
+        kReadOnly,
+        kWriteOnly,
+        kRdWr,
+    };
+    enum SeekPosition
+    {
+        kSeekSet,
+        kSeekCur,
+        kSeekEnd
+    };
+
     class File
     {
     public:
@@ -22,7 +39,7 @@ namespace fileutil
         File(const File& f) = delete;
         File(File&& f) = delete;
         File& operator=(const File& f) = delete;
-        File& operator=(const File&& f) = delete;
+        File& operator=(File&& f) = delete;
 
     public:     /* 打开状态下方法 */
         /**
@@ -30,18 +47,17 @@ namespace fileutil
         *   1. 如果当前打开的路径的父目录不存在，则不允许文件打开。该类不负责创建目录，使用者要自己确保操作的文件的目录已存在；
         *   2. 不接受相对路径，如果类构造时使用了相对路径，Open方法会失败。
         */
-        int Open(const std::string& mode);
-        int Close();
-        int Seek(int32_t off, int where);
+        int Open(OpenModel om, AccessModel am, int permission);
+        void Close();
+        int Seek(int64_t off, SeekPosition where);
         int Read(std::string* out, uint32_t expected_size);
 
         /* 仅用于处理文本文件, 如果成功返回正整数，读到文件尾返回0，失败返回-1*/
         int ReadLine(std::string* out);
-        bool IsEOF();
 
-        int Write(const unsigned char* indata, uint32_t insize);
+        int Write(const void* indata, uint32_t insize);
         
-        int Flush();
+        void Flush();
 
 
     public: /* 关闭状态下可调用方法 */
@@ -58,17 +74,19 @@ namespace fileutil
         static int Copy(const std::string& srcpath, const std::string& dstpath, bool overlay);
         static int Rename(const std::string& oldname, const std::string& newname);
 
+        static bool IsNormalFile(const std::string& filename);
+
         /* @function 快速设置文件大小（扩大容量或者截断文件，扩大的空间的内容随机）
            @param filename  文件名
            @param length    期望的文件大小
         */
-        static bool Truncate(const std::string& filename, uint32_t length);
+        static int Truncate(const std::string& filename, uint64_t length);
         static bool IsExist(const std::string& path);
 
     private:
-
+        class FilePtr;
         std::string path_;
-        FILE* file_;
+        FilePtr* file_;
     };
 
 };

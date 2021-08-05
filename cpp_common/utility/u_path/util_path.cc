@@ -85,6 +85,7 @@ namespace pathutil
     std::string GetDirOfPathName(const std::string& path)
     {
         std::string ret_str = path;
+        PathStyleConvert(ret_str);
 
         auto it = std::find_if(ret_str.rbegin(), ret_str.rend(), [](char c)->bool { return c == '\\' || c == '/'; });
         if (it == ret_str.rend())
