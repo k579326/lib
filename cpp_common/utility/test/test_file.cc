@@ -14,7 +14,7 @@ int main()
     File file("./test");
     filename = file.Name();
 
-    if (file.Open(kCreate, kRdWr, 0) != 0)
+    if (file.Open(kCreate, kRdWr, 0600) != 0)
     {
         printf("open failed!\n");
         return -1;
@@ -76,6 +76,17 @@ int main()
     }
     if (File::Size(backupfile) != size) {
         printf("Size failed!\n");
+        return -1;
+    }
+
+    File newfile(backupfile.c_str());
+    if (newfile.Open(kCreateForce, kRdWr, 0600) != 0) {
+        printf("Create file which is Existed failed!\n");
+        return -1;
+    }
+    newfile.Close();
+    if (File::Size(backupfile) != 0) {
+        printf("Create file which is Existed exception!\n");
         return -1;
     }
 

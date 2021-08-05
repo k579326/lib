@@ -16,11 +16,16 @@
 namespace fileutil {
 
     const static std::map<OpenModel, DWORD>
-        cs_openmodel_map = { {kCreate, CREATE_NEW}, {kOpenAlways, OPEN_ALWAYS}, {kOpenExist, OPEN_EXISTING} };
+        cs_openmodel_map = {    { kCreate, CREATE_NEW }, 
+                                { kOpenAlways, OPEN_ALWAYS }, 
+                                { kOpenExist, OPEN_EXISTING },
+                                { kCreateForce, CREATE_ALWAYS},
+                            };
     const static std::map<AccessModel, DWORD>
-        cs_accessmodel_map = { {kReadOnly, GENERIC_READ},
-                                {kWriteOnly, GENERIC_WRITE},
-                                {kRdWr, GENERIC_READ | GENERIC_WRITE} };
+        cs_accessmodel_map = {  { kReadOnly, GENERIC_READ },
+                                { kWriteOnly, GENERIC_WRITE },
+                                { kRdWr, GENERIC_READ | GENERIC_WRITE } 
+                            };
     const static std::map<SeekPosition, DWORD>
         cs_seekpos_map = { {kSeekSet, FILE_BEGIN}, {kSeekCur, FILE_CURRENT}, {kSeekEnd, FILE_END} };
     class File::FilePtr
@@ -39,7 +44,11 @@ namespace fileutil {
         size_t len = 256;
 
         if (path[0] == '.') {
-            if (_getcwd(dir, (int)len)) 
+            if (path[1] != '/' && path[1] != '\\') {
+                assert(false);
+                path_ = "";
+            }
+            else if (_getcwd(dir, (int)len)) 
             {
                 path_ = dir + path_.substr(1);
             }

@@ -288,38 +288,8 @@ namespace fileutil
             return -1;
         }
 
-        auto fp_free = [](FILE* fp) { if (fp) fclose(fp); };
-        std::shared_ptr<FILE> srcpath_ptr(fopen(srcpath.c_str(), "rb"), fp_free);
-        std::shared_ptr<FILE> dstpath_ptr(fopen(dstpath.c_str(), "wb"), fp_free);
+        
 
-        if (!srcpath_ptr || !dstpath_ptr)
-        {
-            return -1;
-        }
-
-
-        const int roundsize = 1024 * 1024;
-        std::shared_ptr<char> buf_ptr(new char[roundsize], [](char* p) { delete[] p; });
-
-        while (true) {
-
-            int rs = fread(buf_ptr.get(), 1, roundsize, srcpath_ptr.get());
-            
-            if (rs > 0)
-                if (fwrite(buf_ptr.get(), 1, rs, dstpath_ptr.get()) < rs) {
-                    // exception occur
-                    dstpath_ptr.reset();
-                    remove(dstpath.c_str());
-                    return -1;
-                }
-
-            if (feof(srcpath_ptr.get())) {
-                // success
-                break;
-            }
-        }
-
-        return 0;
     }
     int File::Rename(const std::string& oldname, const std::string& newname)
     {

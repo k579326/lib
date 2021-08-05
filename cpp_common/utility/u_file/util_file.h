@@ -12,9 +12,10 @@ namespace fileutil
 {
 
     enum OpenModel {
-        kCreate,
-        kOpenExist,
-        kOpenAlways,
+        kCreate,            // 创建新文件，已存在则失败
+        kCreateForce,       // 强制创建，覆盖已存在文件
+        kOpenExist,         // 打开已存在文件，不存在则失败
+        kOpenAlways,        // 打开文件，不存在则创建
     };
     enum AccessModel {
         kReadOnly,
