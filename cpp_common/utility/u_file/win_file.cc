@@ -148,6 +148,7 @@ namespace fileutil {
         DWORD readsize = 0;
         BOOL success;
 
+        out->clear();
         if (!IsOpened()) {
             return -1;
         }

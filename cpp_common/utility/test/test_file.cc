@@ -1,5 +1,5 @@
 
-
+#include <assert.h>
 
 #include "u_path//util_path.h"
 #include "u_file/util_file.h"
@@ -19,10 +19,7 @@ int main()
         printf("open failed!\n");
         return -1;
     }
-    if (file.Seek(1024, kSeekSet) != 0) {
-        printf("seek failed! \n");
-        return -1;
-    }
+    
     if (file.Write((const unsigned char*)"123456789", 9) != 0) {
         printf("Write failed! \n");
         return -1;
@@ -91,6 +88,54 @@ int main()
     }
 
     File::Remove(backupfile);
+
+    // test create
+    {
+        File f(filename.c_str());
+        assert(f.Open(kCreate, kRdWr, 0600) == 0);
+        f.Write("aaaaaaaaaaaaaaaaaaaaaaaaaa", 27);
+        f.Close();
+
+        // openalways
+        std::string content;
+        if (f.Open(kOpenAlways, kReadOnly, 0600) != 0) {
+            printf("kOpenAlways failed!\n");
+            return -1;
+        }
+        f.Read(&content, 128);
+        if (content.size() != 27) {
+            printf("kOpenAlways read failed!\n");
+            return -1;
+        }
+        f.Close();
+
+
+        // CreateForce
+        if (f.Open(kCreateForce, kReadOnly, 0600) != 0) {
+            printf("kCreateForce failed!\n");
+            return -1;
+        }
+        
+        f.Read(&content, 27);
+        if (content.size() != 0) {
+            printf("kCreateForce read failed!\n");
+            return -1;
+        }
+        f.Close();
+
+
+        // Open Exist
+        if (f.Open(kOpenExist, kWriteOnly, 0) != 0) {
+            printf("kOpenExist failed! \n");
+            return -1;
+        }
+        f.Close();
+        if (File::Remove(filename) != 0) {
+             printf("remove file failed!\n");
+             return -1;
+        }
+    }
+
     printf("test pass!");
 
     return 0;

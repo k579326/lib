@@ -66,18 +66,18 @@ namespace fileutil
         }
         
         int exist = access(path_.c_str(), F_OK);
-        if (om == kCreate && !exist)
+        if (om == OpenModel::kCreate && !exist)
             return -1;
-        if (om == kOpenExist && exist)
+        if (om == OpenModel::kOpenExist && exist)
             return -1;
 
         int flag = 0;
         switch (om)
         {
-            case kCreate:
+            case OpenModel::kCreate:
                 flag |= O_CREAT;
                 break;
-            case kCreateForce:
+            case OpenModel::kCreateForce:
                 flag |= (O_CREAT | O_TRUNC);
                 break;
             default:
@@ -85,13 +85,13 @@ namespace fileutil
         }
         switch (am)
         {
-            case kReadOnly:
+            case AccessModel::kReadOnly:
                 flag |= O_RDONLY;
                 break;
-            case kWriteOnly:
+            case AccessModel::kWriteOnly:
                 flag |= O_WRONLY;
                 break;
-            case kRdWr:
+            case AccessModel::kRdWr:
                 flag |= O_RDWR;
                 break;
             default:
@@ -112,7 +112,7 @@ namespace fileutil
 
     int File::Seek(int64_t off, SeekPosition where)
     {
-        if (IsOpened()) {
+        if (!IsOpened()) {
             return -1;
         }
 
@@ -151,6 +151,7 @@ namespace fileutil
     {
         int ret = 0;
         ssize_t readsize = 0;
+        out->clear();
 
         if (!IsOpened()) {
             return -1;
@@ -163,7 +164,6 @@ namespace fileutil
             return -1;
         }
         if (readsize == 0) {
-            out->clear();
             return 0;
         }
 
@@ -258,7 +258,6 @@ namespace fileutil
     // static 
     uint64_t File::Size(const std::string& filepath)
     {
-        uint64_t size;
         if (filepath.empty()) {
             return 0;
         }
@@ -268,7 +267,7 @@ namespace fileutil
         {
             return 0;
         }
-        size = filestat.st_size;
+        return filestat.st_size;
     }
 
     // static 
@@ -287,36 +286,42 @@ namespace fileutil
             return -1;
         }
 
-        auto fp_free = [](FILE* fp) { if (fp) fclose(fp); };
-        std::shared_ptr<FILE> srcpath_ptr(fopen(srcpath.c_str(), "rb"), fp_free);
-        std::shared_ptr<FILE> dstpath_ptr(fopen(dstpath.c_str(), "wb"), fp_free);
-
-        if (!srcpath_ptr || !dstpath_ptr)
+        int rd = open(srcpath.c_str(), O_RDONLY);
+        int wd = open(dstpath.c_str(), O_CREAT | O_WRONLY);
+        if (rd < 0 || wd < 0)
         {
             return -1;
         }
 
-
-        const int roundsize = 1024 * 1024;
+        const int roundsize = 1024 * 1024 * 4;
         std::shared_ptr<char> buf_ptr(new char[roundsize], [](char* p) { delete[] p; });
 
         while (true) {
-
-            int rs = fread(buf_ptr.get(), 1, roundsize, srcpath_ptr.get());
-            
-            if (rs > 0)
-                if (fwrite(buf_ptr.get(), 1, rs, dstpath_ptr.get()) < rs) {
+            int rs = read(rd, buf_ptr.get(), roundsize);
+            if (rs > 0) 
+            {
+                if (write(wd, buf_ptr.get(), rs) < rs) {
                     // exception occur
-                    dstpath_ptr.reset();
+                    close(wd);
                     remove(dstpath.c_str());
                     return -1;
                 }
-
-            if (feof(srcpath_ptr.get())) {
-                // success
+            }
+            else if (rs == 0) {
                 break;
+            } 
+            else {
+                // error
+                close(wd);
+                remove(dstpath.c_str());
+                return -1;
             }
         }
+
+        if (wd > 0)
+            close(wd);
+        if (rd > 0)
+            close(rd);
 
         return 0;
     }
