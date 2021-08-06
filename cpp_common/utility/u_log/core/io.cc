@@ -4,6 +4,7 @@
 #include "u_path/util_path.h"
 #include "u_dir/util_dir.h"
 
+using namespace fileutil;
 
 UniversalFactory::UniversalFactory()
 {
@@ -45,7 +46,7 @@ int FileIO::Open(const std::string& path)
         return -1;
     }
 
-    return f_->Open("ab+");
+    return f_->Open(kOpenAlways, kRdWr, 0600);
 }
 
 int FileIO::Write(const std::string& content, __LogTextColor textcolor)
@@ -54,7 +55,7 @@ int FileIO::Write(const std::string& content, __LogTextColor textcolor)
         return -1;
     }
     
-    int ret = f_->Write((unsigned char*)content.c_str(), content.size());
+    int ret = f_->Write(content.c_str(), content.size());
     f_->Flush();
     return ret;
 }
