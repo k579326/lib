@@ -194,4 +194,109 @@ namespace codeconvert
 
 
 
+
+    static std::pair<std::shared_ptr<void>, size_t>
+    EasyConvert(EncodeType f, EncodeType t, void* stream, size_t bytesize)
+    {
+        if (f == UTF8_BOM) f = UTF8;
+        if (t == UTF8_BOM) t = UTF8;
+
+        if (f == t) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            ret.first = std::shared_ptr<void>(new char[bytesize], 
+                [](void* p)->void { delete[] p; });
+            memcpy(ret.first.get(), stream, bytesize);
+            ret.second = bytesize;
+            return ret;
+        }
+
+        if (f == ANSI && t == UTF8) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<ANSI, UTF8>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == UTF8 && t == ANSI) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF8, ANSI>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == ANSI && t == UTF16_LE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<ANSI, UTF16_LE>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+        if (f == ANSI && t == UTF16_BE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<ANSI, UTF16_BE>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+        if (f == UTF16_LE && t == ANSI) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_LE, ANSI>::convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == UTF16_BE && t == ANSI) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_BE, ANSI>::convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == UTF16_LE && t == UTF8) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_LE, UTF8>::convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == UTF16_BE && t == UTF8) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_BE, UTF8>::convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<char>(tostring.first);
+            ret.second = tostring.second;
+            return ret;
+        }
+        if (f == UTF16_LE && t == UTF16_BE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_LE, UTF16_BE>::
+                convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+        if (f == UTF16_BE && t == UTF16_LE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF16_BE, UTF16_LE>::
+                convert((const cv_char16*)stream, bytesize / sizeof(cv_char16));
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+        if (f == UTF8 && t == UTF16_LE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF8, UTF16_LE>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+        if (f == UTF8 && t == UTF16_BE) {
+            std::pair<std::shared_ptr<void>, size_t> ret;
+            auto tostring = CodeConvert<UTF8, UTF16_BE>::convert((const char*)stream, bytesize);
+            ret.first = std::reinterpret_pointer_cast<cv_char16>(tostring.first);
+            ret.second = tostring.second * sizeof(cv_char16);
+            return ret;
+        }
+
+        return std::pair<std::shared_ptr<void>, size_t>();
+    }
 };
