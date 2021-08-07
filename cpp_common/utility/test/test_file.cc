@@ -196,8 +196,36 @@ int main()
         File::Remove(filename);
     }
 
+    // test large file
+    {
+        File f(filename.c_str());
+        f.Open(kCreate, kReadOnly);
+        f.Close();
 
-    printf("test pass!");
+        if (0 != File::Truncate(filename, 1024 * 1024 *1024 * 5llu))
+        {
+            printf("Truncate large file error\n");
+            return -1;
+        }
+
+        if (f.Open(kOpen, kReadOnly) != 0) {
+            printf("Open Large file error!\n");
+            return -1;
+        }
+        if (f.Seek(1024*1024*1024*4ll, kSeekSet) != 0) {
+            printf("Seek Large file error\n");
+            return -1;
+        }
+        f.Close();
+
+        if (File::Size(filename) != 1024 * 1024 *1024 * 5llu) {
+            printf("large file size is not correct!\n");
+            return -1;
+        }
+        File::Remove(filename);
+    }
+
+    printf("all test pass!\n");
 
     return 0;
 }

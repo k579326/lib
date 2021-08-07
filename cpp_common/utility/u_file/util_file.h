@@ -7,6 +7,11 @@
 
 #include <string>
 
+// linux 32位程序需要此宏来操作大文件
+// 64位程序不需要此宏
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
 
 namespace fileutil
 {
