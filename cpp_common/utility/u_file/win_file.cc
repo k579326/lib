@@ -138,7 +138,7 @@ namespace fileutil {
     }
 
 
-    int File::Seek(int64_t off, SeekPosition where)
+    int File::Seek(int64_t off, SeekPosition where) const
     {
         int32_t hword, lword;
         int32_t* phword;
@@ -179,7 +179,7 @@ namespace fileutil {
         return;
     }
 
-    int File::Read(std::string* out, uint32_t expected_size)
+    int File::Read(std::string* out, uint32_t expected_size) const
     {
         int ret = 0;
         DWORD readsize = 0;
@@ -204,7 +204,7 @@ namespace fileutil {
     }
 
 
-    int File::Write(const void* indata, uint32_t insize)
+    int File::Write(const void* indata, uint32_t insize) const
     {
         DWORD writesize = 0;
         BOOL success = FALSE;
@@ -236,7 +236,7 @@ namespace fileutil {
         return 0;
     }
 
-    int File::ReadLine(std::string* out)
+    int File::ReadLine(std::string* out) const
     {
         if (!IsOpened()) {
             return -1;

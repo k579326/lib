@@ -323,7 +323,7 @@ namespace fileutil
         }
 
         int rd = open(srcpath.c_str(), O_RDONLY);
-        int wd = open(dstpath.c_str(), O_CREAT | O_WRONLY);
+        int wd = open(dstpath.c_str(), O_CREAT|O_TRUNC|O_WRONLY);
         if (rd < 0 || wd < 0)
         {
             return -1;
