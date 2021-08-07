@@ -64,8 +64,6 @@ static int _create_path(const char* path)
 
 #else // windows implement
 
-
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <Shlobj.h>
@@ -229,7 +227,7 @@ int closedir(DIR *dir)
 	return 0;
 }
 
-#endif
+#endif	// windows directory operator 
 
 
 // 支持创建相对路径的目录
@@ -297,57 +295,6 @@ bool CommIsEmptyDir(const char* path)
     closedir(dir);
 
 	return empty;
-}
-
-bool CommToAbsolutePath(const char* relativepath, 
-	char absolutepath[], size_t length)
-{
-	if (!absolutepath || !length ||
-		!relativepath || 2 > strlen(relativepath))
-	{
-		return false;
-	}
-
-	if (relativepath[0] != '.' ||
-		(relativepath[1] != '\\' && relativepath[1] != '/'))
-	{
-		int exist;
-#ifndef WIN32
-		exist = access(relativepath, F_OK) == 0;
-#else
-		exist = PathFileExistsA(relativepath);
-#endif
-		if (exist && length >= strlen(relativepath) + 1)
-		{
-			strcpy(absolutepath, relativepath);
-			return true;
-		}
-		return false;
-	}
-
-
-	char dir[512];
-	size_t len = 512;
-
-#ifdef WIN32
-	if (!_getcwd(dir, 512)) {
-		return false;
-	}
-#elif defined __unix__
-	if (!getcwd(dir, 512)) {
-		return false;
-	}
-#endif
-
-	if (length < strlen(dir) + strlen(relativepath) + 1)
-	{
-		return false;
-	}
-
-	strcpy(absolutepath, dir);
-	strcat(absolutepath, "/");
-	strcat(absolutepath, relativepath + 1);
-	return true;
 }
 
 

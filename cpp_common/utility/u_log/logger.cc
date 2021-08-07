@@ -36,12 +36,6 @@ Logger* Logger::GetInstance()
     return &logger;
 }
 
-bool Logger::IsInited()
-{
-    return isInited_;
-}
-
-
 
 Logger::Logger()
 {
@@ -49,7 +43,11 @@ Logger::Logger()
 }
 Logger::~Logger()
 {
+}
 
+bool Logger::IsInited()
+{
+    return isInited_;
 }
 
 
@@ -73,12 +71,13 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
 
     if (info.outputModel == kFileModel) 
     {
-        char dir[PATHBUF_MAXLENGTH];
-        if (!CommToAbsolutePath(path.c_str(), dir, PATHBUF_MAXLENGTH)) {
+        std::string logpath;
+        logpath = pathutil::RelativeToAbsolute(path);
+        if (logpath.empty()) {
             assert(false);
             return;
         }
-        std::string logpath = pathutil::PathCombines(dir, "logs");
+        logpath = pathutil::PathCombines(logpath, "logs");
         lnm_.SetLabel(info.label);
         lnm_.SetPath(logpath);
 

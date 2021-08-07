@@ -4,6 +4,17 @@
 
 #include <assert.h>
 
+#ifdef __unix__
+#include <dirent.h>
+#include <unistd.h>
+#else   // windows
+#include <Shlwapi.h>
+#include <direct.h>
+
+#pragma comment(lib, "shlwapi.lib")
+#endif
+
+
 #include <algorithm>
 
 namespace pathutil
@@ -100,7 +111,7 @@ namespace pathutil
     {
         std::string tmp = path;
 
-        PathStyleConvert(tmp, kUnix);
+        PathStyleConvert(tmp, PathStyle::kUnix);
 
         size_t pos = tmp.rfind("/");
         if (pos == std::string::npos) {
@@ -109,6 +120,39 @@ namespace pathutil
         return tmp.substr(pos + 1);
     }
 
+    std::string RelativeToAbsolute(const std::string& reltpath)
+    {
+        if (reltpath.size() < 2)
+        {
+            return "";
+        }
+
+        if (reltpath[0] != '.' ||
+            (reltpath[1] != '\\' && reltpath[1] != '/'))
+        {
+            int exist;
+#ifndef WIN32
+            exist = access(reltpath.c_str(), F_OK) == 0;
+#else
+            exist = PathFileExistsA(reltpath.c_str());
+#endif
+            return exist ? reltpath : "";
+        }
+
+        char dir[512];
+        size_t len = 512;
+#ifdef WIN32
+        if (!_getcwd(dir, 512)) {
+            return "";
+        }
+#elif defined __unix__
+        if (!getcwd(dir, 512)) {
+            return "";
+        }
+#endif
+        
+        return PathCombines(dir, reltpath.substr(1));
+    }
 
 };
 

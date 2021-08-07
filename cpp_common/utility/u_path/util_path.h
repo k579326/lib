@@ -5,7 +5,7 @@
 
 namespace pathutil
 {
-    enum PathStyle
+    enum class PathStyle : char
     {
         kWindows,
         kUnix,
@@ -13,7 +13,7 @@ namespace pathutil
     };
     
     // 风格转换（unix与windows路径风格自适应），并移除重复的斜杠
-    void PathStyleConvert(std::string& path, PathStyle to_style = kAuto);
+    void PathStyleConvert(std::string& path, PathStyle to_style = PathStyle::kAuto);
     
     // 路径拼接
     std::string PathCombines(const std::string& dir, const std::string& filename);
@@ -22,6 +22,8 @@ namespace pathutil
     std::string GetDirOfPathName(const std::string& path);
     
     std::string GetShortNameOfPath(const std::string& path);
+
+    std::string RelativeToAbsolute(const std::string& reltpath);
 };
 
 
