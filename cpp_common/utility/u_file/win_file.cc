@@ -14,17 +14,18 @@
 #include "u_path/util_path.h"
 
 /*
-1������fopen׷��ģʽ�Ĳ��Խ����
-    write����д���ļ�ĩβ����ʹʹ��fseekҲ�޷��ı�д��λ��
-    readִ�������write����������
-    wirte֮��read����ȡ�����쳣����ʹʹ��fseek��fflush�ȷ������޷���ȡĿ��λ�õ�����
-2����fopen��rb+ģʽ���в��ԣ�
-    read��write���ִ�У���ʹ��fflush�������Ȼ���ң�����ļ��Ĳ�������Ҳ�������ֵ
-    �����д�������ɺ�ִ��fflush���������̽��������
-3����Windows API���в��ԣ�
-    OPEN_ALWAYSģʽ����ȡ��д����ȫ�����ļ�ָ��λ�÷��ؽ��
-*/
 
+1、对于fopen追加模式的测试结果：
+    write总是写在文件末尾，即使使用fseek也无法改变写入位置
+    read执行完后，再write，发生崩溃
+    wirte之后read，读取内容异常，即使使用fseek，fflush等方法，无法读取目标位置的内容
+2、对fopen的rb+模式进行测试：
+    read与write混合执行，不使用fflush，结果依然混乱，最后文件的部分内容也出现随机值
+    如果在写入操作完成后执行fflush，测试流程结果正常。
+3、对Windows API进行测试：
+    OPEN_ALWAYS模式，读取与写入完全按照文件指针位置返回结果
+
+*/
 
 
 namespace fileutil {
