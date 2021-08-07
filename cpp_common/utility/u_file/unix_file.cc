@@ -10,6 +10,27 @@
 
 #include <memory>
 
+/*
+对open函数进行测试的汇总：
+    常规打开模式：文件打开后指针初始偏移为0，与WindowsAPI一致
+
+    1、O_CREAT 如果没有该flag，open函数仅可以打开已存在的文件，绝不会创建文件
+        如果文件已存在，该flag仅与O_EXCL组合对open有特殊控制。
+
+    2、O_APPEND 追加模式，持有该flag而没有O_CREAT，open函数仅可以打开已存在的文件
+        它对O_CREAT的规则没有影响。此模式下read与write操作无fopen的混乱情况；
+        write总是写在文件末尾，lseek对追加模式的write其无效，read结果依循文件指针位置读取。
+        不受读写权限影响
+
+    3、O_EXCL 仅对O_CREAT有效，如果O_EXCL与O_CREAT同时存在，打开已存在的文件将会失败
+        文件不存在或者没有O_CREAT，该标志无效
+
+    4、O_TRUNC 截断模式，打开的文件将被清空，可以与O_CREAT同时存在（可能没什么意义）。
+        该模式需要与O_WRONLY或者O_RDWR配合（即只有写权限才可以截断打开文件）
+        文件存在与否，该标志不影响open成功失败结果。
+*/
+
+
 
 #include "u_path/util_path.h"
 
@@ -60,6 +81,10 @@ namespace fileutil
             return -1;
         }
 
+        // 强制创建必须在WrrteOnly 或者 RdWr 模式下
+        if (kCreateForce == om && kReadOnly == am)
+            return -1;
+
         std::string dir = pathutil::GetDirOfPathName(path_);
         if (access(dir.c_str(), F_OK) != 0) {
             return -1;
@@ -68,17 +93,28 @@ namespace fileutil
         int exist = access(path_.c_str(), F_OK);
         if (om == OpenModel::kCreate && !exist)
             return -1;
-        if (om == OpenModel::kOpenExist && exist)
+        if (om == OpenModel::kOpen && exist)
+            return -1;
+        if (om == OpenModel::kAppend && exist)
             return -1;
 
         int flag = 0;
         switch (om)
         {
             case OpenModel::kCreate:
-                flag |= O_CREAT;
+                flag |= (O_CREAT|O_EXCL);
                 break;
             case OpenModel::kCreateForce:
-                flag |= (O_CREAT | O_TRUNC);
+                flag |= (O_CREAT|O_TRUNC);
+                break;
+            case OpenModel::kOpenForce:
+                flag |= O_CREAT;
+                break;
+            case OpenModel::kAppend:
+                flag |= O_APPEND;
+                break;
+            case OpenModel::kAppendForce:
+                flag |= (O_CREAT|O_APPEND);
                 break;
             default:
                 break; 

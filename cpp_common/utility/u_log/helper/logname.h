@@ -9,7 +9,10 @@
 class LogNameManager
 {
 public:
-    LogNameManager(const std::string& path = "", const std::string& label = "");
+    LogNameManager() : path_(""), label_(""), separator_('#') 
+    {
+    }
+    LogNameManager(const std::string& path, const std::string& label);
     ~LogNameManager();
     
     void SetPath(const std::string& path);

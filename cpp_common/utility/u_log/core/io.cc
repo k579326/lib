@@ -46,7 +46,7 @@ int FileIO::Open(const std::string& path)
         return -1;
     }
 
-    return f_->Open(kOpenAlways, kRdWr, 0600);
+    return f_->Open(kAppendForce, kRdWr);
 }
 
 int FileIO::Write(const std::string& content, __LogTextColor textcolor)

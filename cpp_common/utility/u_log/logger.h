@@ -11,6 +11,7 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 #include "logger_define.h"
 #include "helper/logname.h"
@@ -44,7 +45,7 @@ public:
     ~Logger();
 
     static Logger* GetInstance();
-    static bool IsInited();
+    inline static bool IsInited();
 
     void Init(const LogInitInfo& info, const std::string& version, const std::string& path);
     void Uninit();
@@ -78,7 +79,7 @@ private:
     AutoCleaner clr_ = nullptr;
     LogNameManager lnm_;
 private:
-    static bool isInited_;
+    static std::atomic<bool> isInited_;
 };
 
 
@@ -102,6 +103,9 @@ static LogInitInfo g_logconsole_info = {
 	strcpy(g_logconsole_info.label, label_str);	\
 	Logger::GetInstance()->Init(g_logconsole_info, (ver), (logdir))
 
+#define LOG_Uninit()    \
+    Logger::GetInstance()->Uninit()
+
 #define LOG_Debug(format, ...)      		Logger::GetInstance()->Print(kDebugLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 #define LOG_Infor(format, ...)      		Logger::GetInstance()->Print(kInforLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 #define LOG_Warning(format, ...)    		Logger::GetInstance()->Print(kWarningLevel, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
@@ -121,6 +125,7 @@ static LogInitInfo g_logconsole_info = {
 
 #define LOG_InitAsFileMode(label_str, ver, logdir)
 #define LOG_InitAsConsoleMode(label_str, ver, logdir)
+#define LOG_Uninit()
 
 #define LOG_Debug(format, ...)
 #define LOG_Infor(format, ...)

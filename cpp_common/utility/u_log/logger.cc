@@ -25,7 +25,10 @@ static const char* g_log_start = "\n\
 ";
 
 
-bool Logger::isInited_ = false;
+#define USERLOG_MAXLENGTH   256
+#define PATHBUF_MAXLENGTH   512
+
+std::atomic<bool> Logger::isInited_(false);
 
 Logger* Logger::GetInstance()
 {
@@ -66,13 +69,19 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
         printer_.reset(new SyncPrinter(info.outputModel));
     }
 
-    std::string logpath = pathutil::PathCombines(path, "logs");
-    
     fmt_ = std::make_shared<Formatter>(info.columns, version);
-    lnm_.SetLabel(info.label);
-    lnm_.SetPath(logpath);
 
-    if (info.outputModel == kFileModel) {
+    if (info.outputModel == kFileModel) 
+    {
+        char dir[PATHBUF_MAXLENGTH];
+        if (!CommToAbsolutePath(path.c_str(), dir, PATHBUF_MAXLENGTH)) {
+            assert(false);
+            return;
+        }
+        std::string logpath = pathutil::PathCombines(dir, "logs");
+        lnm_.SetLabel(info.label);
+        lnm_.SetPath(logpath);
+
         CommCreateDir(logpath.c_str());
         logpath_ = logpath;
         clr_ = std::make_shared<LogClr>(logpath_, info.keep_days, &lnm_);
@@ -93,7 +102,7 @@ void Logger::Init(const LogInitInfo& info, const std::string& version, const std
 
 void Logger::SetLoggerHeader()
 {
-    char buf[2048];
+    char buf[1024];
 
     time_t timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     tm* tp = localtime(&timestamp);
@@ -112,9 +121,15 @@ void Logger::SetLoggerHeader()
 
 void Logger::Uninit()
 {
+    if (!IsInited())
+        return;
     memset(&loginfo_, 0, sizeof(loginfo_));
     logpath_ = "";
     version_ = "";
+
+    fmt_.reset();
+    clr_.reset();
+    printer_.reset();
 
     isInited_ = false;
 }
@@ -125,10 +140,10 @@ void Logger::Print(uint8_t floor, TextColor tc, const char* format, ...)
         tc = TextColor::TC_White;
     }
 
-    char buf[256] = { 0 };
+    char buf[USERLOG_MAXLENGTH] = { 0 };
     va_list varArgs;
     va_start(varArgs, format);
-    std::vsnprintf(buf, 256, format, varArgs);
+    std::vsnprintf(buf, USERLOG_MAXLENGTH, format, varArgs);
     va_end(varArgs);
 
     if (lnm_.NeedUpdate()) {
@@ -154,10 +169,10 @@ void Logger::Print(LogLevels level, const std::string& filename,
 
     std::string column_str = fmt_->Format(level, filename, function, linenum);
 
-    char buf[640] = { 0 };
+    char buf[USERLOG_MAXLENGTH];
     va_list varArgs;
     va_start(varArgs, format);
-    std::vsnprintf(buf, 640, format, varArgs);
+    std::vsnprintf(buf, USERLOG_MAXLENGTH, format, varArgs);
     va_end(varArgs);
 
     if (lnm_.NeedUpdate()) {
@@ -167,7 +182,9 @@ void Logger::Print(LogLevels level, const std::string& filename,
     _LOGPROPERTY log;
     log.logstr = column_str + "###  " + buf;
     log.level = level;
+
     printer_->Output(log);
+    return;
 }
 
 char Logger::ConvertCharacter(const char& c)

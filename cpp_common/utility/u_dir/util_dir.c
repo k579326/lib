@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 #ifndef WIN32
 #include <dirent.h>
-
+#include <unistd.h>
 
 static bool _is_dir(const char* dirpath)
 {
@@ -69,6 +70,7 @@ static int _create_path(const char* path)
 #include <windows.h>
 #include <Shlobj.h>
 #include <Shlwapi.h>
+#include <direct.h>
 
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "shlwapi.lib")
@@ -296,6 +298,58 @@ bool CommIsEmptyDir(const char* path)
 
 	return empty;
 }
+
+bool CommToAbsolutePath(const char* relativepath, 
+	char absolutepath[], size_t length)
+{
+	if (!absolutepath || !length ||
+		!relativepath || 2 > strlen(relativepath))
+	{
+		return false;
+	}
+
+	if (relativepath[0] != '.' ||
+		(relativepath[1] != '\\' && relativepath[1] != '/'))
+	{
+		int exist;
+#ifndef WIN32
+		exist = access(relativepath, F_OK) == 0;
+#else
+		exist = PathFileExistsA(relativepath);
+#endif
+		if (exist && length >= strlen(relativepath) + 1)
+		{
+			strcpy(absolutepath, relativepath);
+			return true;
+		}
+		return false;
+	}
+
+
+	char dir[512];
+	size_t len = 512;
+
+#ifdef WIN32
+	if (!_getcwd(dir, 512)) {
+		return false;
+	}
+#elif defined __unix__
+	if (!getcwd(dir, 512)) {
+		return false;
+	}
+#endif
+
+	if (length < strlen(dir) + strlen(relativepath) + 1)
+	{
+		return false;
+	}
+
+	strcpy(absolutepath, dir);
+	strcat(absolutepath, "/");
+	strcat(absolutepath, relativepath + 1);
+	return true;
+}
+
 
 int CommClearDir(const char* path, bool force)
 {

@@ -9,29 +9,57 @@
 
 #include <map>
 #include <memory>
-
+#include <atomic>
 
 #include "u_path/util_path.h"
 
-namespace fileutil {
+/*
+1������fopen׷��ģʽ�Ĳ��Խ����
+    write����д���ļ�ĩβ����ʹʹ��fseekҲ�޷��ı�д��λ��
+    readִ�������write����������
+    wirte֮��read����ȡ�����쳣����ʹʹ��fseek��fflush�ȷ������޷���ȡĿ��λ�õ�����
+2����fopen��rb+ģʽ���в��ԣ�
+    read��write���ִ�У���ʹ��fflush�������Ȼ���ң�����ļ��Ĳ�������Ҳ�������ֵ
+    �����д�������ɺ�ִ��fflush���������̽��������
+3����Windows API���в��ԣ�
+    OPEN_ALWAYSģʽ����ȡ��д����ȫ�����ļ�ָ��λ�÷��ؽ��
+*/
 
-    const static std::map<OpenModel, DWORD>
-        cs_openmodel_map = {    { kCreate, CREATE_NEW }, 
-                                { kOpenAlways, OPEN_ALWAYS }, 
-                                { kOpenExist, OPEN_EXISTING },
-                                { kCreateForce, CREATE_ALWAYS},
-                            };
-    const static std::map<AccessModel, DWORD>
-        cs_accessmodel_map = {  { kReadOnly, GENERIC_READ },
-                                { kWriteOnly, GENERIC_WRITE },
-                                { kRdWr, GENERIC_READ | GENERIC_WRITE } 
-                            };
-    const static std::map<SeekPosition, DWORD>
-        cs_seekpos_map = { {kSeekSet, FILE_BEGIN}, {kSeekCur, FILE_CURRENT}, {kSeekEnd, FILE_END} };
+
+
+namespace fileutil {
+    // ...
+    // OPEN_ALWAYS: open or create file, and file pointer is 0 offset
+    // OPEN_EXISTING: open exist file, and file pointer is 0 offset
+    // CREATE_ALWAYS: if file exist, set the file to 0 size
+    const static std::map<OpenModel, DWORD> cs_openmodel_map = 
+    {   
+        { kCreate, CREATE_NEW },
+        { kCreateForce, CREATE_ALWAYS},
+        { kOpen, OPEN_EXISTING },
+        { kOpenForce, OPEN_ALWAYS },
+        { kAppend, OPEN_EXISTING },
+        { kAppendForce, OPEN_ALWAYS },
+    };
+    const static std::map<AccessModel, DWORD> cs_accessmodel_map = 
+    {   { kReadOnly, GENERIC_READ },
+        { kWriteOnly, GENERIC_WRITE },
+        { kRdWr, GENERIC_READ | GENERIC_WRITE } 
+    };
+    const static std::map<SeekPosition, DWORD> cs_seekpos_map = 
+    { 
+        {kSeekSet, FILE_BEGIN}, 
+        {kSeekCur, FILE_CURRENT}, 
+        {kSeekEnd, FILE_END} 
+    };
+
+
     class File::FilePtr
     {
     public:
-        HANDLE hFile = INVALID_HANDLE_VALUE;
+        HANDLE hFile_ = INVALID_HANDLE_VALUE;
+        DWORD creation_model;
+        DWORD access_model;
     };
 
     File::File() : file_(nullptr)
@@ -67,6 +95,10 @@ namespace fileutil {
         if (path_.empty()) {
             return -1;
         }
+        
+        // 强制创建必须在WrrteOnly 或者 RdWr 模式下
+        if (kCreateForce == om && kReadOnly == am)
+            return -1;
 
         std::string dir = pathutil::GetDirOfPathName(path_);
         if (!PathFileExistsA(dir.c_str())) {
@@ -74,29 +106,33 @@ namespace fileutil {
         }
 
         BOOL exist = PathFileExistsA(path_.c_str());
-        if (om == kCreate && exist) {
+        if (om == kCreate && exist)
             return -1;
-        }
-        if (om == kOpenExist && !exist) {
+        if (om == kOpen && !exist)
             return -1;
-        }
+        if (om == kAppend && !exist)
+            return -1;
 
         if (IsOpened()) {
             return -1;
         }
-
-        file_->hFile = CreateFileA(path_.c_str(), 
+        
+        file_->hFile_ = CreateFileA(path_.c_str(),
                                     cs_accessmodel_map.find(am)->second,
-                                    0,  // always no share
+                                    FILE_SHARE_READ,  // only share read
                                     NULL,
                                     cs_openmodel_map.find(om)->second,
                                     FILE_ATTRIBUTE_NORMAL,
                                     NULL);
 
-        if (file_->hFile == INVALID_HANDLE_VALUE)
+        if (file_->hFile_ == INVALID_HANDLE_VALUE)
         {
             return -1;
         }
+
+        file_->access_model = am;
+        file_->creation_model = om;
+
         return 0;
     }
 
@@ -114,7 +150,7 @@ namespace fileutil {
         else
             phword = NULL;
 
-        DWORD ret = SetFilePointer(file_->hFile, 
+        DWORD ret = SetFilePointer(file_->hFile_,
                                     lword, 
                                     (PLONG)phword, 
                                     cs_seekpos_map.find(where)->second);
@@ -134,10 +170,10 @@ namespace fileutil {
 
     void File::Close()
     {
-        if (file_ && file_->hFile != INVALID_HANDLE_VALUE) {
+        if (file_ && file_->hFile_ != INVALID_HANDLE_VALUE) {
             Flush();
-            CloseHandle(file_->hFile);
-            file_->hFile = INVALID_HANDLE_VALUE;
+            CloseHandle(file_->hFile_);
+            file_->hFile_ = INVALID_HANDLE_VALUE;
         }
         return;
     }
@@ -155,7 +191,7 @@ namespace fileutil {
 
         std::shared_ptr<char> str_array(new char[expected_size], [](char* ptr) { delete[] ptr; });
 
-        success = ReadFile(file_->hFile, str_array.get(), expected_size, &readsize, NULL);
+        success = ReadFile(file_->hFile_, str_array.get(), expected_size, &readsize, NULL);
         if (!success)
         {
             return -1;
@@ -176,7 +212,21 @@ namespace fileutil {
             return -1;
         }
 
-        success = WriteFile(file_->hFile, indata, insize, &writesize, NULL);
+        /*
+            windows API do not support append model,
+            we simulate it by moving file pointer.
+        */
+        if (file_->creation_model == OpenModel::kAppend ||
+            file_->creation_model == OpenModel::kAppendForce)
+        {
+            if (SetFilePointer(file_->hFile_, 0, NULL, FILE_END) 
+                == INVALID_SET_FILE_POINTER) {
+                if (GetLastError() != 0)
+                    return -1;
+            }
+        }
+
+        success = WriteFile(file_->hFile_, indata, insize, &writesize, NULL);
         if (!success)
         {
             return -1;
@@ -198,7 +248,7 @@ namespace fileutil {
 
         while (true)
         {
-            if (!ReadFile(file_->hFile, strptr.get(), 256, &readsize, NULL)) {
+            if (!ReadFile(file_->hFile_, strptr.get(), 256, &readsize, NULL)) {
                 break;
             }
 
@@ -227,7 +277,7 @@ namespace fileutil {
     void File::Flush()
     {
         if (IsOpened())
-            FlushFileBuffers(file_->hFile);
+            FlushFileBuffers(file_->hFile_);
         return;
     }
 
@@ -246,7 +296,7 @@ namespace fileutil {
 
     bool File::IsOpened(void) const
     {
-        return file_ != nullptr && file_->hFile != INVALID_HANDLE_VALUE;
+        return file_ != nullptr && file_->hFile_ != INVALID_HANDLE_VALUE;
     }
     
 

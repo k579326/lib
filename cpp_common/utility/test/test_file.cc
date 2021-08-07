@@ -14,7 +14,7 @@ int main()
     File file("./test");
     filename = file.Name();
 
-    if (file.Open(kCreate, kRdWr, 0600) != 0)
+    if (file.Open(kCreateForce, kRdWr, 0600) != 0)
     {
         printf("open failed!\n");
         return -1;
@@ -96,9 +96,15 @@ int main()
         f.Write("aaaaaaaaaaaaaaaaaaaaaaaaaa", 27);
         f.Close();
 
+        if (f.Open(kCreate, kRdWr) == 0)
+        {
+            printf("Create should not open file\n");
+            return -1;
+        }
+
         // openalways
         std::string content;
-        if (f.Open(kOpenAlways, kReadOnly, 0600) != 0) {
+        if (f.Open(kOpenForce, kReadOnly, 0600) != 0) {
             printf("kOpenAlways failed!\n");
             return -1;
         }
@@ -111,8 +117,12 @@ int main()
 
 
         // CreateForce
-        if (f.Open(kCreateForce, kReadOnly, 0600) != 0) {
-            printf("kCreateForce failed!\n");
+        if (f.Open(kCreateForce, kReadOnly, 0600) == 0) {
+            printf("kCreateForce should not create file with readonly model!\n");
+            return -1;
+        }
+        if (f.Open(kCreateForce, kRdWr, 0600) != 0) {
+            printf("kCreateForce should not create file with readonly model!\n");
             return -1;
         }
         
@@ -125,7 +135,7 @@ int main()
 
 
         // Open Exist
-        if (f.Open(kOpenExist, kWriteOnly, 0) != 0) {
+        if (f.Open(kOpen, kWriteOnly, 0) != 0) {
             printf("kOpenExist failed! \n");
             return -1;
         }
@@ -135,6 +145,57 @@ int main()
              return -1;
         }
     }
+
+    // test append model
+    {
+        File file(filename.c_str());
+        if (0 == file.Open(kAppend, kRdWr)) {
+            printf("Append should not create file!\n");
+            return -1;
+        }
+
+        if (0 != file.Open(kAppendForce, kRdWr)) {
+            printf("AppendForce should create file always!\n");
+            return -1;
+        }
+        if (file.Write("123456789", 9) != 0) {
+            printf("Append model write failed!\n");
+            return -1;
+        }
+        file.Close();
+
+        if (0 != file.Open(kAppend, kRdWr)) {
+            printf("Append model open failed!\n");
+            return -1;
+        }
+        if (File::Size(filename) != 9) {
+            printf("Append model open execption!\n");
+            return -1;
+        }
+
+        if (file.Write("123456789", 9) != 0) {
+            printf("Append model write failed!\n");
+            return -1;
+        }
+        file.Close();
+
+        std::string append_readbuf;
+        if (0 != file.Open(kAppend, kRdWr)) {
+            printf("Append model open failed!\n");
+            return -1;
+        }
+        if (file.Read(&append_readbuf, 18) != 0) {
+            printf("Append model read failed!\n");
+            return -1;
+        }
+        if (append_readbuf != "123456789123456789") {
+            printf("Append model check failed!\n");
+            return -1;
+        }
+        file.Close();
+        File::Remove(filename);
+    }
+
 
     printf("test pass!");
 

@@ -39,9 +39,9 @@ std::string LogNameManager::GetLogName(const std::chrono::system_clock::time_poi
 {
     time_t timestamp = std::chrono::system_clock::to_time_t(timepoint);
 
-    char timestr[256];
+    char timestr[64];
     tm* tp = localtime(&timestamp);
-    sprintf(timestr, "%4d-%02d-%02d ", tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday);
+    sprintf(timestr, "%4d-%02d-%02d", tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday);
 
     std::string filename = std::string(timestr) + separator_ + label_;
     std::string fullpath = path_ + "/" + filename + ".log";

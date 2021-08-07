@@ -70,6 +70,7 @@ int     CommClearDir(const char* path, bool force);
 
 bool 	CommIsEmptyDir(const char* path);
 
+bool    CommToAbsolutePath(const char* relativepath, char absolutepath[], size_t length);
 
 #ifdef WIN32
 	
