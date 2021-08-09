@@ -104,6 +104,26 @@ static void MakeBalance(TreeNode* node)
 
 }
 
+static bool PairLess(const PAIR* l, const PAIR* r)
+{
+    return less(l->key, r->key);
+}
+static bool PairEqual(const PAIR* l, const PAIR* r)
+{
+    return !PairLess(l, r) && !PairLess(r, l);
+}
+
+
+static bool NodeLess(const TreeNode* l, const TreeNode* r)
+{
+    return PairLess(&l->pair_, &r->pair_);
+}
+
+static bool NodeEqual(const TreeNode* l, const TreeNode* r)
+{
+    return !NodeLess(l, r) && !NodeLess(r, l);
+}
+
 TreeNode* Insert(TreeNode* rbtree, PAIR* pair)
 {
     TreeNode* insert_pos = NULL;
@@ -117,7 +137,20 @@ TreeNode* Insert(TreeNode* rbtree, PAIR* pair)
     */
     insert_pos = FindFirstLargeNode(rbtree, pair->key, true);
     
+    TreeNode* left = insert_pos->left_;
+    TreeNode* parent = insert_pos->parent_;
+    if (PairEqual(&insert_pos->pair_, pair))
+        return NULL;
+    if (left && PairEqual(&left->pair_, pair))
+        return NULL;
+    if (parent && PairEqual(&parent->pair_, pair))
+        return NULL;
     
+    // 所有元素都比pair小
+    if (PairLess(&insert_pos->pair_, pair)) {
+
+    }
+
 
 
 
