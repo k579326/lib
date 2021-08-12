@@ -4,10 +4,10 @@
 #include <stddef.h>
 
 typedef struct _treenode TreeNode;
+typedef TreeNode RbTree;
 
-
-TreeNode* CreateRbTree();
-TreeNode* Insert(TreeNode* retree);
+RbTree* CreateRbTree();
+TreeNode* Insert(RbTree* rbtree, PAIR* pair);
 TreeNode* Find(TreeNode* retree, int key);
 
 
