@@ -21,6 +21,13 @@ typedef struct _treenode
     PAIR              pair_;
 }TreeNode;
 
+typedef struct _RBTree
+{
+    TreeNode*   root_;
+    size_t      count_;
+}RbTree;
+
+
 #define rb_black    0
 #define rb_red      1
 #define rb_white    -1      // use for create root node only
@@ -32,29 +39,37 @@ bool less(int l, int r)
 
 RbTree* CreateRbTree()
 {
-    TreeNode* node = CreateNewNode();
-    memset(node, 0, sizeof(TreeNode));
-    node->color_ = rb_white;
-    return node;
+    RbTree* rbtree = (RbTree*)malloc(sizeof(RbTree));
+    memset(rbtree, 0, sizeof(RbTree));
+    rbtree->count_ = 0;
+    rbtree->root_ = NULL;
+    return rbtree;
+}
+
+
+TreeNode* Find(RbTree* rbtree, int key)
+{
+    if (!rbtree || !rbtree->root_)
+        return NULL;
+    return __Find(rbtree->root_, key);
 }
 
 
 
-
-TreeNode* Find(TreeNode* rbtree, int key)
+TreeNode* __Find(TreeNode* node, int key)
 {
-    if (!rbtree) {
+    if (!node) {
         return NULL;
     }
-    if (less(key, rbtree->pair_.key)) {
-        return Find(rbtree->left_, key);
+    if (less(key, node->pair_.key)) {
+        return Find(node->left_, key);
     }
-    else if (less(rbtree->pair_.key, key))
+    else if (less(node->pair_.key, key))
     {
-        return Find(rbtree->right_, key);
+        return Find(node->right_, key);
     }   
     
-    return rbtree;
+    return node;
 }
 
 TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
@@ -191,7 +206,7 @@ void __ChangeParentOf3Node(TreeNode* first, TreeNode* second, TreeNode* third)
         second->parent_ = pp;
 
         third->left_ = right;
-        third->left_->parent_ = third;
+        if (right) right->parent_ = third;
         third->parent_ = second;
 
         first->color_ = rb_red;
@@ -200,6 +215,7 @@ void __ChangeParentOf3Node(TreeNode* first, TreeNode* second, TreeNode* third)
         return;
     }
 
+    // 红色节点在右边，不太可能有这种情况？
     if (second->right_ == third)
     {
         pp = first->parent_;
@@ -209,7 +225,7 @@ void __ChangeParentOf3Node(TreeNode* first, TreeNode* second, TreeNode* third)
         second->parent_ = pp;
 
         first->right_ = left;
-        first->right_->parent_ = first;
+        if (left) first->right_->parent_ = first;
         first->parent_ = second;
 
         first->color_ = rb_red;
@@ -226,9 +242,9 @@ void __ChangeParentOf3Node(TreeNode* first, TreeNode* second, TreeNode* third)
     first->parent_ = second;
     third->parent_ = second;
 
-    left->parent_ = first;
+    if (left) left->parent_ = first;
     first->right_ = left;
-    right->parent_ = third;
+    if (right) right->parent_ = third;
     third->left_ = right;
 
     first->color_ = rb_red;
@@ -240,7 +256,7 @@ void __ChangeParentOf3Node(TreeNode* first, TreeNode* second, TreeNode* third)
 /* 插入新节点至一个三节点，不会发生向上扩展 
     tar_node: 三节点中的黑节点
 */
-void Insert3Node(TreeNode* new_node, TreeNode* black, TreeNode* red)
+void Insert3Node(RbTree* rbtree, TreeNode* new_node, TreeNode* black, TreeNode* red)
 {
     // 插入三节点，至少tar_node及其父节点是存在的
     TreeNode* array[3] = { new_node, red, black };
@@ -264,7 +280,7 @@ void Insert3Node(TreeNode* new_node, TreeNode* black, TreeNode* red)
     if (black == array[1]) {
         // newnode变红即可
         new_node->color_ = rb_red;
-        return;
+        goto _label_success;
     }
 
     __ChangeParentOf3Node(array[0], array[1], array[2]);
@@ -272,7 +288,8 @@ void Insert3Node(TreeNode* new_node, TreeNode* black, TreeNode* red)
     // pp
     if (!pp) {
         array[1]->parent_ = NULL;
-        return;
+        rbtree->root_ = array[1];
+        goto _label_success;
     }
     array[1]->parent_ = pp;
     if (left)
@@ -282,7 +299,131 @@ void Insert3Node(TreeNode* new_node, TreeNode* black, TreeNode* red)
     else {
         pp->right_ = array[1];
     }
+
+_label_success:
+    rbtree->count_++;
     return;
+}
+
+
+
+TreeNode* __ChangeParentOf4Node_1(TreeNode* new_node, 
+                                TreeNode* left,
+                                TreeNode* parent, 
+                                TreeNode* right)
+{
+    TreeNode* new_parent = NULL;
+    if (NodeLess(new_node, left))
+    {
+        new_parent = left;
+
+        left->left_ = new_node;
+        new_node->parent_ = left;
+        left->right_ = right;
+        right->parent_ = left;
+        right->left_ = parent;
+        parent->parent_ = right;
+        parent->left_ = NULL;
+        parent->right_ = NULL;
+        new_node->color_ = rb_black;
+        left->color_ = rb_black;
+        right->color_ = rb_black;
+        parent->color_ = rb_red;
+    }
+    else if (NodeLess(right, new_node))
+    {
+        new_parent = parent;
+
+        right->parent_ = new_node;
+        new_node->parent_ = parent;
+        new_node->left_ = right;
+        right->left_ = NULL;
+        right->right_ = NULL;
+        right->color_ = rb_red;
+        new_node->color_ = rb_black;
+        left->color_ = rb_black;
+    }
+    else if (NodeLess(left, new_node) &&
+        NodeLess(new_node, parent))
+    {// new_node
+        new_parent = new_node;
+        new_node->left_ = left;
+        new_node->right_ = right;
+        right->left_ = parent;
+        left->parent_ = new_node;
+        right->parent_ = new_node;
+        parent->parent_ = right;
+        parent->left_ = NULL;
+        parent->right_ = NULL;
+
+        new_node->color_ = rb_black;
+        left->color_ = rb_black;
+        right->color_ = rb_black;
+        parent->color_ = rb_red;
+    }
+    else /* parent < new_node < right*/
+    {
+        new_parent = parent;
+        parent->right_ = new_node;
+        new_node->parent_ = parent;
+        new_node->left_ = right;
+        right->parent_ = new_node;
+        
+        left->color_ = rb_black;
+        right->color_ = rb_red;
+        new_node->color_ = rb_black;
+        parent->color_ = rb_black;
+    }
+
+    return new_parent;
+}
+
+
+/* 4节点插入
+    4节点具有平衡性，所以它的情况有限
+    1、两个红节点都没有孩子节点
+    2、两个红节点都有左右子树
+*/
+TreeNode* Insert4Node(RbTree* rbtree, TreeNode* new_node, TreeNode* red_node)
+{
+    TreeNode* left = NULL;
+    TreeNode* right = NULL;
+    TreeNode* parent = red_node->parent_;
+    TreeNode* pp = parent->parent_;
+
+    if (IsLeftChild(red_node)) {
+        left = red_node;
+        right = SiblingNode(red_node);
+    }
+    else {
+        left = SiblingNode(red_node);
+        right = red_node;
+    }
+
+    // 情况1，
+    if (!red_node->left_)
+    {
+       // 只需要判断一个子节点是否存在
+        TreeNode* new_p = __ChangeParentOf4Node_1(new_node, left, parent, right);
+        if (!pp)
+        {
+            new_p->parent_ = NULL;
+            rbtree->root_ = new_p;
+        }
+        else {
+            if (IsLeftChild(parent))
+                pp->left_ = new_p;
+            else
+                pp->right_ = new_p;
+            new_p->parent_ = pp;
+        }
+        return new_p;
+    }
+
+    // 情况2：树腰上的4节点
+
+
+
 }
 
 

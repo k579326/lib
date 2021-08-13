@@ -4,11 +4,11 @@
 #include <stddef.h>
 
 typedef struct _treenode TreeNode;
-typedef TreeNode RbTree;
+typedef struct _RBTree RbTree;
 
 RbTree* CreateRbTree();
 TreeNode* Insert(RbTree* rbtree, PAIR* pair);
-TreeNode* Find(TreeNode* retree, int key);
+TreeNode* Find(RbTree* retree, int key);
 
 
 
