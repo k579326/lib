@@ -18,12 +18,6 @@ bool less(const MyPair* p1, const MyPair* p2)
 }
 
 
-#define registe(type) type_less;
-    
-    
-
-
-
 int main()
 {
     RbTree* map = CreateRbTree(sizeof(MyPair), (TypeLess)less);
@@ -33,8 +27,7 @@ int main()
     auto starttime = std::chrono::steady_clock::now();
     for (int i = 0; i < 1000000; i++)
     {
-        pair.key = i;
-        sprintf(pair.value, "%d", i);
+        pair.key = rand();
         Insert(map, &pair);
     }
     auto endtime = std::chrono::steady_clock::now();
@@ -66,7 +59,7 @@ int main()
     std::map<int, void*, intless> testmap;
     for (int i = 0; i < 1000000; i++)
     {
-        testmap.insert(std::make_pair(i, (void*)i));
+        testmap.insert(std::make_pair(rand(), (void*)i));
     }
     endtime = std::chrono::steady_clock::now();
     usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -

@@ -136,15 +136,16 @@ TreeNode* LastLessOrEnd(TreeNode* node, PAIR* pair, bool* equal)
 
 static TreeNode* __FindInsertPos(TreeNode* node, PAIR* pair, bool* equal)
 {
-    RbTree* tree = node->tree_;
+    TypeLess less_func = node->tree_->less_;
     TreeNode* nextnode = node;
     while (nextnode)
     {
-        if (!tree->less_(pair, nextnode->data))
+        if (!less_func(pair, nextnode->data))
         {
-            if (!tree->less_(nextnode->data, pair))
+            if (!less_func(nextnode->data, pair))
             {
                 *equal = true;
+                break;
             }
 
             if (!nextnode->right_)
@@ -521,32 +522,33 @@ TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
     return retnode;
 }
 
-TreeNode* Makebalance(TreeNode* insert_pos, TreeNode* newnode)
+TreeNode* Makebalance(TreeNode* newnode)
 {
-    TreeNode* parent = insert_pos->parent_;
-    TreeNode* pp = parent ? parent->parent_ : NULL;
-    TreeNode* sibling = SiblingNode(insert_pos);
-    TreeNode* rst = NULL;
+    TreeNode* rst = newnode;
+    TreeNode* parent = rst->parent_;
 
-    int direction = rb_left;
-
-    if (!IsRed(insert_pos) && Is2Node(insert_pos, newnode))
+    while (true)
     {
-        rst = Insert2Node(insert_pos, newnode);
-        return rst;
-    }
-    
-    if (Is3Node(insert_pos, newnode))
-    {// 在3节点的从节色插入
-        rst = Insert3Node(newnode, insert_pos);
-        return rst;
-    }
-    // 插入四节点
-    rst = Insert4Node(newnode, insert_pos);
+        if (!IsRed(parent) && Is2Node(parent, rst))
+        {
+            rst = Insert2Node(parent, rst);
+            break;
+        }
 
-    if (rst->parent_ == NULL)
-        return rst;
-    return Makebalance(rst->parent_, rst);
+        if (Is3Node(parent, rst))
+        {// 在3节点的从节色插入
+            rst = Insert3Node(rst, parent);
+            break;
+        }
+        // 插入四节点
+        rst = Insert4Node(rst, parent);
+
+        if (rst->parent_ == NULL)
+            break;
+        parent = rst->parent_;
+    }
+
+    return rst;
 }
 
 inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
@@ -571,21 +573,9 @@ TreeNode* FindInsertPos(RbTree* tree, PAIR* pair, bool* equal)
 
     if (tree->less_(pair, tree->min_->data))
         return tree->min_;
-    else if (!tree->less_(tree->min_->data, pair))
-    {
-        // equal
-        *equal = true;
-        return tree->min_;
-    }
 
     if (tree->less_(tree->max_->data, pair))
         return tree->max_;
-    else if (!tree->less_(pair, tree->max_->data))
-    {
-        // equal
-        *equal = true;
-        return tree->max_;
-    }
 
     return __FindInsertPos(tree->root_, pair, equal);
 }
@@ -629,7 +619,7 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
         insert_pos->right_ = new_node;
     new_node->parent_ = insert_pos;
 
-    TreeNode* finalchange = Makebalance(insert_pos, new_node);
+    TreeNode* finalchange = Makebalance(new_node);
     UpdateTree(
         rbtree, 
         finalchange->parent_ == NULL ? finalchange : NULL, 
