@@ -32,7 +32,7 @@ typedef struct _RBTree
 #define rb_right    567
 
 
-bool less(int l, int r)
+inline static bool less(int l, int r)
 {
     return l < r;
 }
