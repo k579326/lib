@@ -32,6 +32,22 @@ typedef struct _RBTree
 #define rb_right    567
 
 
+// ä½¿ç”¨å®ï¼Œå¯¹ç®—æ³•æ•ˆç‡æ— æŸã€‚
+// å¦åˆ™å³ä½¿inlineåœ¨debugæ¨¡å¼ä¹Ÿæ— æ•ˆ
+#define IsRed(node) (node->color_ == rb_red)
+#define IsBlack(node) (node->color_ == rb_black)
+#define RelinkParent(parent, direction, newnode)    \
+{                    \
+    if ((parent))                             \
+    {                                       \
+        if ((direction) == rb_left)           \
+            (parent)->left_ = (newnode);        \
+        else                                \
+            (parent)->right_ = (newnode);       \
+    }                                       \
+    (newnode)->parent_ = (parent);              \
+} 
+    
 inline static bool less(int l, int r)
 {
     return l < r;
@@ -51,6 +67,23 @@ RbTree* CreateRbTree()
 
 TreeNode* __Find(TreeNode* node, int key)
 {
+    TreeNode* p_node = node;
+
+    while (p_node)
+    {
+        if (less(key, p_node->pair_.key))
+            p_node = p_node->left_;
+        else if (less(p_node->pair_.key, key))
+            p_node = p_node->right_;
+        else
+            break;
+    }
+    return p_node;
+}
+
+/*
+TreeNode* __Find(TreeNode* node, int key)
+{
     if (!node) {
         return NULL;
     }
@@ -64,6 +97,7 @@ TreeNode* __Find(TreeNode* node, int key)
 
     return node;
 }
+*/
 
 PAIR* Find(RbTree* rbtree, int key)
 {
@@ -83,7 +117,7 @@ PAIR* Find(RbTree* rbtree, int key)
 
 TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
 {
-    // rbtree²»ÄÜÎª¿Õ£¬ÒÔ´ËÈ·±£¸Ãº¯Êı±Ø·µ»ØÒ»¸ö½Úµã
+    // rbtreeä¸èƒ½ä¸ºç©ºï¼Œä»¥æ­¤ç¡®ä¿è¯¥å‡½æ•°å¿…è¿”å›ä¸€ä¸ªèŠ‚ç‚¹
     assert(rbtree);
 
     if (!less(rbtree->pair_.key, key)) {
@@ -94,7 +128,7 @@ TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
 
         TreeNode* leftnode = rbtree->left_;
         if (!leftnode) {
-            return rbtree;  // ·µ»Ø±ß½ç½Úµã
+            return rbtree;  // è¿”å›è¾¹ç•ŒèŠ‚ç‚¹
         }
         return LastLessOrEnd(rbtree->left_, key, equal);
     }
@@ -111,9 +145,39 @@ TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
     // never to this
     return NULL;
 }
+
+
+static TreeNode* __FindInsertPos(TreeNode* rbtree, int key, bool* equal)
+{
+    TreeNode* nextnode = rbtree;
+    while (nextnode)
+    {
+        if (!less(key, nextnode->pair_.key))
+        {
+            if (!less(nextnode->pair_.key, key))
+            {
+                *equal = true;
+            }
+
+            if (!nextnode->right_)
+                break;
+            nextnode = nextnode->right_;
+        }
+        else
+        {
+            if (!nextnode->left_) {
+                break;
+            }
+            nextnode = nextnode->left_;
+        }
+    }
+
+    return nextnode;
+}
+
 TreeNode* FirstLargeOrEnd(TreeNode* rbtree, int key, bool* equal)
 {
-    // rbtree²»ÄÜÎª¿Õ£¬ÒÔ´ËÈ·±£¸Ãº¯Êı±Ø·µ»ØÒ»¸ö½Úµã
+    // rbtreeä¸èƒ½ä¸ºç©ºï¼Œä»¥æ­¤ç¡®ä¿è¯¥å‡½æ•°å¿…è¿”å›ä¸€ä¸ªèŠ‚ç‚¹
     assert(rbtree);
 
     if (!less(key, rbtree->pair_.key)) 
@@ -126,7 +190,7 @@ TreeNode* FirstLargeOrEnd(TreeNode* rbtree, int key, bool* equal)
         TreeNode* rightnode = rbtree->right_;
         if (!rightnode)
         {
-            return rbtree;  // ·µ»Ø±ß½ç½Úµã
+            return rbtree;  // è¿”å›è¾¹ç•ŒèŠ‚ç‚¹
         }
         return FirstLargeOrEnd(rightnode, key, equal);
     }
@@ -196,8 +260,8 @@ inline static bool IsLeftChild(TreeNode* child)
 }
 
 
-// ÅĞ¶ÏnodeÊÇ·ñÊÇ2½Úµã
-// ±ØĞëÖªµÀÄÄ¸öÊÇĞÂ²åÈëµÄ½Úµã
+// åˆ¤æ–­nodeæ˜¯å¦æ˜¯2èŠ‚ç‚¹
+// å¿…é¡»çŸ¥é“å“ªä¸ªæ˜¯æ–°æ’å…¥çš„èŠ‚ç‚¹
 inline static bool Is2Node(const TreeNode* node, const TreeNode* newnode)
 {
     TreeNode* sibling = SiblingNode(newnode);
@@ -237,7 +301,8 @@ inline static bool Is3Node(TreeNode* tarnode, TreeNode* newnode)
 }
 
 
-// ÖØĞÂÁ´½Ó½×¶Îµ÷ÕûºóµÄ×ÓÊ÷µÄ¸¸½Úµã
+// é‡æ–°é“¾æ¥é˜¶æ®µè°ƒæ•´åçš„å­æ ‘çš„çˆ¶èŠ‚ç‚¹
+/*
 inline static void RelinkParent(TreeNode* parent, int direction, TreeNode* newnode)
 {
     if (parent)
@@ -249,7 +314,7 @@ inline static void RelinkParent(TreeNode* parent, int direction, TreeNode* newno
     }
     newnode->parent_ = parent;
     return;
-}
+}*/
 
 
 inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
@@ -275,15 +340,15 @@ inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
         retnode = tarnode;
     }
 
-    // RelinkParent(parent, direction, retnode);
-    if (parent)
-    {
-        if (direction == rb_left)
-            parent->left_ = retnode;
-        else
-            parent->right_ = retnode;
-    }
-    retnode->parent_ = parent;
+    RelinkParent(parent, direction, retnode);
+    // if (parent)
+    // {
+    //     if (direction == rb_left)
+    //         parent->left_ = retnode;
+    //     else
+    //         parent->right_ = retnode;
+    // }
+    // retnode->parent_ = parent;
 
     return retnode;
 }
@@ -374,8 +439,8 @@ inline static TreeNode* __Insert3NodeFromRight(TreeNode* rednode, TreeNode* newn
 }
 
 
-/* ²åÈëĞÂ½ÚµãÖÁÒ»¸öÈı½Úµã£¬²»»á·¢ÉúÏòÉÏÀ©Õ¹ 
-    tar_node: Èı½ÚµãÖĞµÄºÚ½Úµã
+/* æ’å…¥æ–°èŠ‚ç‚¹è‡³ä¸€ä¸ªä¸‰èŠ‚ç‚¹ï¼Œä¸ä¼šå‘ç”Ÿå‘ä¸Šæ‰©å±• 
+    tar_node: ä¸‰èŠ‚ç‚¹ä¸­çš„é»‘èŠ‚ç‚¹
 */
 inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
 {
@@ -400,8 +465,8 @@ inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
         parent = __Insert3NodeFromRight(insert_pos, newnode);
     }
 
-    // RelinkParent(pp, direction, parent);
-    if (pp)
+    RelinkParent(pp, direction, parent);
+    /*if (pp)
     {
         if (direction == rb_left)
             pp->left_ = parent;
@@ -409,7 +474,7 @@ inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
             pp->right_ = parent;
     }
     parent->parent_ = pp;
-
+    */
     return parent;
 }
 
@@ -471,10 +536,10 @@ inline static TreeNode* Insert4NodeFromLeft(TreeNode* expandnode, TreeNode* redn
 }
 
 
-/* 4½Úµã²åÈë
-    4½Úµã¾ßÓĞÆ½ºâĞÔ£¬ËùÒÔËüµÄÇé¿öÓĞÏŞ
-    1¡¢Á½¸öºì½Úµã¶¼Ã»ÓĞº¢×Ó½Úµã
-    2¡¢Á½¸öºì½Úµã¶¼ÓĞ×óÓÒ×ÓÊ÷
+/* 4èŠ‚ç‚¹æ’å…¥
+    4èŠ‚ç‚¹å…·æœ‰å¹³è¡¡æ€§ï¼Œæ‰€ä»¥å®ƒçš„æƒ…å†µæœ‰é™
+    1ã€ä¸¤ä¸ªçº¢èŠ‚ç‚¹éƒ½æ²¡æœ‰å­©å­èŠ‚ç‚¹
+    2ã€ä¸¤ä¸ªçº¢èŠ‚ç‚¹éƒ½æœ‰å·¦å³å­æ ‘
 */
 TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
 {
@@ -488,15 +553,15 @@ TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
     else
         retnode = Insert4NodeFromRight(new_node, red_node);
 
-    // RelinkParent(pp, direction, retnode);
-    if (pp)
-    {
-        if (direction == rb_left)
-            pp->left_ = retnode;
-        else
-            pp->right_ = retnode;
-    }
-    retnode->parent_ = pp;
+    RelinkParent(pp, direction, retnode);
+    // if (pp)
+    // {
+    //     if (direction == rb_left)
+    //         pp->left_ = retnode;
+    //     else
+    //         pp->right_ = retnode;
+    // }
+    // retnode->parent_ = pp;
     return retnode;
 }
 
@@ -516,11 +581,11 @@ TreeNode* Makebalance(TreeNode* insert_pos, TreeNode* newnode)
     }
     
     if (Is3Node(insert_pos, newnode))
-    {// ÔÚ3½ÚµãµÄ´Ó½ÚÉ«²åÈë
+    {// åœ¨3èŠ‚ç‚¹çš„ä»èŠ‚è‰²æ’å…¥
         rst = Insert3Node(newnode, insert_pos);
         return rst;
     }
-    // ²åÈëËÄ½Úµã
+    // æ’å…¥å››èŠ‚ç‚¹
     rst = Insert4Node(newnode, insert_pos);
 
     if (rst->parent_ == NULL)
@@ -565,7 +630,7 @@ TreeNode* FindInsertPos(RbTree* tree, PAIR* pair, bool* equal)
         return tree->max_;
     }
 
-    return FirstLargeOrEnd(tree->root_, pair->key, equal);
+    return __FindInsertPos(tree->root_, pair->key, equal);
 }
 
 
@@ -576,7 +641,7 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
     if (!rbtree) {
         return NULL;
     }
-    // ²åÈë¸ù½Úµã
+    // æ’å…¥æ ¹èŠ‚ç‚¹
     if (!rbtree->root_)
     {
         new_node = CreateNewNode();
@@ -586,21 +651,21 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
         return new_node;
     }
 
-    /* Ë¼Â·´íÁË£¿ Ó¦¸ÃÓÅÏÈÍùÒ¶×Ó½ÚµãÉÏ²åÈë£¿
-        ²éÕÒµ½Ò»¸öºÏÊÊµÄ²åÈëµã£¬µ«ÊÇÕâ¸öµã²»Ò»¶¨±Èpair´ó£¬¿ÉÄÜµÈÓÚ£¬Ò²¿ÉÄÜĞ¡ÓÚ
-        ³¢ÊÔÏÈÅĞ¶Ï£¬¸ù¾İÅĞ¶Ï½á¹ûÀ´¾ö¶¨°ÑĞÂ½ÚµãÁ´µ½×ó±ß»¹ÊÇÓÒ±ß£¬È»ºóÔÙµ÷ÕûÆ½ºâ£¿
+    /* æ€è·¯é”™äº†ï¼Ÿ åº”è¯¥ä¼˜å…ˆå¾€å¶å­èŠ‚ç‚¹ä¸Šæ’å…¥ï¼Ÿ
+        æŸ¥æ‰¾åˆ°ä¸€ä¸ªåˆé€‚çš„æ’å…¥ç‚¹ï¼Œä½†æ˜¯è¿™ä¸ªç‚¹ä¸ä¸€å®šæ¯”pairå¤§ï¼Œå¯èƒ½ç­‰äºï¼Œä¹Ÿå¯èƒ½å°äº
+        å°è¯•å…ˆåˆ¤æ–­ï¼Œæ ¹æ®åˆ¤æ–­ç»“æœæ¥å†³å®šæŠŠæ–°èŠ‚ç‚¹é“¾åˆ°å·¦è¾¹è¿˜æ˜¯å³è¾¹ï¼Œç„¶åå†è°ƒæ•´å¹³è¡¡ï¼Ÿ
     */
     bool flag_equal = false;
     insert_pos = FindInsertPos(rbtree, pair, &flag_equal);
 
-    // »ñÈ¡¹ı³ÌÖĞ·¢ÏÖÓëpairÏàµÈµÄ½Úµã
+    // è·å–è¿‡ç¨‹ä¸­å‘ç°ä¸pairç›¸ç­‰çš„èŠ‚ç‚¹
     if (flag_equal)
         return insert_pos;
 
     new_node = CreateNewNode();
     memcpy(&new_node->pair_, pair, sizeof(PAIR));
 
-    // ÏÈ¸øËü½ÓÉÏÈ¥
+    // å…ˆç»™å®ƒæ¥ä¸Šå»
     if (NodeLess(new_node, insert_pos))
         insert_pos->left_ = new_node;
     else
@@ -615,6 +680,13 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
 
     return new_node;
 }
+
+
+
+
+
+
+
 
 
 static TreeNode* g_array[10000] = { 0 };
@@ -655,91 +727,6 @@ void WalkTreeAsLevel(RbTree* tree)
         }
     }
     return;
-}
-
-
-// 
-TreeNode* Insert_test(RbTree* rbtree, PAIR* pair)
-{
-    TreeNode* insert_pos = NULL;
-    TreeNode* new_node = NULL;
-    if (!rbtree) {
-        return NULL;
-    }
-    // ²åÈë¸ù½Úµã
-    if (!rbtree->root_)
-    {
-        new_node = CreateNewNode();
-        memcpy(&new_node->pair_, pair, sizeof(PAIR));
-        new_node->color_ = rb_black;
-        rbtree->count_ = 1;
-        rbtree->root_ = new_node;
-        return new_node;
-    }
-
-    /* Ë¼Â·´íÁË£¿ Ó¦¸ÃÓÅÏÈÍùÒ¶×Ó½ÚµãÉÏ²åÈë£¿
-        ²éÕÒµ½Ò»¸öºÏÊÊµÄ²åÈëµã£¬µ«ÊÇÕâ¸öµã²»Ò»¶¨±Èpair´ó£¬¿ÉÄÜµÈÓÚ£¬Ò²¿ÉÄÜĞ¡ÓÚ
-        ³¢ÊÔÏÈÅĞ¶Ï£¬¸ù¾İÅĞ¶Ï½á¹ûÀ´¾ö¶¨°ÑĞÂ½ÚµãÁ´µ½×ó±ß»¹ÊÇÓÒ±ß£¬È»ºóÔÙµ÷ÕûÆ½ºâ£¿
-    */
-    bool flag_equal = false;
-    insert_pos = FirstLargeOrEnd(rbtree->root_, pair->key, &flag_equal);
-    
-    // »ñÈ¡¹ı³ÌÖĞ·¢ÏÖÓëpairÏàµÈµÄ½Úµã
-    if (flag_equal)
-        return NULL;
-    
-    new_node = CreateNewNode();
-    memcpy(&new_node->pair_, pair, sizeof(PAIR));
-    // insert_pos¿Ï¶¨Ã»ÓĞÓÒ½Úµã£¬
-    // ÒòÎª½ÚµãÈ«²¿×óÇãĞ±£¬insert_posÓÖ¿Ï¶¨ÊÇÒ¶×Ó½Úµã
-    // ËùÒÔÖ»ÅĞ¶ÏÊÇ·ñ´æÔÚ×ó½Úµã
-
-    // ×ó½ÚµãÒ²²»ÓÃÅĞ¶ÏÁË£¬Ò»¶¨Ã»ÓĞ
-    // insert_posÊÇµÚÒ»¸ö±Èpair´óµÄ½Úµã£¬ËµÃ÷ËüÃ»ÓĞ×ó×ÓÊ÷
-    // ¹â¸ËË¾Áî insert_pos
-    if (insert_pos->left_)
-    {
-        // Ë³ĞòÒ»¶¨ÊÇ insert_pos > pair > insert_pos->left
-    }
-
-    TreeNode* sibling = SiblingNode(insert_pos);
-    if (insert_pos->color_ == rb_black) {
-        Insert2Node(insert_pos, new_node);
-        return new_node;
-    }
-
-
-    // ÏÖÔÚinsert_posÊÇºìÉ«µÄ£¨ºìÉ«²»¿ÉÄÜÊÇ¸ù½Úµã£©
-    // insert_pos¼´¿ÉÄÜÊÇ×ó½Úµã£¬ÓÖ¿ÉÄÜÊÇÓÒ½Úµã
-    // ¼ì²âinsert_posÈç¹ûÃ»ÓĞÓÒĞÖµÜ½Úµã
-    if (!insert_pos->parent_->right_)
-    {
-        // Ã»ÓĞÓÒĞÖµÜ½Úµã£¬ËùÒÔ pair < insert_pos < insert_pos->parent
-        // Ğı×ª£¬Ê¹insert_pos±äÎª¸¸½Úµã
-        
-    }
-    else
-    {// ÓÒĞÖµÜ½Úµã´æÔÚ£¬·ÖÁ½ÖÖÇé¿ö£º1¡¢insert_posÔÚÓÒ(×óÇã¹æÔò£¬ÓĞÓÒ±ØÓĞ×ó)£»2¡¢ÓÒĞÖµÜ´æÔÚ£¬¶øinsert_posÔÚ×ó
-
-     // ÓĞÃ»ÓĞ¿ÉÄÜ×óºìÓÒºÚÄØ£¿²»¿ÉÄÜ£¬×óºìÓÒºÚËµÃ÷ËûÃÇµÄ¸¸½ÚµãÊÇÒ»¸ö3½Úµã£¬ÓÒĞÖµÜÊÇºÚÉ«£¬
-     // ËµÃ÷ËüÊÇ3½ÚµãµÄº¢×Ó½Úµã£¬Õâ¸ö3½Úµã±ØÈ»´æÔÚÁíÍâÁ½¸öº¢×Ó½Úµã£¬Ó¦¸ÃÔÚºìÉ«×óĞÖµÜÉÏ£¬ÕâÊÇ²»¿ÉÄÜµÄ£¬
-     // ÒòÎªºìÉ«½ÚµãÊÇ²éÕÒµ½µÄ²åÈë½Úµã£¬ËüÒ»¶¨²»»áÍ¬Ê±ÓĞÁ½¸öº¢×Ó
-      
-     // ËùÒÔÎŞÂÛ1¡¢2ÕâÁ½ÖÖÇé¿öµÄÄÄÖÖ£¬insert_pos, insert_pos->parent, sibing of inser_pos
-     // ÕâÈı¸ö½Úµã±ØÈ»ÊÇ¹¹³ÉÁËÒ»¸ö4½×Ê÷ÖĞ4½Úµã£¬ËùÒÔÊÇÒ»ºÚÁ½ºì
-        
-     // ĞÂ²åÈëµÄ½ÚµãÒªÃ´×î´ó£¬ÒªÃ´×îĞ¡£¬ÄÇÃ´4¸ö½ÚµãµÄ´óĞ¡¹ØÏµÈçÏÂ£º
-     // sibing < parent < insertnode < newnode£¬·ñÔò newnode < insertnode < parent < sibing
-     // ¸ù¾İ4½×Ê÷À©Õ¹¹æÔò£¬ÉıĞòÅÅÁĞµÚ¶şÎ»µÄ½Úµã½«ÏòÉÏÀ©Õ¹
-
-    }
-
-    // ËùÓĞÔªËØ¶¼±ÈpairĞ¡
-    if (PairLess(&insert_pos->pair_, pair)) {
-
-    }
-
-    return NULL;
 }
 
 
