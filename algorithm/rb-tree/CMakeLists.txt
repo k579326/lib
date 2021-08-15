@@ -6,3 +6,4 @@ project(rbtree)
 
 add_library(rbtree STATIC rb_tree.c rb_tree.h)
 
+add_subdirectory(test)
