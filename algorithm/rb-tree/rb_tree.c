@@ -149,18 +149,18 @@ inline static bool PairLess(const PAIR* l, const PAIR* r)
 }
 inline static bool PairEqual(const PAIR* l, const PAIR* r)
 {
-    return !PairLess(l, r) && !PairLess(r, l);
+    return !less(l->key, r->key) && !less(r->key, l->key);
 }
 
 
 inline static bool NodeLess(const TreeNode* l, const TreeNode* r)
 {
-    return PairLess(&l->pair_, &r->pair_);
+    return less(l->pair_.key, r->pair_.key);
 }
 
 inline static bool NodeEqual(const TreeNode* l, const TreeNode* r)
 {
-    return !NodeLess(l, r) && !NodeLess(r, l);
+    return !less(l->pair_.key, r->pair_.key) && !less(r->pair_.key, l->pair_.key);
 }
 
 inline static TreeNode* CreateNewNode()
@@ -200,15 +200,16 @@ inline static bool IsLeftChild(TreeNode* child)
 // 必须知道哪个是新插入的节点
 inline static bool Is2Node(const TreeNode* node, const TreeNode* newnode)
 {
+    TreeNode* sibling = SiblingNode(newnode);
     if (node->color_ == rb_red)
         return false;
 
-    if (!SiblingNode(newnode))
+    if (!sibling)
     {
         return true;
     }
 
-    return SiblingNode(newnode)->color_ == rb_black;
+    return sibling->color_ == rb_black;
 }
 
 inline static bool Is3Node(TreeNode* tarnode, TreeNode* newnode)
@@ -239,19 +240,16 @@ inline static bool Is3Node(TreeNode* tarnode, TreeNode* newnode)
 // 重新链接阶段调整后的子树的父节点
 inline static void RelinkParent(TreeNode* parent, int direction, TreeNode* newnode)
 {
-    if (!parent)
-        newnode->parent_ = NULL;
-    else
+    if (parent)
     {
         if (direction == rb_left)
             parent->left_ = newnode;
         else
             parent->right_ = newnode;
-        newnode->parent_ = parent;
     }
+    newnode->parent_ = parent;
     return;
 }
-
 
 
 inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
@@ -277,7 +275,16 @@ inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
         retnode = tarnode;
     }
 
-    RelinkParent(parent, direction, retnode);
+    // RelinkParent(parent, direction, retnode);
+    if (parent)
+    {
+        if (direction == rb_left)
+            parent->left_ = retnode;
+        else
+            parent->right_ = retnode;
+    }
+    retnode->parent_ = parent;
+
     return retnode;
 }
 // 
@@ -393,7 +400,16 @@ inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
         parent = __Insert3NodeFromRight(insert_pos, newnode);
     }
 
-    RelinkParent(pp, direction, parent);
+    // RelinkParent(pp, direction, parent);
+    if (pp)
+    {
+        if (direction == rb_left)
+            pp->left_ = parent;
+        else
+            pp->right_ = parent;
+    }
+    parent->parent_ = pp;
+
     return parent;
 }
 
@@ -472,7 +488,15 @@ TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
     else
         retnode = Insert4NodeFromRight(new_node, red_node);
 
-    RelinkParent(pp, direction, retnode);
+    // RelinkParent(pp, direction, retnode);
+    if (pp)
+    {
+        if (direction == rb_left)
+            pp->left_ = retnode;
+        else
+            pp->right_ = retnode;
+    }
+    retnode->parent_ = pp;
     return retnode;
 }
 

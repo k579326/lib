@@ -12,7 +12,7 @@ typedef struct _RBTree RbTree;
 
 typedef struct _pair
 {
-    int             key;
+    int   key;
     void* v_;
 }PAIR;
 
