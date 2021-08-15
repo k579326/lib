@@ -34,8 +34,8 @@ typedef struct _RBTree
 
 // 使用宏，对算法效率无损。
 // 否则即使inline在debug模式也无效
-#define IsRed(node) (node->color_ == rb_red)
-#define IsBlack(node) (node->color_ == rb_black)
+#define IsRed(node) ((node)->color_ == rb_red)
+#define IsBlack(node) ((node)->color_ == rb_black)
 #define RelinkParent(parent, direction, newnode)    \
 {                    \
     if ((parent))                             \
@@ -265,7 +265,7 @@ inline static bool IsLeftChild(TreeNode* child)
 inline static bool Is2Node(const TreeNode* node, const TreeNode* newnode)
 {
     TreeNode* sibling = SiblingNode(newnode);
-    if (node->color_ == rb_red)
+    if (IsRed(node))
         return false;
 
     if (!sibling)
@@ -278,19 +278,19 @@ inline static bool Is2Node(const TreeNode* node, const TreeNode* newnode)
 
 inline static bool Is3Node(TreeNode* tarnode, TreeNode* newnode)
 {
-    if (tarnode->color_ == rb_red)
+    TreeNode* sibling = SiblingNode(tarnode);
+    if (IsRed(tarnode))
     {
-        TreeNode* sibling = SiblingNode(tarnode);
         if (sibling)
-            return sibling->color_ == rb_black;
+            return IsBlack(sibling);
         // sibling is NULL
         return true;
     }
     else
     {
-        TreeNode* sibling = SiblingNode(newnode);
+        sibling = SiblingNode(newnode);
         if (sibling)
-            return sibling->color_ == rb_red;
+            return IsRed(sibling);
         // sibling is NULL
         return false;
     }
@@ -341,14 +341,6 @@ inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
     }
 
     RelinkParent(parent, direction, retnode);
-    // if (parent)
-    // {
-    //     if (direction == rb_left)
-    //         parent->left_ = retnode;
-    //     else
-    //         parent->right_ = retnode;
-    // }
-    // retnode->parent_ = parent;
 
     return retnode;
 }
@@ -445,7 +437,8 @@ inline static TreeNode* __Insert3NodeFromRight(TreeNode* rednode, TreeNode* newn
 inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
 {
     TreeNode* parent = NULL, *pp = NULL;
-    if (insert_pos->color_ == rb_red) {
+    if (IsRed(insert_pos)) 
+    {
         parent = insert_pos->parent_;
         pp = parent->parent_;
     }
@@ -466,15 +459,6 @@ inline static TreeNode* Insert3Node(TreeNode* newnode, TreeNode* insert_pos)
     }
 
     RelinkParent(pp, direction, parent);
-    /*if (pp)
-    {
-        if (direction == rb_left)
-            pp->left_ = parent;
-        else
-            pp->right_ = parent;
-    }
-    parent->parent_ = pp;
-    */
     return parent;
 }
 
@@ -554,14 +538,6 @@ TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
         retnode = Insert4NodeFromRight(new_node, red_node);
 
     RelinkParent(pp, direction, retnode);
-    // if (pp)
-    // {
-    //     if (direction == rb_left)
-    //         pp->left_ = retnode;
-    //     else
-    //         pp->right_ = retnode;
-    // }
-    // retnode->parent_ = pp;
     return retnode;
 }
 
@@ -574,7 +550,7 @@ TreeNode* Makebalance(TreeNode* insert_pos, TreeNode* newnode)
 
     int direction = rb_left;
 
-    if (Is2Node(insert_pos, newnode))
+    if (!IsRed(insert_pos) && Is2Node(insert_pos, newnode))
     {
         rst = Insert2Node(insert_pos, newnode);
         return rst;
