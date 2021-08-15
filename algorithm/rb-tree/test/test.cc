@@ -6,18 +6,35 @@
 #include <chrono>
 #include <map>
 
+struct MyPair
+{
+    int key;
+    char value[10];
+};
+
+bool less(const MyPair* p1, const MyPair* p2)
+{
+    return p1->key < p2->key;
+}
+
+
+#define registe(type) type_less;
+    
+    
+
+
 
 int main()
 {
-    RbTree* map = CreateRbTree();
+    RbTree* map = CreateRbTree(sizeof(MyPair), (TypeLess)less);
 
-    PAIR pair;
+    MyPair pair;
 
     auto starttime = std::chrono::steady_clock::now();
     for (int i = 0; i < 1000000; i++)
     {
         pair.key = i;
-        pair.v_ = (void*)i;
+        sprintf(pair.value, "%d", i);
         Insert(map, &pair);
     }
     auto endtime = std::chrono::steady_clock::now();
@@ -29,7 +46,8 @@ int main()
     starttime = std::chrono::steady_clock::now();
     for (int i = 0; i < 1000000; i++)
     {
-        Find(map, i);
+        pair.key = i;
+        Find(map, &pair);
     }
     endtime = std::chrono::steady_clock::now();
     usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -
@@ -38,7 +56,14 @@ int main()
     //WalkTreeAsLevel(map);
 
     starttime = std::chrono::steady_clock::now();
-    std::map<int, void*> testmap;
+    struct intless {
+        constexpr bool operator ()(const int& a, const int& b) const
+        {
+            return a < b;
+        }
+    };
+
+    std::map<int, void*, intless> testmap;
     for (int i = 0; i < 1000000; i++)
     {
         testmap.insert(std::make_pair(i, (void*)i));

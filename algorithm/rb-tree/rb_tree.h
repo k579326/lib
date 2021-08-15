@@ -2,6 +2,8 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,17 +11,14 @@ extern "C" {
 
 typedef struct _treenode TreeNode;
 typedef struct _RBTree RbTree;
+typedef void   PAIR;
 
-typedef struct _pair
-{
-    int   key;
-    void* v_;
-}PAIR;
+typedef bool(*TypeLess)(const PAIR*, const PAIR*);
 
+RbTree*     CreateRbTree(uint16_t typelen, TypeLess cmp);
+TreeNode*   Insert(RbTree* rbtree, PAIR* pair);
+PAIR*       Find(RbTree* retree, PAIR* keypair);
 
-RbTree* CreateRbTree();
-TreeNode* Insert(RbTree* rbtree, PAIR* pair);
-PAIR* Find(RbTree* retree, int key);
 
 void WalkTreeAsLevel(RbTree* tree);
 

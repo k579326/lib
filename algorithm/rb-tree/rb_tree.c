@@ -1,6 +1,7 @@
 
 #include "rb_tree.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -13,7 +14,8 @@ typedef struct _treenode
     struct _treenode* left_;
     struct _treenode* right_;
     char              color_;       // true: red, false: black
-    PAIR              pair_;
+    struct _RBTree*   tree_;
+    void*             data;
 }TreeNode;
 
 typedef struct _RBTree
@@ -22,6 +24,8 @@ typedef struct _RBTree
     size_t      count_;
     TreeNode*   max_;
     TreeNode*   min_;
+    uint16_t    type_len_;
+    TypeLess    less_;
 }RbTree;
 
 
@@ -47,13 +51,9 @@ typedef struct _RBTree
     }                                       \
     (newnode)->parent_ = (parent);              \
 } 
-    
-inline static bool less(int l, int r)
-{
-    return l < r;
-}
 
-RbTree* CreateRbTree()
+
+RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp)
 {
     RbTree* rbtree = (RbTree*)malloc(sizeof(RbTree));
     if (!rbtree)
@@ -61,19 +61,23 @@ RbTree* CreateRbTree()
     memset(rbtree, 0, sizeof(RbTree));
     rbtree->count_ = 0;
     rbtree->root_ = NULL;
+    rbtree->type_len_ = typelen;
+    rbtree->less_ = cmp;
+
     return rbtree;
 }
 
 
-TreeNode* __Find(TreeNode* node, int key)
+TreeNode* __Find(TreeNode* node, PAIR* keypair)
 {
     TreeNode* p_node = node;
+    RbTree* tree = node->tree_;
 
     while (p_node)
     {
-        if (less(key, p_node->pair_.key))
+        if (tree->less_(keypair, p_node->data))
             p_node = p_node->left_;
-        else if (less(p_node->pair_.key, key))
+        else if (tree->less_(p_node->data, keypair))
             p_node = p_node->right_;
         else
             break;
@@ -81,65 +85,48 @@ TreeNode* __Find(TreeNode* node, int key)
     return p_node;
 }
 
-/*
-TreeNode* __Find(TreeNode* node, int key)
-{
-    if (!node) {
-        return NULL;
-    }
-    if (less(key, node->pair_.key)) {
-        return __Find(node->left_, key);
-    }
-    else if (less(node->pair_.key, key))
-    {
-        return __Find(node->right_, key);
-    }
 
-    return node;
-}
-*/
-
-PAIR* Find(RbTree* rbtree, int key)
+PAIR* Find(RbTree* rbtree, PAIR* keypair)
 {
     TreeNode* node = NULL;
     if (!rbtree || !rbtree->root_)
         return NULL;
-    if (less(key, rbtree->min_->pair_.key))
+    if (rbtree->less_(keypair, rbtree->min_->data))
         return NULL;
-    if (less(rbtree->max_->pair_.key, key))
+    if (rbtree->less_(rbtree->max_->data, keypair))
         return NULL;
 
-    node = __Find(rbtree->root_, key);
-    return node ? &node->pair_ : NULL;
+    node = __Find(rbtree->root_, keypair);
+    return node ? node->data : NULL;
 }
 
 
 
-TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
+TreeNode* LastLessOrEnd(TreeNode* node, PAIR* pair, bool* equal)
 {
     // rbtree不能为空，以此确保该函数必返回一个节点
-    assert(rbtree);
+    assert(node);
 
-    if (!less(rbtree->pair_.key, key)) {
-        if (!less(key, rbtree->pair_.key))
+    if (!node->tree_->less_(node->data, pair)) {
+        if (!node->tree_->less_(pair, node->data))
         {
             *equal = true;
         }
 
-        TreeNode* leftnode = rbtree->left_;
+        TreeNode* leftnode = node->left_;
         if (!leftnode) {
-            return rbtree;  // 返回边界节点
+            return node;  // 返回边界节点
         }
-        return LastLessOrEnd(rbtree->left_, key, equal);
+        return LastLessOrEnd(node->left_, pair, equal);
     }
     else
     {
-        TreeNode* rightnode = rbtree->right_;
+        TreeNode* rightnode = node->right_;
         if (!rightnode)
         {
-            return rbtree;
+            return node;
         }
-        return LastLessOrEnd(rightnode, key, equal);
+        return LastLessOrEnd(rightnode, pair, equal);
     }
 
     // never to this
@@ -147,14 +134,15 @@ TreeNode* LastLessOrEnd(TreeNode* rbtree, int key, bool* equal)
 }
 
 
-static TreeNode* __FindInsertPos(TreeNode* rbtree, int key, bool* equal)
+static TreeNode* __FindInsertPos(TreeNode* node, PAIR* pair, bool* equal)
 {
-    TreeNode* nextnode = rbtree;
+    RbTree* tree = node->tree_;
+    TreeNode* nextnode = node;
     while (nextnode)
     {
-        if (!less(key, nextnode->pair_.key))
+        if (!tree->less_(pair, nextnode->data))
         {
-            if (!less(nextnode->pair_.key, key))
+            if (!tree->less_(nextnode->data, pair))
             {
                 *equal = true;
             }
@@ -175,59 +163,49 @@ static TreeNode* __FindInsertPos(TreeNode* rbtree, int key, bool* equal)
     return nextnode;
 }
 
-TreeNode* FirstLargeOrEnd(TreeNode* rbtree, int key, bool* equal)
+TreeNode* FirstLargeOrEnd(TreeNode* node, PAIR* pair, bool* equal)
 {
     // rbtree不能为空，以此确保该函数必返回一个节点
-    assert(rbtree);
+    assert(node);
 
-    if (!less(key, rbtree->pair_.key)) 
+    if (!node->tree_->less_(pair, node->data))
     {
-        if (!less(rbtree->pair_.key, key))
+        if (!node->tree_->less_(node->data, pair))
         {
             *equal = true;
         }
 
-        TreeNode* rightnode = rbtree->right_;
+        TreeNode* rightnode = node->right_;
         if (!rightnode)
         {
-            return rbtree;  // 返回边界节点
+            return node;  // 返回边界节点
         }
-        return FirstLargeOrEnd(rightnode, key, equal);
+        return FirstLargeOrEnd(rightnode, pair, equal);
     }
     else
     {
-        TreeNode* leftnode = rbtree->left_;
+        TreeNode* leftnode = node->left_;
         if (!leftnode) {
-            return rbtree;
+            return node;
         }
-        return FirstLargeOrEnd(rbtree->left_, key, equal);
+        return FirstLargeOrEnd(node->left_, pair, equal);
     }
     // never to this
     return NULL;
 }
 
 
-inline static bool PairLess(const PAIR* l, const PAIR* r)
-{
-    return less(l->key, r->key);
-}
-inline static bool PairEqual(const PAIR* l, const PAIR* r)
-{
-    return !less(l->key, r->key) && !less(r->key, l->key);
-}
-
-
 inline static bool NodeLess(const TreeNode* l, const TreeNode* r)
 {
-    return less(l->pair_.key, r->pair_.key);
+    return l->tree_->less_(l->data, r->data);
 }
 
 inline static bool NodeEqual(const TreeNode* l, const TreeNode* r)
 {
-    return !less(l->pair_.key, r->pair_.key) && !less(r->pair_.key, l->pair_.key);
+    return !l->tree_->less_(l->data, r->data) && !l->tree_->less_(r->data, l->data);
 }
 
-inline static TreeNode* CreateNewNode()
+inline static TreeNode* CreateNewNode(RbTree* tree)
 {
     TreeNode* newnode = (TreeNode*)malloc(sizeof(TreeNode));
     if (!newnode) {
@@ -235,6 +213,8 @@ inline static TreeNode* CreateNewNode()
     }
     memset(newnode, 0, sizeof(TreeNode));
     newnode->color_ = rb_red;
+    newnode->data = malloc(tree->type_len_);
+    newnode->tree_ = tree;
     return newnode;
 }
 
@@ -571,6 +551,7 @@ TreeNode* Makebalance(TreeNode* insert_pos, TreeNode* newnode)
 
 inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
 {
+    newnode->tree_ = rbtree;
     rbtree->count_++;
     if (root)
         rbtree->root_ = root;
@@ -588,25 +569,25 @@ TreeNode* FindInsertPos(RbTree* tree, PAIR* pair, bool* equal)
     bool flag_equal = false;
     *equal = false;
 
-    if (PairLess(pair, &tree->min_->pair_))
+    if (tree->less_(pair, tree->min_->data))
         return tree->min_;
-    else if (!PairLess(&tree->min_->pair_, pair))
+    else if (!tree->less_(tree->min_->data, pair))
     {
         // equal
         *equal = true;
         return tree->min_;
     }
 
-    if (PairLess(&tree->max_->pair_, pair))
+    if (tree->less_(tree->max_->data, pair))
         return tree->max_;
-    else if (!PairLess(pair, &tree->max_->pair_))
+    else if (!tree->less_(pair, tree->max_->data))
     {
         // equal
         *equal = true;
         return tree->max_;
     }
 
-    return __FindInsertPos(tree->root_, pair->key, equal);
+    return __FindInsertPos(tree->root_, pair, equal);
 }
 
 
@@ -620,8 +601,8 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
     // 插入根节点
     if (!rbtree->root_)
     {
-        new_node = CreateNewNode();
-        memcpy(&new_node->pair_, pair, sizeof(PAIR));
+        new_node = CreateNewNode(rbtree);
+        memcpy(new_node->data, pair, sizeof(rbtree->type_len_));
         new_node->color_ = rb_black;
         UpdateTree(rbtree, new_node, new_node);
         return new_node;
@@ -638,8 +619,8 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
     if (flag_equal)
         return insert_pos;
 
-    new_node = CreateNewNode();
-    memcpy(&new_node->pair_, pair, sizeof(PAIR));
+    new_node = CreateNewNode(rbtree);
+    memcpy(new_node->data, pair, sizeof(rbtree->type_len_));
 
     // 先给它接上去
     if (NodeLess(new_node, insert_pos))
@@ -683,7 +664,7 @@ void WalkTreeAsLevel(RbTree* tree)
     g_array[next] = 0;
     while (g_array[cursor] != 0)
     {
-        printf("<%d, %p> ", g_array[cursor]->pair_.key, g_array[cursor]->pair_.v_);
+        printf("<%p, %p> ", g_array[cursor]->data, g_array[cursor]->data);
 
         if (g_array[cursor]->left_) {
             g_array[queue_tail] = g_array[cursor]->left_;
