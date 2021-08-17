@@ -134,7 +134,7 @@ TreeNode* LastLessOrEnd(TreeNode* node, PAIR* pair, bool* equal)
 }
 
 
-static TreeNode* __FindInsertPos(TreeNode* node, PAIR* pair, bool* equal)
+static TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, bool* equal)
 {
     TypeLess less_func = node->tree_->less_;
     TreeNode* nextnode = node;
@@ -220,7 +220,7 @@ inline static TreeNode* CreateNewNode(RbTree* tree)
 }
 
 
-inline static TreeNode* SiblingNode(TreeNode* node)
+inline static TreeNode* SiblingNode(const TreeNode* node)
 {
     if (!node->parent_)
         return NULL;
@@ -229,7 +229,7 @@ inline static TreeNode* SiblingNode(TreeNode* node)
     return node->parent_->left_;
 }
 
-inline static bool IsLeftChild(TreeNode* child)
+inline static bool IsLeftChild(const TreeNode* child)
 {
     //assert(child->parent_);
     if (!child->parent_)
@@ -257,7 +257,7 @@ inline static bool Is2Node(const TreeNode* node, const TreeNode* newnode)
     return sibling->color_ == rb_black;
 }
 
-inline static bool Is3Node(TreeNode* tarnode, TreeNode* newnode)
+inline static bool Is3Node(const TreeNode* tarnode, const TreeNode* newnode)
 {
     TreeNode* sibling = SiblingNode(tarnode);
     if (IsRed(tarnode))
@@ -565,7 +565,7 @@ inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
     return;
 }
 
-TreeNode* FindInsertPos(RbTree* tree, PAIR* pair, bool* equal)
+TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool* equal)
 {
     TreeNode* node = NULL;
     bool flag_equal = false;
@@ -592,7 +592,7 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
     if (!rbtree->root_)
     {
         new_node = CreateNewNode(rbtree);
-        memcpy(new_node->data, pair, sizeof(rbtree->type_len_));
+        memcpy(new_node->data, pair, rbtree->type_len_);
         new_node->color_ = rb_black;
         UpdateTree(rbtree, new_node, new_node);
         return new_node;
@@ -610,13 +610,14 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
         return insert_pos;
 
     new_node = CreateNewNode(rbtree);
-    memcpy(new_node->data, pair, sizeof(rbtree->type_len_));
+    memcpy(new_node->data, pair, rbtree->type_len_);
 
     // 先给它接上去
     if (NodeLess(new_node, insert_pos))
         insert_pos->left_ = new_node;
     else
         insert_pos->right_ = new_node;
+    // 被优化了。。。。怎么办
     new_node->parent_ = insert_pos;
 
     TreeNode* finalchange = Makebalance(new_node);
