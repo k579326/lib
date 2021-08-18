@@ -63,7 +63,7 @@ RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp)
     rbtree->root_ = NULL;
     rbtree->type_len_ = typelen;
     rbtree->less_ = cmp;
-
+    
     return rbtree;
 }
 
@@ -72,12 +72,12 @@ TreeNode* __Find(TreeNode* node, PAIR* keypair)
 {
     TreeNode* p_node = node;
     RbTree* tree = node->tree_;
-
+    TypeLess less = tree->less_;
     while (p_node)
     {
-        if (tree->less_(keypair, p_node->data))
+        if (less(keypair, p_node->data))
             p_node = p_node->left_;
-        else if (tree->less_(p_node->data, keypair))
+        else if (less(p_node->data, keypair))
             p_node = p_node->right_;
         else
             break;
@@ -134,10 +134,10 @@ TreeNode* LastLessOrEnd(TreeNode* node, PAIR* pair, bool* equal)
 }
 
 
-static TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, bool* equal)
+inline static const TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, bool* equal)
 {
     TypeLess less_func = node->tree_->less_;
-    TreeNode* nextnode = node;
+    const TreeNode* nextnode = node;
     while (nextnode)
     {
         if (!less_func(pair, nextnode->data))
@@ -203,7 +203,8 @@ inline static bool NodeLess(const TreeNode* l, const TreeNode* r)
 
 inline static bool NodeEqual(const TreeNode* l, const TreeNode* r)
 {
-    return !l->tree_->less_(l->data, r->data) && !l->tree_->less_(r->data, l->data);
+    TypeLess less = l->tree_->less_;
+    return !less(l->data, r->data) && !less(r->data, l->data);
 }
 
 inline static TreeNode* CreateNewNode(RbTree* tree)
@@ -522,23 +523,21 @@ TreeNode* Insert4Node(TreeNode* new_node, TreeNode* red_node)
     return retnode;
 }
 
-TreeNode* Makebalance(TreeNode* newnode)
+inline static TreeNode* Makebalance(TreeNode* newnode)
 {
     TreeNode* rst = newnode;
     TreeNode* parent = rst->parent_;
 
     while (true)
     {
-        if (!IsRed(parent) && Is2Node(parent, rst))
+        if (Is2Node(parent, rst))
         {
-            rst = Insert2Node(parent, rst);
-            break;
+            return Insert2Node(parent, rst);
         }
 
         if (Is3Node(parent, rst))
         {// 在3节点的从节色插入
-            rst = Insert3Node(rst, parent);
-            break;
+            return Insert3Node(rst, parent);
         }
         // 插入四节点
         rst = Insert4Node(rst, parent);
@@ -565,19 +564,20 @@ inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
     return;
 }
 
-TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool* equal)
+inline static TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool* equal)
 {
     TreeNode* node = NULL;
     bool flag_equal = false;
+    TypeLess less = tree->less_;
     *equal = false;
 
-    if (tree->less_(pair, tree->min_->data))
+    if (less(pair, tree->min_->data))
         return tree->min_;
-
-    if (tree->less_(tree->max_->data, pair))
+    
+    if (less(tree->max_->data, pair))
         return tree->max_;
 
-    return __FindInsertPos(tree->root_, pair, equal);
+    return (TreeNode*)__FindInsertPos(tree->root_, pair, equal);
 }
 
 
@@ -617,7 +617,6 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
         insert_pos->left_ = new_node;
     else
         insert_pos->right_ = new_node;
-    // 被优化了。。。。怎么办
     new_node->parent_ = insert_pos;
 
     TreeNode* finalchange = Makebalance(new_node);
