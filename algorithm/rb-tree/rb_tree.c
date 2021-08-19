@@ -629,7 +629,40 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
 }
 
 
+void Delete(RbTree* rbtree, PAIR* keypair)
+{
+    TreeNode* tar = __Find(rbtree, keypair);
 
+    while (tar)
+    {
+        TreeNode* ltree = tar->left_;
+        TreeNode* rtree = tar->right_;
+        TreeNode* newtar = NULL;
+
+        // 如果是叶子节点
+
+
+
+
+
+        // 如果不是叶子节点
+        while (ltree->right_ || rtree->left_)
+        {
+            if (ltree->right_) {
+                ltree = ltree->right_;
+                newtar = ltree;
+            }
+            if (rtree->left_) {
+                rtree = rtree->left_;
+                newtar = rtree;
+            }
+        }
+
+
+    }
+
+    return;
+}
 
 
 
