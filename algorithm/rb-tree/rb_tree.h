@@ -16,9 +16,9 @@ typedef void   PAIR;
 typedef bool(*TypeLess)(const PAIR*, const PAIR*);
 
 RbTree*     CreateRbTree(uint16_t typelen, TypeLess cmp);
-TreeNode*   Insert(RbTree* rbtree, PAIR* pair);
+TreeNode*   InsertNode(RbTree* rbtree, PAIR* pair);
 PAIR*       Find(RbTree* rbtree, PAIR* keypair);
-void        Delete(RbTree* rbtree, PAIR* keypair);
+void        DeleteNode(RbTree* rbtree, PAIR* keypair);
 
 void WalkTreeAsLevel(RbTree* tree);
 

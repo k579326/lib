@@ -91,10 +91,10 @@ PAIR* Find(RbTree* rbtree, PAIR* keypair)
     TreeNode* node = NULL;
     if (!rbtree || !rbtree->root_)
         return NULL;
-    if (rbtree->less_(keypair, rbtree->min_->data))
-        return NULL;
-    if (rbtree->less_(rbtree->max_->data, keypair))
-        return NULL;
+    //if (rbtree->less_(keypair, rbtree->min_->data))
+    //    return NULL;
+    //if (rbtree->less_(rbtree->max_->data, keypair))
+    //    return NULL;
 
     node = __Find(rbtree->root_, keypair);
     return node ? node->data : NULL;
@@ -556,10 +556,10 @@ inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
     rbtree->count_++;
     if (root)
         rbtree->root_ = root;
-    if (!rbtree->min_ || NodeLess(newnode, rbtree->min_))
-        rbtree->min_ = newnode;
-    if (!rbtree->max_ || NodeLess(rbtree->max_, newnode))
-        rbtree->max_ = newnode;
+    //if (!rbtree->min_ || NodeLess(newnode, rbtree->min_))
+    //    rbtree->min_ = newnode;
+    //if (!rbtree->max_ || NodeLess(rbtree->max_, newnode))
+    //    rbtree->max_ = newnode;
     
     return;
 }
@@ -571,17 +571,17 @@ inline static TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool
     TypeLess less = tree->less_;
     *equal = false;
 
-    if (less(pair, tree->min_->data))
-        return tree->min_;
-    
-    if (less(tree->max_->data, pair))
-        return tree->max_;
+    //if (less(pair, tree->min_->data))
+    //    return tree->min_;
+    //
+    //if (less(tree->max_->data, pair))
+    //    return tree->max_;
 
     return (TreeNode*)__FindInsertPos(tree->root_, pair, equal);
 }
 
 
-TreeNode* Insert(RbTree* rbtree, PAIR* pair)
+TreeNode* InsertNode(RbTree* rbtree, PAIR* pair)
 {
     TreeNode* insert_pos = NULL;
     TreeNode* new_node = NULL;
@@ -629,37 +629,166 @@ TreeNode* Insert(RbTree* rbtree, PAIR* pair)
 }
 
 
-void Delete(RbTree* rbtree, PAIR* keypair)
+inline static void _DeleteNode(TreeNode* node, bool remove_data)
 {
-    TreeNode* tar = __Find(rbtree, keypair);
+    TreeNode* parent = node->parent_;
+    if (!parent)
+    {
+        node->tree_->root_ = NULL;
+        node->tree_->max_ = NULL;
+        node->tree_->min_ = NULL;
+    }
+    else
+    {
+        if (IsLeftChild(node))
+            parent->left_ = NULL;
+        else
+            parent->right_ = NULL;
+    }
+
+    if (remove_data)
+        free(node->data);
+    free(node);
+    return;
+}
+
+void DeleteNode(RbTree* rbtree, PAIR* keypair)
+{
+    TreeNode* tar = __Find(rbtree->root_, keypair);
+    TreeNode* del_node = NULL;
+
+    TreeNode* ltree = NULL;
+    TreeNode* rtree = NULL;
+    TreeNode* parent = NULL;
+    TreeNode* sibling = NULL;
+    TreeNode* pp = NULL;
+    bool left = true;       // 向左找替代节点
+    bool right = true;      // 向右找替代节点
+
+    // 先释放掉这个被删除节点的数据
+    if (tar)
+    {
+        free(tar->data);
+        tar->data = NULL;
+    }
 
     while (tar)
     {
-        TreeNode* ltree = tar->left_;
-        TreeNode* rtree = tar->right_;
-        TreeNode* newtar = NULL;
+        ltree = tar->left_;
+        rtree = tar->right_;
+        parent = tar->parent_;
+        sibling = SiblingNode(tar);
 
-        // 如果是叶子节点
+        if (!ltree && !rtree)
+        {
+            if (parent == NULL)
+            {
+                _DeleteNode(tar, false);
+                break;
+            }
 
+            if (IsRed(tar))
+            {
+                _DeleteNode(tar, false);
+            }
+            else
+            {// 黑色，且父节点存在，那么它一定有兄弟节点
+                pp = parent->parent_;
 
+                if (IsLeftChild(tar))
+                {
+                    // leftrotate(tar->parent)
+                    parent->right_ = sibling->left_;
+                    if (parent->right_)
+                    {
+                        parent->right_->parent_ = parent;
+                        parent->right_->color_ = rb_red;
+                    }
 
+                    sibling->left_ = parent;
+                    sibling->left_->parent_ = sibling;
+                    if (sibling->color_ == rb_black &&
+                        sibling->right_)
+                        sibling->right_->color_ = rb_black;
+                }
+                else
+                {
+                    parent->left_ = sibling->right_;
+                    if (parent->left_)
+                    {
+                        parent->left_->parent_ = parent;
+                        parent->left_->color_ = rb_red;
+                    }
+                    sibling->right_ = parent;
+                    sibling->right_->parent_ = sibling;
+                    if (sibling->color_ == rb_black &&
+                        sibling->left_)
+                        sibling->left_->color_ = rb_black;
+                }
 
+                sibling->color_ = parent->color_;
+                parent->color_ = rb_black;
+                _DeleteNode(tar, false);
+
+                sibling->parent_ = pp;
+                if (!pp)
+                    rbtree->root_ = sibling;
+                else if (parent == pp->left_)
+                    pp->left_ = sibling;
+                else
+                    pp->right_ = sibling;
+
+                // 处理一下黑黑黑删除后，剩两黑的情况
+                if (parent->color_ == sibling->color_
+                    && !SiblingNode(parent))
+                    parent->color_ = rb_red;
+            }
+            break;
+        }
+
+        // 如果仅有一个孩子节点，tar一定是黑色的。红色节点要么有两个孩子，要么一个都没有
+        if (!ltree || !rtree)
+        {
+            TreeNode* child = ltree;
+            if (!child)
+                child = rtree;
+
+            child->parent_ = parent;
+            if (!parent)
+                rbtree->root_ = child;
+            else
+            {
+                if (IsLeftChild(tar)) {
+                    child->parent_->left_ = child;
+                }
+                else
+                    child->parent_->right_ = child;
+            }
+            
+            child->color_ = rb_black;
+            _DeleteNode(tar, false);
+            break;
+        }
 
         // 如果不是叶子节点
-        while (ltree->right_ || rtree->left_)
+        while (ltree && rtree)
         {
-            if (ltree->right_) {
+            if (ltree) {
+                del_node = ltree;
                 ltree = ltree->right_;
-                newtar = ltree;
             }
-            if (rtree->left_) {
+            if (rtree) {
+                del_node = rtree;
                 rtree = rtree->left_;
-                newtar = rtree;
             }
         }
 
-
+        //memcpy(tar->data, del_node->data, rbtree->type_len_);
+        tar->data = del_node->data;
+        tar = del_node;
     }
+
+    rbtree->count_--;
 
     return;
 }

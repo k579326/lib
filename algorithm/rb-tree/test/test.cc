@@ -32,49 +32,57 @@ int main()
     MyPair pair;
     int64_t usetime;
     usetime = GetNow();
-    for (int i = 0; i < 10000000; i++)
+    for (int i = 0; i < 10; i++)
     {
         pair.key = i;
-        Insert(map, &pair);
+        InsertNode(map, &pair);
     }
     usetime = GetNow() - usetime;
     printf("rbtree insert 10000 times use time %lld \n", usetime);
+
+    WalkTreeAsLevel(map);
     
-    
-    usetime = GetNow();
-    for (int i = 0; i < 10000000; i++)
+    for (int i = 0; i < 10; i++)
     {
         pair.key = i;
-        Find(map, &pair);
+        DeleteNode(map, &pair);
     }
-    usetime = GetNow() - usetime;
-    printf("rbtree search 10000 times use time %llu \n", usetime);
-    //WalkTreeAsLevel(map);
+    WalkTreeAsLevel(map);
 
-    usetime = GetNow();
-    struct intless {
-        constexpr bool operator ()(const int& a, const int& b) const
-        {
-            return a < b;
-        }
-    };
-    
-    std::map<int, std::string, intless> testmap;
-    for (int i = 0; i < 10000000; i++)
-    {
-        testmap.insert(std::make_pair(i, "123456789"));
-    }
-    usetime = GetNow() - usetime;
-    printf("map insert 10000 times use time %llu \n", usetime);
-    
-    usetime = GetNow();
-    for (int i = 0; i < 10000000; i++)
-    {
-        testmap.find(i);
-    }
-    
-    usetime = GetNow() - usetime;
-    printf("map search 10000 times use time %llu \n", usetime);
+    //usetime = GetNow();
+    //for (int i = 0; i < 10000000; i++)
+    //{
+    //    pair.key = i;
+    //    Find(map, &pair);
+    //}
+    //usetime = GetNow() - usetime;
+    //printf("rbtree search 10000 times use time %llu \n", usetime);
+    WalkTreeAsLevel(map);
+
+    // usetime = GetNow();
+    // struct intless {
+    //     constexpr bool operator ()(const int& a, const int& b) const
+    //     {
+    //         return a < b;
+    //     }
+    // };
+    // 
+    // std::map<int, std::string, intless> testmap;
+    // for (int i = 0; i < 10000000; i++)
+    // {
+    //     testmap.insert(std::make_pair(i, "123456789"));
+    // }
+    // usetime = GetNow() - usetime;
+    // printf("map insert 10000 times use time %llu \n", usetime);
+    // 
+    // usetime = GetNow();
+    // for (int i = 0; i < 10000000; i++)
+    // {
+    //     testmap.find(i);
+    // }
+    // 
+    // usetime = GetNow() - usetime;
+    // printf("map search 10000 times use time %llu \n", usetime);
 
 
 
