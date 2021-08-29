@@ -652,6 +652,12 @@ inline static void _DeleteNode(TreeNode* node, bool remove_data)
     return;
 }
 
+
+inline static bool HasChildren(TreeNode* node)
+{
+    return node->left_ || node->right_;
+}
+
 void DeleteNode(RbTree* rbtree, PAIR* keypair)
 {
     TreeNode* tar = __Find(rbtree->root_, keypair);
@@ -662,8 +668,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
     TreeNode* parent = NULL;
     TreeNode* sibling = NULL;
     TreeNode* pp = NULL;
-    bool left = true;       // 向左找替代节点
-    bool right = true;      // 向右找替代节点
+    int direction = rb_left;
 
     // 先释放掉这个被删除节点的数据
     if (tar)
@@ -671,125 +676,186 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
         free(tar->data);
         tar->data = NULL;
     }
-
-    while (tar)
-    {
-        ltree = tar->left_;
-        rtree = tar->right_;
-        parent = tar->parent_;
-        sibling = SiblingNode(tar);
-
-        if (!ltree && !rtree)
-        {
-            if (parent == NULL)
-            {
-                _DeleteNode(tar, false);
-                break;
-            }
-
-            if (IsRed(tar))
-            {
-                _DeleteNode(tar, false);
-            }
-            else
-            {// 黑色，且父节点存在，那么它一定有兄弟节点
-                pp = parent->parent_;
-
-                if (IsLeftChild(tar))
-                {
-                    // leftrotate(tar->parent)
-                    parent->right_ = sibling->left_;
-                    if (parent->right_)
-                    {
-                        parent->right_->parent_ = parent;
-                        parent->right_->color_ = rb_red;
-                    }
-
-                    sibling->left_ = parent;
-                    sibling->left_->parent_ = sibling;
-                    if (sibling->color_ == rb_black &&
-                        sibling->right_)
-                        sibling->right_->color_ = rb_black;
-                }
-                else
-                {
-                    parent->left_ = sibling->right_;
-                    if (parent->left_)
-                    {
-                        parent->left_->parent_ = parent;
-                        parent->left_->color_ = rb_red;
-                    }
-                    sibling->right_ = parent;
-                    sibling->right_->parent_ = sibling;
-                    if (sibling->color_ == rb_black &&
-                        sibling->left_)
-                        sibling->left_->color_ = rb_black;
-                }
-
-                sibling->color_ = parent->color_;
-                parent->color_ = rb_black;
-                _DeleteNode(tar, false);
-
-                sibling->parent_ = pp;
-                if (!pp)
-                    rbtree->root_ = sibling;
-                else if (parent == pp->left_)
-                    pp->left_ = sibling;
-                else
-                    pp->right_ = sibling;
-
-                // 处理一下黑黑黑删除后，剩两黑的情况
-                if (parent->color_ == sibling->color_
-                    && !SiblingNode(parent))
-                    parent->color_ = rb_red;
-            }
-            break;
-        }
-
-        // 如果仅有一个孩子节点，tar一定是黑色的。红色节点要么有两个孩子，要么一个都没有
-        if (!ltree || !rtree)
-        {
-            TreeNode* child = ltree;
-            if (!child)
-                child = rtree;
-
-            child->parent_ = parent;
-            if (!parent)
-                rbtree->root_ = child;
-            else
-            {
-                if (IsLeftChild(tar)) {
-                    child->parent_->left_ = child;
-                }
-                else
-                    child->parent_->right_ = child;
-            }
-            
-            child->color_ = rb_black;
-            _DeleteNode(tar, false);
-            break;
-        }
-
-        // 如果不是叶子节点
-        while (ltree && rtree)
-        {
-            if (ltree) {
-                del_node = ltree;
-                ltree = ltree->right_;
-            }
-            if (rtree) {
-                del_node = rtree;
-                rtree = rtree->left_;
-            }
-        }
-
-        //memcpy(tar->data, del_node->data, rbtree->type_len_);
-        tar->data = del_node->data;
-        tar = del_node;
+    else {
+        return;
     }
-
     rbtree->count_--;
 
+    ltree = tar->left_;
+    rtree = tar->right_;
+
+    while (ltree || rtree)
+    {
+        if (ltree) {
+            del_node = ltree;
+            ltree = ltree->right_;
+        }
+        if (rtree) {
+            del_node = rtree;
+            rtree = rtree->left_;
+        }
+    }
+
+    if (del_node) 
+    {
+        tar->data = del_node->data;
+        del_node->data = NULL;
+        tar = del_node;
+    }
+    else {
+        del_node = tar;
+    }
+
+    if (IsRed(tar) || !tar->parent_)
+    {
+        _DeleteNode(tar, true);
+        return;
+    }
+
+    while (tar->parent_)
+    {
+        pp = parent->parent_;
+        direction = (pp && pp->left_ == parent ? rb_left : rb_right);
+        sibling = SiblingNode(tar);
+        if (IsRed(sibling))
+        {
+            if (IsLeftChild(tar))
+            {
+                parent->right_ = sibling->left_;
+                sibling->left_ = parent;
+                if (parent->right_) parent->right_->parent_ = parent;
+                sibling->left_->parent_ = sibling;
+            }
+            else {
+                parent->left_ = sibling->right_;
+                sibling->right_ = parent;
+                if (parent->left_) parent->left_->parent_ = parent;
+                sibling->right_->parent_ = sibling;
+            }
+            RelinkParent(pp, direction, sibling);
+            parent->color_ = rb_red;
+            sibling->color_ = rb_black;
+            // 下一次tar的sibling一定是黑色
+            continue;
+        }
+        if ((sibling->left_ && IsRed(sibling->left_)) ||
+            (sibling->right_ && IsRed(sibling->right_))
+            )
+        {
+            TreeNode* rnode = NULL;
+            if (IsLeftChild(tar))
+            {
+                if (sibling->right_ && IsRed(sibling->right_))
+                {
+                    // 把sibling的右红色节点偏转到左边
+                    parent->right_ = sibling->right_;
+                    sibling->right_ = sibling->right_->left_;
+                    parent->right_->left_ = sibling;
+                    if (sibling->right_) sibling->right_->parent_ = sibling;
+                    parent->right_->left_->parent_ = parent->right_;
+                    
+                    // 设置sibling
+                    sibling = parent->right_;
+                    sibling->left_->color_ = rb_red;
+                    sibling->color_ = rb_black;
+                }
+                // 将sibling的左红色节点去替代parent做左旋转
+                rnode = sibling->left_;
+                parent->right_ = rnode->left_;
+                sibling->left_ = rnode->right_;
+                rnode->left_ = parent;
+                rnode->right_ = sibling;
+                if (parent->right_) parent->right_->parent_ = parent;
+                if (sibling->left_) sibling->left_->parent_ = sibling;
+                rnode->left_->parent_ = rnode;
+                rnode->right_->parent_ = rnode;
+            }
+            else
+            {
+                if (sibling->left_ && IsRed(sibling->left_))
+                {
+                    // 把sibling的左红色节点偏转到右边
+                    parent->left_ = sibling->left_;
+                    sibling->left_ = sibling->left_->right_;
+                    parent->left_->right_ = sibling;
+                    if (sibling->left_) sibling->left_->parent_ = sibling;
+                    parent->left_->right_->parent_ = parent->left_;
+
+                    // 设置sibling
+                    sibling = parent->left_;
+                    sibling->right_->color_ = rb_red;
+                    sibling->color_ = rb_black;
+                }
+                // 将sibling的右红色节点去替代parent做右旋转
+                rnode = sibling->right_;
+                parent->left_ = rnode->right_;
+                sibling->right_ = rnode->left_;
+                rnode->right_ = parent;
+                rnode->left_ = sibling;
+                if (parent->left_) parent->left_->parent_ = parent;
+                if (sibling->right_) sibling->right_->parent_ = sibling;
+                rnode->right_->parent_ = rnode;
+                rnode->left_->parent_ = rnode;
+            }
+            
+            int origin_color = parent->color_;
+            parent->color_ = rb_black;
+            rnode->color_ = rb_red;
+            RelinkParent(pp, direction, rnode);
+
+            tar = rnode;
+            if (origin_color == rb_black) {
+                continue;
+            }
+            break;
+        }
+        if (IsRed(tar->parent_))
+        {
+            tar->parent_->color_ = rb_black;
+            sibling->color_ = rb_red;
+            break;
+        }
+
+        if (IsLeftChild(tar))
+            direction = rb_left;
+        else
+            direction = rb_right;
+        sibling->color_ = rb_red;
+        tar = tar->parent_;
+    }
+
+    if (tar->parent_->parent_)
+    {
+        // completed
+    }
+    else
+    {
+        // tar->parent == root, tar的兄弟节点，兄弟节点的孩子节点都是黑色
+        if (direction == rb_left)
+        {
+            rbtree->root_ = rbtree->root_->right_;
+            
+            tar->right_ = rbtree->root_->left_;
+            rbtree->root_->left_ = tar;
+            if (tar->right_) tar->right_->parent_ = tar;
+            tar->parent_ = rbtree->root_;
+        }
+        else
+        {
+            rbtree->root_ = rbtree->root_->left_;
+
+            tar->left_ = rbtree->root_->right_;
+            rbtree->root_->right_ = tar;
+            if (tar->left_) tar->left_->parent_ = tar;
+            tar->parent_ = rbtree->root_;
+        }
+
+        tar->color_ = rb_red;
+        rbtree->root_->color_ = rb_black;
+        rbtree->root_->parent_ = NULL;
+    }
+
+    _DeleteNode(del_node, true);
     return;
 }
 
@@ -816,7 +882,8 @@ void WalkTreeAsLevel(RbTree* tree)
     g_array[next] = 0;
     while (g_array[cursor] != 0)
     {
-        printf("<%p, %p> ", g_array[cursor]->data, g_array[cursor]->data);
+        int key = *(int*)g_array[cursor]->data;
+        printf("<%d, %s> ", key, g_array[cursor]->color_ == rb_red ? "red" : "black");
 
         if (g_array[cursor]->left_) {
             g_array[queue_tail] = g_array[cursor]->left_;

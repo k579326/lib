@@ -46,6 +46,8 @@ int main()
     {
         pair.key = i;
         DeleteNode(map, &pair);
+
+        WalkTreeAsLevel(map);
     }
     WalkTreeAsLevel(map);
 
