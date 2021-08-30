@@ -45,11 +45,16 @@ typedef struct _RBTree
     if ((parent))                             \
     {                                       \
         if ((direction) == rb_left)           \
-            (parent)->left_ = (newnode);        \
-        else                                \
-            (parent)->right_ = (newnode);       \
-    }                                       \
-    (newnode)->parent_ = (parent);              \
+            (parent)->left_ = (newnode);      \
+        else                                  \
+            (parent)->right_ = (newnode);     \
+    }                                         \
+    else                                      \
+    {                                         \
+        (newnode)->tree_->root_ = (newnode);  \
+        (newnode)->color_ = rb_black;         \
+    }                                         \
+    (newnode)->parent_ = (parent);            \
 } 
 
 
@@ -714,6 +719,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
 
     while (tar->parent_)
     {
+        parent = tar->parent_;
         pp = parent->parent_;
         direction = (pp && pp->left_ == parent ? rb_left : rb_right);
         sibling = SiblingNode(tar);
@@ -816,43 +822,8 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
             break;
         }
 
-        if (IsLeftChild(tar))
-            direction = rb_left;
-        else
-            direction = rb_right;
         sibling->color_ = rb_red;
         tar = tar->parent_;
-    }
-
-    if (tar->parent_->parent_)
-    {
-        // completed
-    }
-    else
-    {
-        // tar->parent == root, tar的兄弟节点，兄弟节点的孩子节点都是黑色
-        if (direction == rb_left)
-        {
-            rbtree->root_ = rbtree->root_->right_;
-            
-            tar->right_ = rbtree->root_->left_;
-            rbtree->root_->left_ = tar;
-            if (tar->right_) tar->right_->parent_ = tar;
-            tar->parent_ = rbtree->root_;
-        }
-        else
-        {
-            rbtree->root_ = rbtree->root_->left_;
-
-            tar->left_ = rbtree->root_->right_;
-            rbtree->root_->right_ = tar;
-            if (tar->left_) tar->left_->parent_ = tar;
-            tar->parent_ = rbtree->root_;
-        }
-
-        tar->color_ = rb_red;
-        rbtree->root_->color_ = rb_black;
-        rbtree->root_->parent_ = NULL;
     }
 
     _DeleteNode(del_node, true);
