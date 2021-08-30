@@ -32,22 +32,22 @@ int main()
     MyPair pair;
     int64_t usetime;
     usetime = GetNow();
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 60; i++)
     {
-        pair.key = i;
+        pair.key = rand();
         InsertNode(map, &pair);
     }
     usetime = GetNow() - usetime;
     printf("rbtree insert 10000 times use time %lld \n", usetime);
 
-    WalkTreeAsLevel(map);
+    assert(regular_2(map));
+    // WalkTreeAsLevel(map);
     
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1000000; i++)
     {
-        pair.key = i;
+        pair.key = rand();
         DeleteNode(map, &pair);
-
-        WalkTreeAsLevel(map);
+        // WalkTreeAsLevel(map);
     }
     WalkTreeAsLevel(map);
 

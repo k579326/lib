@@ -665,7 +665,7 @@ inline static bool HasChildren(TreeNode* node)
 
 void DeleteNode(RbTree* rbtree, PAIR* keypair)
 {
-    TreeNode* tar = __Find(rbtree->root_, keypair);
+    TreeNode* tar = NULL;
     TreeNode* del_node = NULL;
 
     TreeNode* ltree = NULL;
@@ -674,6 +674,15 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
     TreeNode* sibling = NULL;
     TreeNode* pp = NULL;
     int direction = rb_left;
+
+    if (!rbtree->count_) {
+        return;
+    }
+    else if (!rbtree->root_){
+        assert(false);
+        return;
+    }
+    tar = __Find(rbtree->root_, keypair);
 
     // 先释放掉这个被删除节点的数据
     if (tar)
@@ -711,7 +720,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
         del_node = tar;
     }
 
-    if (IsRed(tar) || !tar->parent_)
+    if (IsRed(tar))
     {
         _DeleteNode(tar, true);
         return;
@@ -827,6 +836,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
     }
 
     _DeleteNode(del_node, true);
+    assert(regular_2(rbtree));
     return;
 }
 
@@ -876,6 +886,61 @@ void WalkTreeAsLevel(RbTree* tree)
     return;
 }
 
+
+bool regular_1(const RbTree* tree)
+{
+    if (!tree->root_)
+        return true;
+    return tree->root_->color_ == rb_black;
+}
+
+
+static bool output_high(const TreeNode* tree, int height, int count)
+{
+    bool rst = true;
+
+    if (!tree)
+        return;
+    if (tree->color_ == rb_black)
+        count++;
+
+    if (!tree->left_ && !tree->right_)
+    {
+        return count == height;
+    }
+    if (tree->left_)
+        rst = output_high(tree->left_, height, count);
+    if (!rst)
+        return false;
+
+    if (tree->right_)
+        rst = output_high(tree->right_, height, count);
+    return rst;
+}
+
+// is balance
+bool regular_2(const RbTree* tree)
+{
+    TreeNode* next = 0;
+    int height = 0, count = 0;
+    if (!tree)
+        return true;
+
+    next = tree->root_;
+    while (next) {
+        if (next->color_ == rb_black)
+            height++;
+        next = next->left_;
+    }
+
+    return output_high(tree->root_, height, count);
+}
+
+
+bool test_tree(const RbTree* tree)
+{
+
+}
 
 
 
