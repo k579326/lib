@@ -20,7 +20,11 @@ TreeNode*   InsertNode(RbTree* rbtree, PAIR* pair);
 PAIR*       Find(RbTree* rbtree, PAIR* keypair);
 void        DeleteNode(RbTree* rbtree, PAIR* keypair);
 
+// is balance
 bool regular_2(const RbTree* tree);
+// check whether node num is correct
+bool regular_3(const RbTree* tree);
+
 void WalkTreeAsLevel(RbTree* tree);
 
 #ifdef __cplusplus

@@ -720,6 +720,20 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
         del_node = tar;
     }
 
+    // 如果tar还存在孩子节点（最多一个，而且一定是红色）
+    if (tar->left_) {
+        tar->data = tar->left_->data;
+        tar->left_->data = NULL;
+        tar = tar->left_;
+        del_node = tar;
+    }
+    else if (tar->right_) {
+        tar->data = tar->right_->data;
+        tar->right_->data = NULL;
+        tar = tar->right_;
+        del_node = tar;
+    }
+
     if (IsRed(tar))
     {
         _DeleteNode(tar, true);
@@ -861,6 +875,8 @@ void WalkTreeAsLevel(RbTree* tree)
     int queue_tail = cursor + 2;
     g_array[cursor] = tree->root_;
     g_array[next] = 0;
+
+    printf("\n\n");
     while (g_array[cursor] != 0)
     {
         int key = *(int*)g_array[cursor]->data;
@@ -936,6 +952,25 @@ bool regular_2(const RbTree* tree)
     return output_high(tree->root_, height, count);
 }
 
+
+static int calc_node_sum(TreeNode* root)
+{
+    int leftsum = 0, rightsum = 0;
+    if (!root)
+        return 0;
+    leftsum = calc_node_sum(root->left_);
+    rightsum = calc_node_sum(root->right_);
+
+    return leftsum + rightsum + 1;
+}
+// check node sum
+bool regular_3(const RbTree* tree)
+{
+    if (!tree)
+        return true;
+
+    return tree->count_ == calc_node_sum(tree->root_);
+}
 
 bool test_tree(const RbTree* tree)
 {
