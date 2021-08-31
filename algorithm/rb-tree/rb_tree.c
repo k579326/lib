@@ -10,12 +10,13 @@
 
 typedef struct _treenode
 {
+    void*             data;     // 放在第一个位置，方便遍历查找时返回
+
     struct _treenode* parent_;
     struct _treenode* left_;
     struct _treenode* right_;
     char              color_;       // true: red, false: black
-    struct _RBTree*   tree_;
-    void*             data;
+    // struct _RBTree*   tree_;
 }TreeNode;
 
 typedef struct _RBTree
@@ -40,22 +41,22 @@ typedef struct _RBTree
 // 否则即使inline在debug模式也无效
 #define IsRed(node) ((node)->color_ == rb_red)
 #define IsBlack(node) ((node)->color_ == rb_black)
-#define RelinkParent(parent, direction, newnode)    \
-{                    \
-    if ((parent))                             \
-    {                                       \
-        if ((direction) == rb_left)           \
-            (parent)->left_ = (newnode);      \
-        else                                  \
-            (parent)->right_ = (newnode);     \
-    }                                         \
-    else                                      \
-    {                                         \
-        (newnode)->tree_->root_ = (newnode);  \
-        (newnode)->color_ = rb_black;         \
-    }                                         \
-    (newnode)->parent_ = (parent);            \
-} 
+// #define RelinkParent(parent, direction, newnode)    \
+// {                    \
+//     if ((parent))                             \
+//     {                                       \
+//         if ((direction) == rb_left)           \
+//             (parent)->left_ = (newnode);      \
+//         else                                  \
+//             (parent)->right_ = (newnode);     \
+//     }                                         \
+//     else                                      \
+//     {                                         \
+//         (newnode)->tree_->root_ = (newnode);  \
+//         (newnode)->color_ = rb_black;         \
+//     }                                         \
+//     (newnode)->parent_ = (parent);            \
+// } 
 
 
 RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp)
@@ -73,11 +74,9 @@ RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp)
 }
 
 
-TreeNode* __Find(TreeNode* node, PAIR* keypair)
+TreeNode* __Find(TreeNode* node, PAIR* keypair, TypeLess less)
 {
     TreeNode* p_node = node;
-    RbTree* tree = node->tree_;
-    TypeLess less = tree->less_;
     while (p_node)
     {
         if (less(keypair, p_node->data))
@@ -101,53 +100,18 @@ PAIR* Find(RbTree* rbtree, PAIR* keypair)
     //if (rbtree->less_(rbtree->max_->data, keypair))
     //    return NULL;
 
-    node = __Find(rbtree->root_, keypair);
-    return node ? node->data : NULL;
+    node = __Find(rbtree->root_, keypair, rbtree->less_);
+    return node ? (PAIR*)node : NULL;
 }
 
-
-
-TreeNode* LastLessOrEnd(TreeNode* node, PAIR* pair, bool* equal)
+inline static const TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, TypeLess less, bool* equal)
 {
-    // rbtree不能为空，以此确保该函数必返回一个节点
-    assert(node);
-
-    if (!node->tree_->less_(node->data, pair)) {
-        if (!node->tree_->less_(pair, node->data))
-        {
-            *equal = true;
-        }
-
-        TreeNode* leftnode = node->left_;
-        if (!leftnode) {
-            return node;  // 返回边界节点
-        }
-        return LastLessOrEnd(node->left_, pair, equal);
-    }
-    else
-    {
-        TreeNode* rightnode = node->right_;
-        if (!rightnode)
-        {
-            return node;
-        }
-        return LastLessOrEnd(rightnode, pair, equal);
-    }
-
-    // never to this
-    return NULL;
-}
-
-
-inline static const TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, bool* equal)
-{
-    TypeLess less_func = node->tree_->less_;
     const TreeNode* nextnode = node;
     while (nextnode)
     {
-        if (!less_func(pair, nextnode->data))
+        if (!less(pair, nextnode->data))
         {
-            if (!less_func(nextnode->data, pair))
+            if (!less(nextnode->data, pair))
             {
                 *equal = true;
                 break;
@@ -169,48 +133,6 @@ inline static const TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* 
     return nextnode;
 }
 
-TreeNode* FirstLargeOrEnd(TreeNode* node, PAIR* pair, bool* equal)
-{
-    // rbtree不能为空，以此确保该函数必返回一个节点
-    assert(node);
-
-    if (!node->tree_->less_(pair, node->data))
-    {
-        if (!node->tree_->less_(node->data, pair))
-        {
-            *equal = true;
-        }
-
-        TreeNode* rightnode = node->right_;
-        if (!rightnode)
-        {
-            return node;  // 返回边界节点
-        }
-        return FirstLargeOrEnd(rightnode, pair, equal);
-    }
-    else
-    {
-        TreeNode* leftnode = node->left_;
-        if (!leftnode) {
-            return node;
-        }
-        return FirstLargeOrEnd(node->left_, pair, equal);
-    }
-    // never to this
-    return NULL;
-}
-
-
-inline static bool NodeLess(const TreeNode* l, const TreeNode* r)
-{
-    return l->tree_->less_(l->data, r->data);
-}
-
-inline static bool NodeEqual(const TreeNode* l, const TreeNode* r)
-{
-    TypeLess less = l->tree_->less_;
-    return !less(l->data, r->data) && !less(r->data, l->data);
-}
 
 inline static TreeNode* CreateNewNode(RbTree* tree)
 {
@@ -221,7 +143,7 @@ inline static TreeNode* CreateNewNode(RbTree* tree)
     memset(newnode, 0, sizeof(TreeNode));
     newnode->color_ = rb_red;
     newnode->data = malloc(tree->type_len_);
-    newnode->tree_ = tree;
+    // newnode->tree_ = tree;
     return newnode;
 }
 
@@ -289,7 +211,6 @@ inline static bool Is3Node(const TreeNode* tarnode, const TreeNode* newnode)
 
 
 // 重新链接阶段调整后的子树的父节点
-/*
 inline static void RelinkParent(TreeNode* parent, int direction, TreeNode* newnode)
 {
     if (parent)
@@ -301,7 +222,7 @@ inline static void RelinkParent(TreeNode* parent, int direction, TreeNode* newno
     }
     newnode->parent_ = parent;
     return;
-}*/
+}
 
 
 inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
@@ -335,7 +256,7 @@ inline static TreeNode* Insert2Node(TreeNode* tarnode, TreeNode* newnode)
 inline static TreeNode* __Insert3NodeFromLeft(TreeNode* rednode, TreeNode* newnode)
 {
     TreeNode* parent = rednode->parent_;
-    if (NodeLess(newnode, rednode))
+    if (newnode == rednode->left_)
     {
         rednode->left_ = newnode;
         parent->left_ = rednode->right_;
@@ -379,7 +300,7 @@ inline static TreeNode* __Insert3NodeFromLeft(TreeNode* rednode, TreeNode* newno
 inline static TreeNode* __Insert3NodeFromRight(TreeNode* rednode, TreeNode* newnode)
 {
     TreeNode* parent = rednode->parent_;
-    if (NodeLess(newnode, rednode))
+    if (newnode == rednode->left_)
     {
         parent->right_ = newnode->left_;
         rednode->left_ = newnode->right_;
@@ -557,36 +478,22 @@ inline static TreeNode* Makebalance(TreeNode* newnode)
 
 inline static void UpdateTree(RbTree* rbtree, TreeNode* root, TreeNode* newnode)
 {
-    newnode->tree_ = rbtree;
+    // newnode->tree_ = rbtree;
     rbtree->count_++;
     if (root)
         rbtree->root_ = root;
-    //if (!rbtree->min_ || NodeLess(newnode, rbtree->min_))
-    //    rbtree->min_ = newnode;
-    //if (!rbtree->max_ || NodeLess(rbtree->max_, newnode))
-    //    rbtree->max_ = newnode;
     
     return;
 }
 
 inline static TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool* equal)
 {
-    TreeNode* node = NULL;
-    bool flag_equal = false;
-    TypeLess less = tree->less_;
     *equal = false;
-
-    //if (less(pair, tree->min_->data))
-    //    return tree->min_;
-    //
-    //if (less(tree->max_->data, pair))
-    //    return tree->max_;
-
-    return (TreeNode*)__FindInsertPos(tree->root_, pair, equal);
+    return (TreeNode*)__FindInsertPos(tree->root_, pair, tree->less_, equal);
 }
 
 
-TreeNode* InsertNode(RbTree* rbtree, PAIR* pair)
+PAIR* InsertNode(RbTree* rbtree, PAIR* pair)
 {
     TreeNode* insert_pos = NULL;
     TreeNode* new_node = NULL;
@@ -600,7 +507,7 @@ TreeNode* InsertNode(RbTree* rbtree, PAIR* pair)
         memcpy(new_node->data, pair, rbtree->type_len_);
         new_node->color_ = rb_black;
         UpdateTree(rbtree, new_node, new_node);
-        return new_node;
+        return (PAIR*)new_node;
     }
 
     /* 思路错了？ 应该优先往叶子节点上插入？
@@ -612,13 +519,13 @@ TreeNode* InsertNode(RbTree* rbtree, PAIR* pair)
 
     // 获取过程中发现与pair相等的节点
     if (flag_equal)
-        return insert_pos;
+        return (PAIR*)insert_pos;
 
     new_node = CreateNewNode(rbtree);
     memcpy(new_node->data, pair, rbtree->type_len_);
 
     // 先给它接上去
-    if (NodeLess(new_node, insert_pos))
+    if (rbtree->less_(new_node->data, insert_pos->data))
         insert_pos->left_ = new_node;
     else
         insert_pos->right_ = new_node;
@@ -630,18 +537,18 @@ TreeNode* InsertNode(RbTree* rbtree, PAIR* pair)
         finalchange->parent_ == NULL ? finalchange : NULL, 
         new_node);
 
-    return new_node;
+    return (PAIR*)new_node;
 }
 
 
-inline static void _DeleteNode(TreeNode* node, bool remove_data)
+inline static void _DeleteNode(RbTree* tree, TreeNode* node, bool remove_data)
 {
     TreeNode* parent = node->parent_;
     if (!parent)
     {
-        node->tree_->root_ = NULL;
-        node->tree_->max_ = NULL;
-        node->tree_->min_ = NULL;
+        tree->root_ = NULL;
+        tree->max_ = NULL;
+        tree->min_ = NULL;
     }
     else
     {
@@ -663,7 +570,7 @@ inline static bool HasChildren(TreeNode* node)
     return node->left_ || node->right_;
 }
 
-void DeleteNode(RbTree* rbtree, PAIR* keypair)
+PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
 {
     TreeNode* tar = NULL;
     TreeNode* del_node = NULL;
@@ -676,28 +583,25 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
     int direction = rb_left;
 
     if (!rbtree->count_) {
-        return;
+        return NULL;
     }
-    else if (!rbtree->root_){
-        assert(false);
-        return;
-    }
-    tar = __Find(rbtree->root_, keypair);
 
-    // 先释放掉这个被删除节点的数据
+    tar = __Find(rbtree->root_, keypair, rbtree->less_);
     if (tar)
     {
+        // 先释放掉这个被删除节点的数据
         free(tar->data);
         tar->data = NULL;
     }
     else {
-        return;
+        return NULL;
     }
     rbtree->count_--;
 
     ltree = tar->left_;
     rtree = tar->right_;
 
+    // 找被删除节点的替代节点
     while (ltree || rtree)
     {
         if (ltree) {
@@ -721,6 +625,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
     }
 
     // 如果tar还存在孩子节点（最多一个，而且一定是红色）
+    // 直接替换，然后这个孩子会被删除
     if (tar->left_) {
         tar->data = tar->left_->data;
         tar->left_->data = NULL;
@@ -736,7 +641,7 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
 
     if (IsRed(tar))
     {
-        _DeleteNode(tar, true);
+        _DeleteNode(rbtree, tar, true);
         return;
     }
 
@@ -761,7 +666,13 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
                 if (parent->left_) parent->left_->parent_ = parent;
                 sibling->right_->parent_ = sibling;
             }
-            RelinkParent(pp, direction, sibling);
+            if (pp)
+                RelinkParent(pp, direction, sibling);
+            else
+            {
+                rbtree->root_ = sibling;
+                sibling->color_ = rb_black;
+            }
             parent->color_ = rb_red;
             sibling->color_ = rb_black;
             // 下一次tar的sibling一定是黑色
@@ -830,7 +741,13 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
             int origin_color = parent->color_;
             parent->color_ = rb_black;
             rnode->color_ = rb_red;
-            RelinkParent(pp, direction, rnode);
+            if (pp)
+                RelinkParent(pp, direction, rnode);
+            else
+            {
+                rbtree->root_ = sibling;
+                sibling->color_ = rb_black;
+            }
 
             tar = rnode;
             if (origin_color == rb_black) {
@@ -849,11 +766,9 @@ void DeleteNode(RbTree* rbtree, PAIR* keypair)
         tar = tar->parent_;
     }
 
-    _DeleteNode(del_node, true);
-    assert(regular_2(rbtree));
+    _DeleteNode(rbtree, del_node, true);
     return;
 }
-
 
 
 
@@ -935,7 +850,7 @@ static bool output_high(const TreeNode* tree, int height, int count)
 }
 
 // is balance
-bool regular_2(const RbTree* tree)
+bool CheckBalance(const RbTree* tree)
 {
     TreeNode* next = 0;
     int height = 0, count = 0;
@@ -964,7 +879,7 @@ static int calc_node_sum(TreeNode* root)
     return leftsum + rightsum + 1;
 }
 // check node sum
-bool regular_3(const RbTree* tree)
+bool CheckNodeSum(const RbTree* tree)
 {
     if (!tree)
         return true;

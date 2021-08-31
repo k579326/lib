@@ -36,20 +36,16 @@ int main()
     {
         pair.key = rand();
         InsertNode(map, &pair);
-        // assert(regular_3(map));
     }
     usetime = GetNow() - usetime;
     printf("rbtree insert 10000 times use time %lld \n", usetime);
 
-    // assert(regular_2(map));
-    // WalkTreeAsLevel(map);
-    
     for (int i = 0; i < 1000000; i++)
     {
         pair.key = rand();
         DeleteNode(map, &pair);
         // WalkTreeAsLevel(map);
-        // assert(regular_3(map));
+        assert(CheckNodeSum(map));
         // WalkTreeAsLevel(map);
     }
 

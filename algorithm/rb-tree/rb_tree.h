@@ -13,17 +13,27 @@ typedef struct _treenode TreeNode;
 typedef struct _RBTree RbTree;
 typedef void   PAIR;
 
+typedef struct _Iterator
+{
+    TreeNode*   node_;
+    PAIR*       data_;
+}*Iterator;
+
+
 typedef bool(*TypeLess)(const PAIR*, const PAIR*);
 
-RbTree*     CreateRbTree(uint16_t typelen, TypeLess cmp);
-TreeNode*   InsertNode(RbTree* rbtree, PAIR* pair);
-PAIR*       Find(RbTree* rbtree, PAIR* keypair);
-void        DeleteNode(RbTree* rbtree, PAIR* keypair);
+RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp);
+PAIR*   InsertNode(RbTree* rbtree, PAIR* pair);
+PAIR*   Find(RbTree* rbtree, PAIR* keypair);
+PAIR*   DeleteNode(RbTree* rbtree, PAIR* keypair);
+
+const Iterator GetFirst(const RbTree* rbtree);
+const Iterator GetNext(Iterator );
 
 // is balance
-bool regular_2(const RbTree* tree);
+bool CheckBalance(const RbTree* tree);
 // check whether node num is correct
-bool regular_3(const RbTree* tree);
+bool CheckNodeSum(const RbTree* tree);
 
 void WalkTreeAsLevel(RbTree* tree);
 
