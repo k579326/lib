@@ -32,57 +32,72 @@ int main()
     MyPair pair;
     int64_t usetime;
     usetime = GetNow();
-    for (int i = 0; i < 100000; i++)
+    for (int i = 0; i < 1000000; i++)
     {
         pair.key = rand();
         InsertNode(map, &pair);
     }
     usetime = GetNow() - usetime;
-    printf("rbtree insert 10000 times use time %lld \n", usetime);
+    printf("rbtree insert 1000000 times use time %lld \n", usetime);
 
+    assert(CheckBalance(map));
+    assert(CheckNodeSum(map));
+
+    usetime = GetNow();
+    Node* node = GetFirst(map);
     for (int i = 0; i < 1000000; i++)
     {
-        pair.key = rand();
-        DeleteNode(map, &pair);
-        // WalkTreeAsLevel(map);
-        assert(CheckNodeSum(map));
-        // WalkTreeAsLevel(map);
+        if (!node)
+            break;
+        node = DeleteNode(map, node);
+        // assert(!next || next->key > pair.key);
+        // assert(CheckNodeSum(map));
     }
-
-    //usetime = GetNow();
-    //for (int i = 0; i < 10000000; i++)
-    //{
-    //    pair.key = i;
-    //    Find(map, &pair);
-    //}
-    //usetime = GetNow() - usetime;
-    //printf("rbtree search 10000 times use time %llu \n", usetime);
-    WalkTreeAsLevel(map);
+    usetime = GetNow() - usetime;
+    printf("rbtree delete 1000000 times use time %llu \n", usetime);
 
     // usetime = GetNow();
-    // struct intless {
-    //     constexpr bool operator ()(const int& a, const int& b) const
-    //     {
-    //         return a < b;
-    //     }
-    // };
-    // 
-    // std::map<int, std::string, intless> testmap;
     // for (int i = 0; i < 10000000; i++)
     // {
-    //     testmap.insert(std::make_pair(i, "123456789"));
+    //     pair.key = i;
+    //     Find(map, &pair);
     // }
     // usetime = GetNow() - usetime;
-    // printf("map insert 10000 times use time %llu \n", usetime);
-    // 
+    // printf("rbtree search 10000 times use time %llu \n", usetime);
+    // WalkTreeAsLevel(map);
+
+    usetime = GetNow();
+    struct intless {
+        constexpr bool operator ()(const int& a, const int& b) const
+        {
+            return a < b;
+        }
+    };
+    
+    std::map<int, std::string, intless> testmap;
+    for (int i = 0; i < 1000000; i++)
+    {
+        testmap.insert(std::make_pair(rand(), "123456789"));
+    }
+    usetime = GetNow() - usetime;
+    printf("map insert 1000000 times use time %llu \n", usetime);
+    
+    usetime = GetNow();
+    for (auto it = testmap.begin(); it != testmap.end(); )
+    {
+        it = testmap.erase(it);
+    }
+    usetime = GetNow() - usetime;
+    printf("map delete 1000000 times use time %llu \n", usetime);
+
     // usetime = GetNow();
-    // for (int i = 0; i < 10000000; i++)
+    // for (int i = 0; i < 1000000; i++)
     // {
     //     testmap.find(i);
     // }
     // 
     // usetime = GetNow() - usetime;
-    // printf("map search 10000 times use time %llu \n", usetime);
+    // printf("map search 1000000 times use time %llu \n", usetime);
 
 
 

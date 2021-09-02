@@ -9,26 +9,22 @@
 extern "C" {
 #endif
 
-typedef struct _treenode TreeNode;
-typedef struct _RBTree RbTree;
 typedef void   PAIR;
-
-typedef struct _Iterator
+typedef struct _node
 {
-    TreeNode*   node_;
-    PAIR*       data_;
-}*Iterator;
-
+    PAIR* data;
+}Node;
+typedef struct _RBTree RbTree;
 
 typedef bool(*TypeLess)(const PAIR*, const PAIR*);
 
 RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp);
-PAIR*   InsertNode(RbTree* rbtree, PAIR* pair);
-PAIR*   Find(RbTree* rbtree, PAIR* keypair);
-PAIR*   DeleteNode(RbTree* rbtree, PAIR* keypair);
+Node*   InsertNode(RbTree* rbtree, PAIR* pair);
+Node*   Find(RbTree* rbtree, PAIR* keypair);
+Node*   DeleteNode(RbTree* rbtree, Node* keypair);
 
-const Iterator GetFirst(const RbTree* rbtree);
-const Iterator GetNext(Iterator );
+Node* GetFirst(const RbTree* rbtree);
+Node* GetNext(Node* node);
 
 // is balance
 bool CheckBalance(const RbTree* tree);

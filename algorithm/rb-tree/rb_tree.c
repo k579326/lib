@@ -90,7 +90,7 @@ TreeNode* __Find(TreeNode* node, PAIR* keypair, TypeLess less)
 }
 
 
-PAIR* Find(RbTree* rbtree, PAIR* keypair)
+Node* Find(RbTree* rbtree, PAIR* keypair)
 {
     TreeNode* node = NULL;
     if (!rbtree || !rbtree->root_)
@@ -101,7 +101,7 @@ PAIR* Find(RbTree* rbtree, PAIR* keypair)
     //    return NULL;
 
     node = __Find(rbtree->root_, keypair, rbtree->less_);
-    return node ? (PAIR*)node : NULL;
+    return node ? (Node*)node : NULL;
 }
 
 inline static const TreeNode* __FindInsertPos(const TreeNode* node, const PAIR* pair, TypeLess less, bool* equal)
@@ -493,7 +493,7 @@ inline static TreeNode* FindInsertPos(const RbTree* tree, const PAIR* pair, bool
 }
 
 
-PAIR* InsertNode(RbTree* rbtree, PAIR* pair)
+Node* InsertNode(RbTree* rbtree, PAIR* pair)
 {
     TreeNode* insert_pos = NULL;
     TreeNode* new_node = NULL;
@@ -507,7 +507,7 @@ PAIR* InsertNode(RbTree* rbtree, PAIR* pair)
         memcpy(new_node->data, pair, rbtree->type_len_);
         new_node->color_ = rb_black;
         UpdateTree(rbtree, new_node, new_node);
-        return (PAIR*)new_node;
+        return (Node*)new_node;
     }
 
     /* 思路错了？ 应该优先往叶子节点上插入？
@@ -519,7 +519,7 @@ PAIR* InsertNode(RbTree* rbtree, PAIR* pair)
 
     // 获取过程中发现与pair相等的节点
     if (flag_equal)
-        return (PAIR*)insert_pos;
+        return (Node*)insert_pos;
 
     new_node = CreateNewNode(rbtree);
     memcpy(new_node->data, pair, rbtree->type_len_);
@@ -537,7 +537,7 @@ PAIR* InsertNode(RbTree* rbtree, PAIR* pair)
         finalchange->parent_ == NULL ? finalchange : NULL, 
         new_node);
 
-    return (PAIR*)new_node;
+    return (Node*)new_node;
 }
 
 
@@ -564,17 +564,47 @@ inline static void _DeleteNode(RbTree* tree, TreeNode* node, bool remove_data)
     return;
 }
 
+static TreeNode* _Next(TreeNode* node)
+{
+    TreeNode* avater = node;
+    if (!node)
+        return NULL;
+    avater = node->right_;
+    while (avater)
+    {
+        if (!avater->left_)
+            break;
+        avater = avater->left_;
+    }
+    if (avater) {
+        return avater;
+    }
+
+    avater = node;
+    while (avater->parent_)
+    {
+        if (avater == avater->parent_->left_)
+        {
+            break;
+        }
+        avater = avater->parent_;
+    }
+    if (!avater->parent_)
+        return NULL;
+    
+    return avater->parent_;
+}
 
 inline static bool HasChildren(TreeNode* node)
 {
     return node->left_ || node->right_;
 }
 
-PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
+Node* DeleteNode(RbTree* rbtree, Node* node)
 {
     TreeNode* tar = NULL;
     TreeNode* del_node = NULL;
-
+    TreeNode* retnode = NULL;
     TreeNode* ltree = NULL;
     TreeNode* rtree = NULL;
     TreeNode* parent = NULL;
@@ -582,11 +612,16 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
     TreeNode* pp = NULL;
     int direction = rb_left;
 
-    if (!rbtree->count_) {
-        return NULL;
+    if (!rbtree ||
+        !rbtree->count_ ||
+        !node ||
+        !node->data
+        ) 
+    {
+        return (Node*)retnode;
     }
 
-    tar = __Find(rbtree->root_, keypair, rbtree->less_);
+    tar = __Find(rbtree->root_, node->data, rbtree->less_);
     if (tar)
     {
         // 先释放掉这个被删除节点的数据
@@ -594,7 +629,7 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
         tar->data = NULL;
     }
     else {
-        return NULL;
+        return (Node*)retnode;
     }
     rbtree->count_--;
 
@@ -610,8 +645,19 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
         }
         if (rtree) {
             del_node = rtree;
+            retnode = rtree;
             rtree = rtree->left_;
         }
+    }
+
+    // 计算返回的节点
+    if (retnode)
+    {
+        if (retnode == del_node)
+            retnode = tar;
+    }
+    else {
+        retnode = _Next(tar);
     }
 
     if (del_node) 
@@ -642,7 +688,7 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
     if (IsRed(tar))
     {
         _DeleteNode(rbtree, tar, true);
-        return;
+        return (Node*)retnode;
     }
 
     while (tar->parent_)
@@ -672,6 +718,7 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
             {
                 rbtree->root_ = sibling;
                 sibling->color_ = rb_black;
+                sibling->parent_ = NULL;
             }
             parent->color_ = rb_red;
             sibling->color_ = rb_black;
@@ -745,8 +792,9 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
                 RelinkParent(pp, direction, rnode);
             else
             {
-                rbtree->root_ = sibling;
-                sibling->color_ = rb_black;
+                rbtree->root_ = rnode;
+                rnode->color_ = rb_black;
+                rnode->parent_ = NULL;
             }
 
             tar = rnode;
@@ -767,8 +815,29 @@ PAIR* DeleteNode(RbTree* rbtree, PAIR* keypair)
     }
 
     _DeleteNode(rbtree, del_node, true);
-    return;
+    return (Node*)retnode;
 }
+
+Node* GetFirst(const RbTree* rbtree)
+{
+    TreeNode* cursor = NULL;
+    if (!rbtree)
+        return NULL;
+
+    if (!rbtree->count_)
+        return NULL;
+
+    cursor = rbtree->root_;
+    while (cursor->left_)
+        cursor = cursor->left_;
+    return (Node*)cursor;
+}
+
+Node* GetNext(Node* node)
+{
+    return (Node*)_Next((TreeNode*)node);
+}
+
 
 
 
@@ -885,11 +954,6 @@ bool CheckNodeSum(const RbTree* tree)
         return true;
 
     return tree->count_ == calc_node_sum(tree->root_);
-}
-
-bool test_tree(const RbTree* tree)
-{
-
 }
 
 
