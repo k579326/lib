@@ -564,7 +564,7 @@ inline static void _DeleteNode(RbTree* tree, TreeNode* node, bool remove_data)
     return;
 }
 
-static TreeNode* _Next(TreeNode* node)
+inline static TreeNode* _Next(TreeNode* node)
 {
     TreeNode* avater = node;
     if (!node)
@@ -594,6 +594,38 @@ static TreeNode* _Next(TreeNode* node)
     
     return avater->parent_;
 }
+
+inline static TreeNode* _Previous(TreeNode* node)
+{
+    TreeNode* avater = node;
+    if (!node)
+        return NULL;
+    avater = node->left_;
+    while (avater)
+    {
+        if (!avater->right_)
+            break;
+        avater = avater->right_;
+    }
+    if (avater) {
+        return avater;
+    }
+
+    avater = node;
+    while (avater->parent_)
+    {
+        if (avater == avater->parent_->right_)
+        {
+            break;
+        }
+        avater = avater->parent_;
+    }
+    if (!avater->parent_)
+        return NULL;
+
+    return avater->parent_;
+}
+
 
 inline static bool HasChildren(TreeNode* node)
 {
@@ -833,12 +865,29 @@ Node* GetFirst(const RbTree* rbtree)
     return (Node*)cursor;
 }
 
+Node* GetLast(const RbTree* rbtree)
+{
+    TreeNode* cursor = NULL;
+    if (!rbtree)
+        return NULL;
+    if (!rbtree->root_)
+        return NULL;
+
+    cursor = rbtree->root_;
+    while (cursor->right_)
+        cursor = cursor->right_;
+    return (Node*)cursor;
+}
+
 Node* GetNext(Node* node)
 {
     return (Node*)_Next((TreeNode*)node);
 }
 
-
+Node* GetPrevious(Node* node)
+{
+    return (Node*)_Previous((TreeNode*)node);
+}
 
 
 

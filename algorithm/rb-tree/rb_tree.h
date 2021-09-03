@@ -19,12 +19,14 @@ typedef struct _RBTree RbTree;
 typedef bool(*TypeLess)(const PAIR*, const PAIR*);
 
 RbTree* CreateRbTree(uint16_t typelen, TypeLess cmp);
-Node*   InsertNode(RbTree* rbtree, PAIR* pair);
+Node*   InsertNode(RbTree* rbtree, PAIR* keypair);
 Node*   Find(RbTree* rbtree, PAIR* keypair);
-Node*   DeleteNode(RbTree* rbtree, Node* keypair);
+Node*   DeleteNode(RbTree* rbtree, Node* node);
 
 Node* GetFirst(const RbTree* rbtree);
+Node* GetLast(const RbTree* rbtree);
 Node* GetNext(Node* node);
+Node* GetPrevious(Node* node);
 
 // is balance
 bool CheckBalance(const RbTree* tree);

@@ -32,7 +32,7 @@ int main()
     MyPair pair;
     int64_t usetime;
     usetime = GetNow();
-    for (int i = 0; i < 1000000; i++)
+    for (int i = 0; i < 32000; i++)
     {
         pair.key = rand();
         InsertNode(map, &pair);
@@ -75,7 +75,7 @@ int main()
     };
     
     std::map<int, std::string, intless> testmap;
-    for (int i = 0; i < 1000000; i++)
+    for (int i = 0; i < 32000; i++)
     {
         testmap.insert(std::make_pair(rand(), "123456789"));
     }
