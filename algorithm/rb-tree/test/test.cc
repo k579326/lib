@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <chrono>
 #include <map>
+#include <string>
 
 struct MyPair
 {
@@ -17,65 +18,86 @@ bool less(const MyPair* p1, const MyPair* p2)
     return p1->key < p2->key;
 }
 
+static int64_t GetNow()
+{
+    auto starttime = std::chrono::steady_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(starttime.time_since_epoch()).count();
+}
+
 
 int main()
 {
     RbTree* map = CreateRbTree(sizeof(MyPair), (TypeLess)less);
-
+    
     MyPair pair;
-
-    auto starttime = std::chrono::steady_clock::now();
-    for (int i = 0; i < 1000000; i++)
+    int64_t usetime;
+    usetime = GetNow();
+    for (int i = 0; i < 32000; i++)
     {
         pair.key = rand();
-        Insert(map, &pair);
+        InsertNode(map, &pair);
     }
-    auto endtime = std::chrono::steady_clock::now();
-    uint64_t usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -
-        std::chrono::duration_cast<std::chrono::microseconds>(starttime.time_since_epoch()).count();
-    printf("rbtree insert 10000 times use time %llu \n", usetime);
+    usetime = GetNow() - usetime;
+    printf("rbtree insert 1000000 times use time %lld \n", usetime);
 
+    assert(CheckBalance(map));
+    assert(CheckNodeSum(map));
 
-    starttime = std::chrono::steady_clock::now();
+    usetime = GetNow();
+    Node* node = GetFirst(map);
     for (int i = 0; i < 1000000; i++)
     {
-        pair.key = i;
-        Find(map, &pair);
+        if (!node)
+            break;
+        node = DeleteNode(map, node);
+        // assert(!next || next->key > pair.key);
+        // assert(CheckNodeSum(map));
     }
-    endtime = std::chrono::steady_clock::now();
-    usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -
-        std::chrono::duration_cast<std::chrono::microseconds>(starttime.time_since_epoch()).count();
-    printf("rbtree search 10000 times use time %llu \n", usetime);
-    //WalkTreeAsLevel(map);
+    usetime = GetNow() - usetime;
+    printf("rbtree delete 1000000 times use time %llu \n", usetime);
 
-    starttime = std::chrono::steady_clock::now();
+    // usetime = GetNow();
+    // for (int i = 0; i < 10000000; i++)
+    // {
+    //     pair.key = i;
+    //     Find(map, &pair);
+    // }
+    // usetime = GetNow() - usetime;
+    // printf("rbtree search 10000 times use time %llu \n", usetime);
+    // WalkTreeAsLevel(map);
+
+    usetime = GetNow();
     struct intless {
         constexpr bool operator ()(const int& a, const int& b) const
         {
             return a < b;
         }
     };
-
-    std::map<int, void*, intless> testmap;
-    for (int i = 0; i < 1000000; i++)
+    
+    std::map<int, std::string, intless> testmap;
+    for (int i = 0; i < 32000; i++)
     {
-        testmap.insert(std::make_pair(rand(), (void*)i));
+        testmap.insert(std::make_pair(rand(), "123456789"));
     }
-    endtime = std::chrono::steady_clock::now();
-    usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -
-        std::chrono::duration_cast<std::chrono::microseconds>(starttime.time_since_epoch()).count();
-    printf("map insert 10000 times use time %llu \n", usetime);
-
-    starttime = std::chrono::steady_clock::now();
-    for (int i = 0; i < 1000000; i++)
+    usetime = GetNow() - usetime;
+    printf("map insert 1000000 times use time %llu \n", usetime);
+    
+    usetime = GetNow();
+    for (auto it = testmap.begin(); it != testmap.end(); )
     {
-        testmap.find(i);
+        it = testmap.erase(it);
     }
+    usetime = GetNow() - usetime;
+    printf("map delete 1000000 times use time %llu \n", usetime);
 
-    endtime = std::chrono::steady_clock::now();
-    usetime = std::chrono::duration_cast<std::chrono::microseconds>(endtime.time_since_epoch()).count() -
-        std::chrono::duration_cast<std::chrono::microseconds>(starttime.time_since_epoch()).count();
-    printf("map search 10000 times use time %llu \n", usetime);
+    // usetime = GetNow();
+    // for (int i = 0; i < 1000000; i++)
+    // {
+    //     testmap.find(i);
+    // }
+    // 
+    // usetime = GetNow() - usetime;
+    // printf("map search 1000000 times use time %llu \n", usetime);
 
 
 
