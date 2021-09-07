@@ -14,20 +14,12 @@ char* AnsiToUtf8(const char* s, size_t inbytes, size_t* outbytes)
     // ANSI -> UNICODE
     wlen = MultiByteToWideChar(CP_ACP, 0, s, inbytes, NULL, 0);
     wbuf = (wchar_t*)malloc((wlen + 1) * sizeof(wchar_t));
-    if (NULL == wbuf)
-    {
-        return NULL;
-    }
     MultiByteToWideChar(CP_ACP, 0, s, inbytes, wbuf, wlen);
     wbuf[wlen] = 0;
 
     // UNICODE -> UTF8
     int ulen = WideCharToMultiByte(CP_UTF8, 0, wbuf, wlen, NULL, 0, NULL, NULL);
     utf8 = (char*)malloc((ulen + 1) * sizeof(char));
-    if (NULL == utf8)
-    {
-        return NULL;
-    }
     WideCharToMultiByte(CP_UTF8, 0, wbuf, wlen, utf8, ulen, NULL, NULL);
     utf8[ulen] = 0;
 
@@ -59,20 +51,12 @@ char* Utf8ToAnsi(const char* s, size_t inbytes, size_t* outbytes)
     // str_utf8 -> UNICODE
     wlen = MultiByteToWideChar(CP_UTF8, 0, s, inbytes, NULL, 0);
     wbuf = (wchar_t*)malloc((wlen + 1) * sizeof(wchar_t));
-    if (NULL == wbuf)
-    {
-        return NULL;
-    }
     MultiByteToWideChar(CP_UTF8, 0, s, inbytes, wbuf, wlen);
     wbuf[wlen] = 0;
 
     // UNICODE -> ansi
     int alen = WideCharToMultiByte(CP_ACP, 0, wbuf, wlen, NULL, 0, NULL, NULL);
     ansi = (char*)malloc((alen + 1) * sizeof(char));
-    if (NULL == ansi)
-    {
-        return NULL;
-    }
     WideCharToMultiByte(CP_ACP, 0, wbuf, wlen, ansi, alen, NULL, NULL);
     ansi[alen] = 0;
 
@@ -88,10 +72,6 @@ wchar_t* Utf8ToUtf16LE(const char* s, size_t inbytes, size_t* outbytes)
     // str_utf8 -> UNICODE
     wlen = MultiByteToWideChar(CP_UTF8, 0, s, inbytes, NULL, 0);
     wbuf = (wchar_t*)malloc((wlen + 1) * sizeof(wchar_t));
-    if (NULL == wbuf)
-    {
-        return NULL;
-    }
     MultiByteToWideChar(CP_UTF8, 0, s, inbytes, wbuf, wlen);
     wbuf[wlen] = 0;
     *outbytes = wlen * sizeof(wchar_t);
@@ -106,10 +86,6 @@ char* Utf16LEToAnsi(const wchar_t* s, size_t inbytes, size_t* outbytes)
     int inlen = inbytes / sizeof(wchar_t);
     int alen = WideCharToMultiByte(CP_ACP, 0, s, inlen, NULL, 0, NULL, NULL);
     ansi = (char*)malloc((alen + 1) * sizeof(char));
-    if (NULL == ansi)
-    {
-        return NULL;
-    }
     WideCharToMultiByte(CP_ACP, 0, s, inlen, ansi, alen, NULL, NULL);
     ansi[alen] = 0;
     *outbytes = alen;
@@ -123,10 +99,6 @@ char* Utf16LEToUtf8(const wchar_t* s, size_t inbytes, size_t* outbytes)
     int inlen = inbytes / sizeof(wchar_t);
     int ulen = WideCharToMultiByte(CP_UTF8, 0, s, inlen, NULL, 0, NULL, NULL);
     utf8 = (char*)malloc((ulen + 1) * sizeof(char));
-    if (NULL == utf8)
-    {
-        return NULL;
-    }
     WideCharToMultiByte(CP_UTF8, 0, s, inlen, utf8, ulen, NULL, NULL);
     utf8[ulen] = 0;
     *outbytes = ulen;
