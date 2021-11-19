@@ -8,6 +8,13 @@
 
 namespace stringutil
 {
+    typedef struct _suxx_guid {
+        unsigned int   Data1;
+        unsigned short Data2;
+        unsigned short Data3;
+        unsigned char  Data4[8];
+    } GUID;
+
     // 字节与16进制字符串相互转换，可指定输出的大小写
     std::string BinToHexstr(const std::string& bin, bool upper);
     std::string HexstrToBin(const std::string& hexstr);
@@ -34,6 +41,23 @@ namespace stringutil
     std::string Base64Encode(const std::string& src);
     std::string Base64Decode(const std::string& base64);
     
+
+    std::string GuidToString(const stringutil::GUID& guid, bool to_upper);
+    stringutil::GUID StringToGuid(const std::string& guid_string);
+
+
+    template<class T>
+    T EndianConvert(T t)
+    {
+        char* __p = reinterpret_cast<char*>(&t);
+        char* __ep = __p + sizeof(T) - 1;
+
+        for (int i = 0; i < sizeof(T) / 2; i++) {
+            std::swap(*(__p + i), *(__ep - i));
+        }
+        return t;
+    }
+
 };
 
 

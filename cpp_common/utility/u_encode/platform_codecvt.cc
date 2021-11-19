@@ -107,6 +107,60 @@ char* Utf16LEToUtf8(const wchar_t* s, size_t inbytes, size_t* outbytes)
 }
 
 
+
+std::string AnsiStringToU8String(const std::string& ansi)
+{
+    size_t outbytes = 0;
+    char* u8 = AnsiToUtf8(ansi.c_str(), ansi.size(), &outbytes);
+    std::string ret = u8 ? u8 : "";
+    free(u8);
+    return ret;
+}
+std::wstring AnsiStringToU16String(const std::string& ansi)
+{
+    size_t outbytes = 0;
+    wchar_t* u16 = AnsiToUtf16LE(ansi.c_str(), ansi.size(), &outbytes);
+    std::wstring ret = u16 ? u16 : L"";
+    free(u16);
+    return ret;
+}
+std::string U16StringToAnsiString(const std::wstring& u16)
+{
+    size_t outbytes = 0;
+    char* a = Utf16LEToAnsi(u16.c_str(), u16.size() * sizeof(wchar_t), &outbytes);
+    std::string ansi = a ? a : "";
+    free(a);
+    return ansi;
+}
+
+std::string U16StringToU8String(const std::wstring& u16)
+{
+    size_t outbytes = 0;
+    char* u8 = Utf16LEToUtf8(u16.c_str(), u16.size() * sizeof(wchar_t), &outbytes);
+    std::string ret = u8 ? u8 : "";
+    free(u8);
+    return ret;
+}
+
+std::string U8StringToAnsiString(const std::string& u8)
+{
+    size_t outbytes = 0;
+    char* a = Utf8ToAnsi(u8.c_str(), u8.size(), &outbytes);
+    std::string ret = a ? a : "";
+    free(a);
+    return ret;
+}
+std::wstring U8StringToU16String(const std::string& u8)
+{
+    size_t outbytes = 0;
+    wchar_t* u16 = Utf8ToUtf16LE(u8.c_str(), u8.size(), &outbytes);
+    std::wstring ret = u16 ? u16 : L"";
+    free(u16);
+    return ret;
+}
+
+
+
 #endif // WIN32
 
 #if defined __unix__  || defined __unix
@@ -280,8 +334,6 @@ char* Utf16LEToUtf8(const cv_char16* s, size_t inbytes, size_t* outbytes)
     *outbytes = rcd - outlen;
     return buf;
 }
-
-
 
 
 

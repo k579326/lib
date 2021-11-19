@@ -206,6 +206,68 @@ namespace stringutil
         return "";
     }
    
+    std::string GuidToString(const stringutil::GUID& guid, bool to_upper)
+    {
+        std::string rst;
+        char buf[64];
+
+        sprintf(buf, "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+                    guid.Data1,
+                    guid.Data2,
+                    guid.Data3,
+                    guid.Data4[0],
+                    guid.Data4[1],
+                    guid.Data4[2],
+                    guid.Data4[3],
+                    guid.Data4[4],
+                    guid.Data4[5],
+                    guid.Data4[6],
+                    guid.Data4[7]);
+        rst = buf;
+        if (to_upper)
+            ToUpper(rst);
+        else
+            ToLower(rst);
+
+        return rst;
+    }
+    stringutil::GUID StringToGuid(const std::string& guid_string)
+    {
+        auto string_list = Split(guid_string, '-');
+        if (string_list.size() != 5)
+            return {};
+
+        if (string_list[0].size() != 8 ||
+            string_list[1].size() != 4 ||
+            string_list[2].size() != 4 ||
+            string_list[3].size() != 4 ||
+            string_list[4].size() != 12)
+            return {};
+
+        std::string data1 = HexstrToBin(string_list[0]);
+        std::string data2 = HexstrToBin(string_list[1]);
+        std::string data3 = HexstrToBin(string_list[2]);
+        std::string data4_1 = HexstrToBin(string_list[3]);
+        std::string data4_2 = HexstrToBin(string_list[4]);
+
+        std::string data4 = data4_1 + data4_2;
+
+        stringutil::GUID guid;
+        guid.Data1 = *(unsigned int*)data1.c_str();
+        guid.Data1 = EndianConvert<unsigned int>(guid.Data1);
+
+        guid.Data2 = *(unsigned short*)data2.c_str();
+        guid.Data2 = EndianConvert<unsigned short>(guid.Data2);
+
+        guid.Data3 = *(unsigned short*)data3.c_str();
+        guid.Data3 = EndianConvert<unsigned short>(guid.Data3);
+
+        memcpy(guid.Data4, data4.c_str(), data4.size());
+        return guid;
+    }
+
+
+
 };
 
 
