@@ -1,17 +1,17 @@
 
 #include <assert.h>
 
-#include "u_path//util_path.h"
-#include "u_file/util_file.h"
+#include "path//util_path.h"
+#include "file/util_file.h"
 
 using namespace fileutil;
 using namespace pathutil;
 
 int main()
 {
-    std::string filename;
-    std::string backupfile;
-    File file("./test");
+    CptString filename;
+    CptString backupfile;
+    File file(TEXT("./test"));
     filename = file.Name();
 
     if (file.Open(kCreateForce, kRdWr, 0600) != 0)
@@ -46,9 +46,9 @@ int main()
         return -1;
     }
 
-    File::Rename(filename, "newtest");
-    std::string dir = pathutil::GetDirOfPathName(filename);
-    backupfile = PathCombines(dir, "newtest");
+    File::Rename(filename, TEXT("newtest"));
+    CptString dir = pathutil::GetDirOfPathName(filename);
+    backupfile = PathCombines(dir, TEXT("newtest"));
     if (!File::IsExist(backupfile)) {
         printf("Rename Or IsExist failed!\n");
         return -1;

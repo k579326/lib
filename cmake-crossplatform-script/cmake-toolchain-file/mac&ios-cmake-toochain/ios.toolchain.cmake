@@ -122,6 +122,14 @@
 # *****************************************************************************
 #
 
+
+# 添加模拟器Arm64架构
+# 为了区分真机ARM64，定义模拟器ARM64架构名为"arm64s"
+
+
+
+
+
 # Fix for PThread library not in path
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
@@ -208,19 +216,30 @@ if (NOT Arch)
     set(Arch ${CMAKE_OSX_ARCHITECTURES})
 endif()
 
+set(CMAKE_IOS_TARGET_PLATFORM "$ENV{iOS_PLATFORM}")
+
+message(STATUS ${CMAKE_IOS_TARGET_PLATFORM})
 message(STATUS "${Arch}")
+
 if(DEFINED Arch)
-    if(Arch MATCHES "arm64") 
-        set(PLATFORM "OS")
-    elseif(Arch MATCHES "armv7")
-        set(PLATFORM "OS")
-    elseif(Arch MATCHES "armv7s")
-        set(PLATFORM "OS")
-    elseif(Arch MATCHES "i386")    
-        set(PLATFORM "SIMULATOR")
-    elseif(Arch MATCHES "x86_64") 
-        set(PLATFORM "SIMULATOR64")
+    if (CMAKE_IOS_TARGET_PLATFORM STREQUAL "iphoneos")
+        if(Arch STREQUAL "arm64") 
+            set(PLATFORM "OS")
+        elseif(Arch MATCHES "armv7")
+            set(PLATFORM "OS")
+        elseif(Arch MATCHES "armv7s")
+            set(PLATFORM "OS")
+        endif()
+    elseif (CMAKE_IOS_TARGET_PLATFORM STREQUAL "simulator")
+	    if(Arch MATCHES "i386")    
+            set(PLATFORM "SIMULATOR")
+    	elseif(Arch MATCHES "x86_64") 
+       	    set(PLATFORM "SIMULATOR64")
+    	elseif(Arch STREQUAL "arm64")
+	        set(PLATFORM "SIMULATORARM")
+        endif()
     else()
+        message(STATUS "${CMAKE_IOS_TARGET_PLATFORM}")
         message(FATAL_ERROR "Arch been set invalid value, this script not support AppleTV and AppleWatch!")
     endif()
 else()
@@ -280,6 +299,11 @@ elseif(PLATFORM_INT STREQUAL "SIMULATOR64")
   set(SDK_NAME iphonesimulator)
   if(NOT ARCHS)
     set(ARCHS x86_64)
+  endif()
+elseif(PLATFORM_INT STREQUAL "SIMULATORARM")
+  set(SDK_NAME iphonesimulator)
+  if(NOT ARCHS)
+    set(ARCHS arm64)
   endif()
 elseif(PLATFORM_INT STREQUAL "TVOS")
   set(SDK_NAME appletvos)
@@ -523,6 +547,7 @@ set(CMAKE_CXX_OSX_CURRENT_VERSION_FLAG "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}")
 if(ARCHS MATCHES "((^|;|, )(arm64|arm64e|x86_64))+")
   set(CMAKE_C_SIZEOF_DATA_PTR 8)
   set(CMAKE_CXX_SIZEOF_DATA_PTR 8)
+  set(CMAKE_SIZEOF_VOID_P 8)
   if(ARCHS MATCHES "((^|;|, )(arm64|arm64e))+")
     set(CMAKE_SYSTEM_PROCESSOR "aarch64")
   else()
@@ -532,6 +557,7 @@ if(ARCHS MATCHES "((^|;|, )(arm64|arm64e|x86_64))+")
 else()
   set(CMAKE_C_SIZEOF_DATA_PTR 4)
   set(CMAKE_CXX_SIZEOF_DATA_PTR 4)
+  set(CMAKE_SIZEOF_VOID_P 4)
   set(CMAKE_SYSTEM_PROCESSOR "arm")
   message(STATUS "Using a data_ptr size of 4")
 endif()

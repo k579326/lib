@@ -6,8 +6,8 @@
 #include <queue>
 #include <map>
 
-#include "check_encode.h"
-#include "u_dir/util_dir.h"
+#include "encode/check_encode.h"
+#include "dir/util_dir.h"
 
 static std::map<EncodeType, char*> s_encodemap =
 {
