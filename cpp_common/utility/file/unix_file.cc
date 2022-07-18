@@ -51,7 +51,7 @@ namespace fileutil
 
     File::File(const CptChar* path) : path_(path), file_(nullptr)
     {
-        path_ = pathutil::RelativeToAbsolute(path);
+        path_ = pathutil::RelativeToAbsolute<CptString>(path);
         file_ = new FilePtr;
     }
 

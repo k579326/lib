@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include <string>
+#include <algorithm>
 #include "cpt-string.h"
 
 #if defined __unix__ || defined __APPLE__
@@ -70,18 +71,18 @@ namespace pathutil
     template<>
     struct Traits<std::string>
     {
-        static constexpr char* slash = "/";
-        static constexpr char* backslash = "\\";
-        static constexpr char* localmark = "./";
-        static constexpr char* prevmark = "../";
+        constexpr static const char* const slash = "/";
+        constexpr static const char* const backslash = "\\";
+        constexpr static const char* const localmark = "./";
+        constexpr static const char* const prevmark = "../";
     };
     template<>
     struct Traits<std::wstring>
     {
-        static constexpr wchar_t* slash = L"/";
-        static constexpr wchar_t* backslash = L"\\";
-        static constexpr wchar_t* localmark = L"./";
-        static constexpr wchar_t* prevmark = L"../";
+        constexpr static const wchar_t* const slash = L"/";
+        constexpr static const wchar_t* const backslash = L"\\";
+        constexpr static const wchar_t* const localmark = L"./";
+        constexpr static const wchar_t* const prevmark = L"../";
     };
 
     // 风格转换（unix与windows路径风格自适应），并移除重复的斜杠

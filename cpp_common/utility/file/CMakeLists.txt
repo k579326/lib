@@ -22,7 +22,7 @@ set_target_properties(fileutil PROPERTIES FOLDER "common/")
 
 
 
-target_link_libraries(fileutil pathutil ${EXTLIB})
+target_link_libraries(fileutil ${EXTLIB})
 target_include_directories(fileutil INTERFACE ../)
 
 if (DEFINED RUNTEST)

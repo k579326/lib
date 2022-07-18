@@ -30,7 +30,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 else ()
 	set(OutLib pthread)
 endif ()
-target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil ${OutLib})
+target_link_libraries(logger logcore loghelper logclr dirutil fileutil ${OutLib})
 target_include_directories(logger PUBLIC ./)
 
 

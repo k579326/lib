@@ -9,7 +9,7 @@
 #include "encode/check_encode.h"
 #include "dir/util_dir.h"
 
-static std::map<EncodeType, char*> s_encodemap =
+static std::map<EncodeType, const char*> s_encodemap =
 {
     {UTF8, "UTF-8"}, 
     {UTF8_BOM, "UTF-8 BOM"},

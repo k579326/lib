@@ -15,4 +15,4 @@ target_link_libraries(test_log logger)
 target_include_directories(test_log PRIVATE ../)
 
 add_executable(test_file test_file.cc)
-target_link_libraries(test_file pathutil fileutil)
+target_link_libraries(test_file fileutil)
