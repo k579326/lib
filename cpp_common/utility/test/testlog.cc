@@ -1,34 +1,32 @@
-
-
-#include "logger.h"
+ï»¿#include "logger.h"
 
 
 int main()
 {
-	CptChar a[256] = TEXT("sdÎÒÊÇ°µÉ«µ÷µÄÅ¼¶ûÅÂÈÈÈË");
+    CptChar a[256] = TEXT("sdæˆ‘æ˜¯æš—è‰²è°ƒçš„å¶å°”æ€•çƒ­äºº");
 
-	// FILE* fp = fopen("D:\\CrashPad_Android.vsdx", "rb");
-	// fread(a, 1, 256, fp);
-	// fclose(fp);
+    // FILE* fp = fopen("D:\\CrashPad_Android.vsdx", "rb");
+    // fread(a, 1, 256, fp);
+    // fclose(fp);
 
-	//LOG_InitAsConsoleMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
-	LOG_InitAsFileMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
+    //LOG_InitAsConsoleMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
+    LOG_InitAsFileMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
 
-	LOGM_Debug(TEXT("char array a"), a, sizeof(a));
-	LOG_Infor(TEXT("ÕâÊÇ·Ö¼¶ÈÕÖ¾µÄInforÈÕÖ¾"));
-	LOG_Warning(TEXT("ÕâÊÇ·Ö¼¶ÈÕÖ¾µÄWarningÈÕÖ¾"));
-	LOG_Fatal(TEXT("ÕâÊÇ·Ö¼¶ÈÕÖ¾µÄfatalÈÕÖ¾"));
-	LOG_Error(TEXT("ÕâÊÇ·Ö¼¶ÈÕÖ¾µÄErrorÈÕÖ¾"));
-	LOG_FREE(1, TC_Red, TEXT("Ò»¼¶ºìÉ«ÈÕÖ¾"));
-	LOG_FREE(2, TC_Cyan, TEXT("¶ş¼¶ÇàÉ«ÈÕÖ¾"));
-	LOG_FREE(3, TC_Yellow, TEXT("Èı¼¶»ÆÉ«ÈÕÖ¾"));
-	LOG_FREE(4, TC_Purple, TEXT("ËÄ¼¶×ÏÉ«ÈÕÖ¾"));
-	LOG_FREE(5, TC_Green, TEXT("Îå¼¶ÂÌÉ«ÈÕÖ¾"));
-	LOG_FREE(3, TC_Blue, TEXT("Èı¼¶À¶É«ÈÕÖ¾"));
+    LOGM_Debug(TEXT("char array a"), a, sizeof(a));
+    LOG_Infor(TEXT("è¿™æ˜¯åˆ†çº§æ—¥å¿—çš„Inforæ—¥å¿—"));
+    LOG_Warning(TEXT("è¿™æ˜¯åˆ†çº§æ—¥å¿—çš„Warningæ—¥å¿—"));
+    LOG_Fatal(TEXT("è¿™æ˜¯åˆ†çº§æ—¥å¿—çš„fatalæ—¥å¿—"));
+    LOG_Error(TEXT("è¿™æ˜¯åˆ†çº§æ—¥å¿—çš„Erroræ—¥å¿—"));
+    LOG_FREE(1, TC_Red, TEXT("ä¸€çº§çº¢è‰²æ—¥å¿—"));
+    LOG_FREE(2, TC_Cyan, TEXT("äºŒçº§é’è‰²æ—¥å¿—"));
+    LOG_FREE(3, TC_Yellow, TEXT("ä¸‰çº§é»„è‰²æ—¥å¿—"));
+    LOG_FREE(4, TC_Purple, TEXT("å››çº§ç´«è‰²æ—¥å¿—"));
+    LOG_FREE(5, TC_Green, TEXT("äº”çº§ç»¿è‰²æ—¥å¿—"));
+    LOG_FREE(3, TC_Blue, TEXT("ä¸‰çº§è“è‰²æ—¥å¿—"));
 
-	// LOG_Uninit();
+    // LOG_Uninit();
 
-	getchar();
+    getchar();
 
-	return 0;
+    return 0;
 }
