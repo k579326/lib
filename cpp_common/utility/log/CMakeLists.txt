@@ -23,7 +23,7 @@ if (OPENLOG)
 	message("[module-logger] logger is being opened!")
 endif()
 
-target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil encode)
+target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil encode pthread)
 target_include_directories(logger PUBLIC ./)
 
 

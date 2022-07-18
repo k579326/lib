@@ -51,21 +51,7 @@ namespace fileutil
 
     File::File(const CptChar* path) : path_(path), file_(nullptr)
     {
-        char dir[256];
-        size_t length = 256;
-
-        if (path[0] == '.')
-        {
-            if (path[1] != '/' && path[1] != '\\') {
-                assert(false);
-                path_ = "";
-            }
-            else if (getcwd(dir, length)) 
-            {
-                path_ = dir + path_.substr(1);
-            }
-        }
-        pathutil::PathStyleConvert(path_);
+        path_ = pathutil::RelativeToAbsolute(path);
         file_ = new FilePtr;
     }
 

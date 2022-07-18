@@ -2,6 +2,7 @@
 
 #include "util_string.h"
 
+#include <string.h>
 #include <cctype>
 #include <algorithm>
 

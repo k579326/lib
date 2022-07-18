@@ -11,7 +11,7 @@ int main()
 {
     CptString filename;
     CptString backupfile;
-    File file(TEXT("./test"));
+    File file(TEXT("./testcase_forfiletest"));
     filename = file.Name();
 
     if (file.Open(kCreateForce, kRdWr, 0600) != 0)
