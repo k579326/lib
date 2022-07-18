@@ -23,7 +23,14 @@ if (OPENLOG)
 	message("[module-logger] logger is being opened!")
 endif()
 
-target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil encode pthread)
+
+set(OutLib)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	set(OutLib encode)
+else ()
+	set(OutLib pthread)
+endif ()
+target_link_libraries(logger logcore loghelper logclr dirutil fileutil pathutil ${OutLib})
 target_include_directories(logger PUBLIC ./)
 
 

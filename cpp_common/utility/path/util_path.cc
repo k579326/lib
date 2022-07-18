@@ -61,11 +61,11 @@ namespace pathutil
     void PathStyleConvert(CptString& path, PathStyle to_style)
     {
         if (to_style == PathStyle::kAuto) {
-            #ifdef WIN32
+#if defined WIN32 || defined _WIN32
             _PathStyleConvert(path, false);
-            #else
+#else
             _PathStyleConvert(path, true);
-            #endif
+#endif
         }
         else if (to_style == PathStyle::kWindows) {
             _PathStyleConvert(path, false);

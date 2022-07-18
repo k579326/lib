@@ -77,7 +77,7 @@ void Logger::Init(const LogInitInfo& info, const CptString& version, const CptSt
             assert(false);
             return;
         }
-        logpath = pathutil::PathCombines(logpath, TEXT("logs"));
+        logpath = pathutil::PathCombine<CptString>(logpath, TEXT("logs"));
         lnm_.SetLabel(info.label);
         lnm_.SetPath(logpath);
 
