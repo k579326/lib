@@ -111,7 +111,7 @@ namespace pathutil
 
     // 路径拼接
     template<class String, class Traits = Traits<String>>
-    String PathCombine(const String& dir, const String& filename)
+    String PathsCombine(const String& dir, const String& filename)
     {
         if (dir.empty()) {
             return filename;
@@ -240,7 +240,7 @@ namespace pathutil
         if (s.compare(0, 2, Traits::localmark) == 0)
             s = s.substr(2);
 
-        return PathCombine(dirstring, s);
+        return PathsCombine(dirstring, s);
     };
 
 };

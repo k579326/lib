@@ -108,7 +108,7 @@ void LogClr::RemoveLogTimeout()
             continue;
         }
         
-        CptString fullname = pathutil::PathCombine<CptString>(log_dir_, e->d_name);
+        CptString fullname = pathutil::PathsCombine<CptString>(log_dir_, e->d_name);
         if (DT_DIR == e->d_type) {
             // 日志目录下不应该有子目录
             CommRemoveDir(fullname.c_str(), true);
