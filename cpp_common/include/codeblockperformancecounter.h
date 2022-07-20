@@ -12,6 +12,7 @@
 
 #include <unordered_set>
 #include <chrono>
+#include <mutex>
 
 using namespace std::chrono;
 
@@ -65,7 +66,8 @@ namespace CodeBlockPerformanceCounter
 			localtmp.invoke_times = 1;
 
 			uint64_t time_interger = costtime.count();
-
+			
+			std::lock_guard<std::mutex> autolock(lock_);
 			auto rst_pair = block_list_.insert(localtmp);
 			if (!rst_pair.second)
 			{
@@ -130,6 +132,7 @@ namespace CodeBlockPerformanceCounter
 		}
 		
 		std::unordered_set<BlockInfo, decltype(HashOfBlockInfo), decltype(BlockInfoEqual)> block_list_;
+		std::mutex lock_;
 	};
 	
 	
