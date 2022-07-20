@@ -48,7 +48,7 @@ int main()
 
     File::Rename(filename, TEXT("newtest"));
     CptString dir = pathutil::GetDirOfPathName(filename);
-    backupfile = PathCombine<CptString>(dir, TEXT("newtest"));
+    backupfile = PathsCombine<CptString>(dir, TEXT("newtest"));
     if (!File::IsExist(backupfile)) {
         printf("Rename Or IsExist failed!\n");
         return -1;
