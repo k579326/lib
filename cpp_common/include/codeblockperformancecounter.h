@@ -140,25 +140,30 @@ namespace CodeBlockPerformanceCounter
 
 
 
-#ifndef _NDEBUG
+#ifndef COUNTER_ENABLE
+#define COUNTER_ENABLE
+#endif
+
+
+#if defined COUNTER_ENABLE && (!defined NDEBUG && !defined _NDEBUG)
 
 #define BlockMonitorBegin(tag)			\
+uint32_t lInENumBEr_##tag = __LINE__;	\
 auto __bloCkMoNiTOrstart_##tag = std::chrono::steady_clock::now().time_since_epoch()
 
 
 #define BlockMonitorEnd(tag)		\
 auto __iNtErvAl_##tag = std::chrono::steady_clock::now().time_since_epoch() - \
 __bloCkMoNiTOrstart_##tag; \
-_iN_cOunteR_CLasS::GetInstance()->RecordScope(__FILE__, __FUNCTION__, __LINE__, #tag, \
+_iN_cOunteR_CLasS::GetInstance()->RecordScope(__FILE__, __FUNCTION__, lInENumBEr_##tag, #tag, \
 duration_cast<microseconds>(__iNtErvAl_##tag))
 
 #else
-	
+    
 #define BlockMonitorBegin(tag)
 #define BlockMonitorEnd(tag)
 
 #endif
-
 
 
 
