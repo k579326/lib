@@ -31,6 +31,7 @@
 #define CptStringCat	wcscat
 #define CptStringCopy	wcscpy
 #define CptStringCmp	wcscmp
+#define CptPrintf		wprintf
 #define CptStringPrintf swprintf
 #define Cptvsprintf		vswprintf
 #define Cptvsnprintf	vswprintf
@@ -40,6 +41,7 @@
 #define CptStringCat	strcat
 #define CptStringCopy	strcpy
 #define CptStringCmp	strcmp
+#define CptPrintf		printf
 #define CptStringPrintf sprintf
 #define Cptvsprintf		vsprintf
 #define Cptvsnprintf	vsnprintf
