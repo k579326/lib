@@ -15,6 +15,7 @@
 #include <mutex>
 #include <thread>
 #include <map>
+#include <vector>
 
 #include <assert.h>
 
@@ -110,7 +111,7 @@ namespace CodeBlockPerformanceCounter
         }
         
         void RecordScopeStart(const std::string& filename, const std::string& funcname, uint32_t linenum, 
-            const std::string tag, const microseconds& starttime)
+            const std::string& tag, const microseconds& starttime)
         {
             BlockInfo localtmp;
             localtmp.funcname = funcname;
@@ -142,7 +143,7 @@ namespace CodeBlockPerformanceCounter
             }
         }
         void RecordScopeEnd(const std::string& filename, const std::string& funcname, uint32_t linenum,
-            const std::string tag, const microseconds& endtime)
+            const std::string& tag, const microseconds& endtime)
         {
             BlockInfo localtmp;
             localtmp.funcname = funcname;
