@@ -15,6 +15,7 @@
 #include <mutex>
 #include <thread>
 #include <map>
+#include <vector>
 
 #include <assert.h>
 
