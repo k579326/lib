@@ -42,6 +42,7 @@ private:
 
 
 #define _SCOPENAME(F, L) F##L
-#define SetupResourceClean(f) ScopeResource<void> _SCOPENAME(__FILE__, __LINE__)(f)
-#define SetupResourceCleanEx(t, f) ScopeResource<decltype(t)> _SCOPENAME(__FILE__, LINE__)(t, f);
+#define _VARIABLENAME(L) _SCOPENAME(__FUNCTION__, L)
+#define SetupResourceClean(f) ScopeResource<void> _VARIABLENAME(__LINE__)(f)
+#define SetupResourceCleanEx(t, f) ScopeResource<decltype(t)> _VARIABLENAME(__LINE__)(t, f);
 
