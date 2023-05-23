@@ -1,48 +1,29 @@
 #pragma once
 
-template<class T>
-using ScopeResourceDeleter = void(*)(T);
+#include <algorithm>
+#include <functional>
 
-template<class T>
 class ScopeResource
 {
 public:
-    ScopeResource(T t, ScopeResourceDeleter<T> f)
+    template<class D, class... T>
+    ScopeResource(D&& f, T&&... t)
     {
-        _t = t;
-        _f = f;
+        _f = std::bind(std::forward<D>(f), std::forward<T>(t)...);
     }
+
     ~ScopeResource() {
-        _f(_t);
+        if (_f) _f();
     }
 
     ScopeResource(const ScopeResource&) = delete;
     ScopeResource& operator= (const ScopeResource&) = delete;
 private:
-    T _t;
-    ScopeResourceDeleter<T> _f;
+    std::function<void()> _f;
 };
-
-template<>
-class ScopeResource<void>
-{
-public:
-    ScopeResource(ScopeResourceDeleter<void> f)
-    {
-        _f = f;
-    }
-    ~ScopeResource() {
-        _f();
-    }
-    ScopeResource(const ScopeResource&) = delete;
-    ScopeResource& operator= (const ScopeResource&) = delete;
-private:
-    ScopeResourceDeleter<void> _f;
-};
-
 
 #define _SCOPENAME(F, L) F##L
 #define _VARIABLENAME(L) _SCOPENAME(__FUNCTION__, L)
-#define SetupResourceClean(f) ScopeResource<void> _VARIABLENAME(__LINE__)(f)
-#define SetupResourceCleanEx(t, f) ScopeResource<decltype(t)> _VARIABLENAME(__LINE__)(t, f);
+#define SetupResourceClean(f, ...) ScopeResource _VARIABLENAME(__LINE__)(f, ##__VA_ARGS__)
+
 
