@@ -9,7 +9,8 @@ public:
     template<class D, class... T>
     ScopeResource(D&& f, T&&... t)
     {
-        _f = std::bind(std::forward<D>(f), std::forward<T>(t)...);
+        if (f != nullptr)
+            _f = std::bind(std::forward<D>(f), std::forward<T>(t)...);
     }
 
     ~ScopeResource() {
