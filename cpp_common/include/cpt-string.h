@@ -49,7 +49,8 @@
 
 #ifndef TEXT
 #if defined _UNICODE || defined UNICODE
-	#define TEXT(x)	L##x 
+	#define __texT_(x) L##x
+	#define TEXT(x)	__texT_(x) 
 #else
 	#define TEXT(x)	x
 #endif
@@ -57,7 +58,7 @@
 
 
 #if defined _UNICODE || defined UNICODE
-#define MACROSTRINGEXPAND(macro) TEXT(macro)
+#define MACROSTRINGEXPAND(macro) __texT_(macro)
 #else
 #define MACROSTRINGEXPAND(macro) macro
 #endif

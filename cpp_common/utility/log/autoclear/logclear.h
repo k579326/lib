@@ -13,6 +13,16 @@
 #include "helper/logname.h"
 #include "cpt-string.h"
 
+/* 
+*   bug记录：
+* 
+    此类在Windows 7平台存在bug, 在用MT方式编译代码后，程序退出时会卡死在日志清理线程中，
+    在StackOverflow上有同样的issue(https://stackoverflow.com/questions/60452341/stdconditional-variable-notify-problem-on-windows-7-called-from-destructor-o)
+    此问题暂时没有找到解决方案，放弃stl用boost又不现实，只能修改代码逻辑了.
+
+    修改方案：不再启动清理线程，改为log初始化时，清理一次
+*/
+
 class LogClr
 {
 public:

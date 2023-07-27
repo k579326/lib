@@ -60,8 +60,9 @@ namespace stringutil
             {
                 break;
             }
-
-            container.push_back(str.substr(s_pos, e_pos - s_pos));
+            if (e_pos != s_pos) {
+                container.push_back(str.substr(s_pos, e_pos - s_pos));
+            }
             s_pos = e_pos + separator.size();
         }
 
