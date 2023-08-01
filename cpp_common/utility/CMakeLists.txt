@@ -19,7 +19,7 @@ add_subdirectory(log)
 add_subdirectory(string)
 add_subdirectory(threadpool)
 add_subdirectory(aes)
-add_subdirectory(mmp)
+add_subdirectory(mmap)
 add_subdirectory(crc)
 
 

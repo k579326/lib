@@ -123,6 +123,9 @@ namespace filemap
         size_t start = offset - offset % pagesize;
         size_t bias = offset - start;
 
+        if (size + offset > file_size_)
+            return { 0, 0 };
+
         void* addr = mmap(0, size + bias, map_access, MAP_SHARED, fhinfo_.hf, start);
         if (!addr)
             return {0, 0};

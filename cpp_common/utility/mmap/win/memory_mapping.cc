@@ -167,6 +167,9 @@ Memory PhyFileMap::MapView(size_t offset, size_t size, Permission pms)
 
     size_t bias = offset - start;
 
+    if (size + offset > file_size_)
+        return { 0, 0 };
+
     void* p = MapViewOfFile(fhinfo_.hm, access, li.HighPart, li.LowPart, size + bias);
     if (!p)
         return {0, 0};
