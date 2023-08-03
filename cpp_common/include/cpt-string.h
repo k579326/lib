@@ -47,12 +47,15 @@
 #define Cptvsnprintf	vsnprintf
 #endif
 
-#ifndef TEXT
 #if defined _UNICODE || defined UNICODE
-	#define __texT_(x) L##x
-	#define TEXT(x)	__texT_(x) 
+#define __texT_(x) L##x
+#ifndef TEXT
+#define TEXT(x)	__texT_(x) 
+#endif
 #else
-	#define TEXT(x)	x
+#define __texT_(x) x
+#ifndef TEXT
+#define TEXT(x)	x
 #endif
 #endif
 
