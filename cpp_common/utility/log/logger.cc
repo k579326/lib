@@ -42,6 +42,8 @@ Logger::Logger()
 }
 Logger::~Logger()
 {
+    if (IsInited())
+        Uninit();
 }
 
 bool Logger::IsInited()
@@ -114,7 +116,9 @@ void Logger::Uninit()
 {
     if (!IsInited())
         return;
-    // memset(&loginfo_, 0, sizeof(loginfo_));
+    
+    Print(LogLevels::kInforLevel, TEXT(""), TEXT(""), 0, TEXT("Logger Exit!\n"));
+
     logpath_ = TEXT("");
     version_ = TEXT("");
 
