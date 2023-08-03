@@ -5,10 +5,14 @@
 #include <string>
 #include <memory>
 
-#include "file/util_file.h"
 #include "logger_define.h"
 #include "console/console_extern.h"
+#include "cpt-string.h"
 
+namespace filemap
+{
+    class PhyFileMap;
+}
 
 class IOInterface
 {
@@ -33,9 +37,21 @@ public:
     virtual int Open(const CptString& path) override;
     virtual int Write(const CptString& content, __LogTextColor textcolor) override;
     virtual void Close() override;
-
 private:
-    std::shared_ptr<fileutil::File> f_ = nullptr;
+    bool Prepare(const CptString& path) const;
+    uint64_t GetRealSize(const void* ptr);
+    void RecordRealSize(uint64_t inc);
+    void InitFile();
+private:
+    std::shared_ptr<filemap::PhyFileMap> map_ = nullptr;
+    void* pointer_ = 0;
+    uint64_t offset_ = 0;
+#if defined _UNICODE || defined UNICODE
+    const int file_info_size_ = 256;
+#else
+    const int file_info_size_ = 128;
+#endif
+    const int file_max_size_ = file_info_size_ * 1024 + file_info_size_;
 };
 
 class ConsoleIO : public IOInterface

@@ -9,8 +9,8 @@ int main()
     // fread(a, 1, 256, fp);
     // fclose(fp);
 
-    LOG_InitAsConsoleMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
-    //LOG_InitAsFileMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
+    //LOG_InitAsConsoleMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
+    LOG_InitAsFileMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
 
     LOGM_Debug(TEXT("char array a"), a, sizeof(a));
     LOG_Infor(TEXT("这是分级日志的Infor日志"));

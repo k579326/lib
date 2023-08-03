@@ -30,6 +30,9 @@ namespace filemap
         PhyFileMap();
         ~PhyFileMap();
         
+        PhyFileMap(PhyFileMap&& o);
+        PhyFileMap& operator=(PhyFileMap&& o);
+
         bool InitFromFile(const char* path, Permission);
         bool InitFromFile(const wchar_t* path, Permission);        
         bool InitFromFile(FHandle filehandle, Permission);

@@ -23,6 +23,34 @@ PhyFileMap::~PhyFileMap()
     Close();
 }
 
+PhyFileMap::PhyFileMap(PhyFileMap&& o)
+{
+    memcpy(&fhinfo_, &o.fhinfo_, sizeof(_FHandleInfo));
+    memcpy(&mvm_, &o.mvm_, sizeof(Memory));
+    file_size_ = o.file_size_;
+    filepath_ = o.filepath_;
+    permission_ = o.permission_;
+
+    memset(&o.fhinfo_, 0, sizeof(_FHandleInfo));
+    memset(&o.mvm_, 0, sizeof(Memory));
+    o.filepath_ = nullptr;
+    o.file_size_ = 0;
+}
+PhyFileMap& PhyFileMap::operator=(PhyFileMap&& o)
+{
+    Close();
+    memcpy(&fhinfo_, &o.fhinfo_, sizeof(_FHandleInfo));
+    memcpy(&mvm_, &o.mvm_, sizeof(Memory));
+    file_size_ = o.file_size_;
+    filepath_ = o.filepath_;
+    permission_ = o.permission_;
+    memset(&o.fhinfo_, 0, sizeof(_FHandleInfo));
+    memset(&o.mvm_, 0, sizeof(Memory));
+    o.filepath_ = nullptr;
+    o.file_size_ = 0;
+    return *this;
+}
+
 bool PhyFileMap::InitFromFile(const char* path, Permission pms)
 {
     int result = MultiByteToWideChar(CP_ACP, 0, path, strlen(path), NULL, 0);

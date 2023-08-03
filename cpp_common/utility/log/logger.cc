@@ -57,7 +57,7 @@ void Logger::Init(const LogInitInfo& info, const CptString& version, const CptSt
     {
         return;
     }
-
+    
     // init printer
     if (info.runModel == RunModel::kAsync) { 
         printer_.reset(new ThreadPrinter(info.outputModel));

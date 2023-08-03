@@ -91,6 +91,8 @@ namespace fileutil
 
         int Write(const void* indata, uint32_t insize) const;
         
+        uint64_t Size() const;
+
         void Flush();
 
         bool GetFileDescriptor(FileDescriptor* fd) const;

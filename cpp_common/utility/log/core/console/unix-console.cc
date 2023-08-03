@@ -8,6 +8,10 @@
 #include <string>
 #include <map>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 #define unused(x) ((void*)&x)
 
 static std::string s_color = "\e[0m";
@@ -25,12 +29,14 @@ static const std::map<__LogTextColor, std::string> color_map =
 };
 
 
-
+static char* g_console_buf = nullptr;
 
 // 总是使用STDOUT_FILENO
 ConsoleID GetConsole()
 {
     // 只要不返回-1就可以，并不使用
+    if (!g_console_buf)
+        g_console_buf = new char[1024 * 4];
     return 0;
 }
 
@@ -51,6 +57,7 @@ bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity
     return true;
 }
 
+#ifndef __ANDROID__
 int WriteConsole_(ConsoleID console, const void* ptr, int len)
 {
     unused(console);
@@ -70,8 +77,7 @@ int WriteConsole_(ConsoleID console, const void* ptr, int len)
         return 0;
     }
     
-    char buf[1024 * 4];
-    sprintf(buf, "%s%s\e[0m", s_color.c_str(), (const char*)ptr);
+    sprintf(g_console_buf, "%s%s\e[0m", s_color.c_str(), (const char*)ptr);
     
     write(STDOUT_FILENO, s_color.c_str(), s_color.size());
     write(STDOUT_FILENO, ptr, len);

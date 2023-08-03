@@ -84,12 +84,13 @@ bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity
 int WriteConsole_(ConsoleID console, const void* ptr, int len)
 {
     DWORD dwSizeWriten = 0;
-    // 这里使用WriteFile，而不用WriteConsole，因为后者输出到控制台后，没办法使用>重定向到文件
-    // 而WriteFile可以，WriteFile完全可以替代WriteConsole
-    if (WriteFile(console, ptr, len, &dwSizeWriten, NULL) == FALSE)
+    // don't use WriteConsole
+    if (!WriteFile(console, ptr, len, &dwSizeWriten, NULL))
     {
         return -1;
     }
+    OutputDebugStringA((char*)ptr);
+    
     return 0;
 }
 

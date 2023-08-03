@@ -67,7 +67,7 @@ void LogClr::ClearProc()
         if (stop_) {
             continue;
         }
-
+        
         RemoveLogTimeout();
     }           
     

@@ -251,6 +251,11 @@ namespace fileutil
         return path_;
     }
 
+    uint64_t File::Size() const
+    {
+        return Size(path_);
+    }
+
     void File::Flush()
     {
         if (IsOpened())
