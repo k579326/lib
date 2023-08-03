@@ -21,7 +21,6 @@ typedef struct
 {
     CptString   label;             // 用于做标识，可指定为任意字符串，此字符串将体现在日志的文件名上
     LogLevels   level;                  // 小于level的日志将不会被打印
-    RunModel    runModel;				// 同步输出或者异步输出
     int         columns;				// 选择输出哪些列，参考 enum LogColumns
     LogOutput   outputModel;			// 输出至文件或者终端
     uint8_t		keep_days;              // 日志保存时间（即随时清理->从当天算keep_days天前的所有日志。如果为0，则不清理任何日志）
@@ -87,10 +86,10 @@ private:
 
 /* some setting for struct LogInitInfo*/
 static LogInitInfo g_logfile_info_ = {
-	TEXT("DefaultNameOfLog"), kDebugLevel, kSync, kAllColumn, kFileModel, 0
+	TEXT("DefaultNameOfLog"), kDebugLevel, kAllColumn, kFileModel, 0
 };
 static LogInitInfo g_logconsole_info = {
-	TEXT("DefaultNameOfLog"), kDebugLevel, kSync, kAllColumn, kConsoleModel, 0
+	TEXT("DefaultNameOfLog"), kDebugLevel, kAllColumn, kConsoleModel, 0
 };
 
 

@@ -11,12 +11,6 @@ const std::map<LogLevels, CptString> g_loglevel_str =
 };
 
 
-const std::map<RunModel, CptString> g_runmodel_str =
-{
-    { kSync, TEXT("SYNC") },
-    { kAsync, TEXT("ASYNC") }
-};
-
 
 
 

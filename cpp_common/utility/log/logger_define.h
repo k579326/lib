@@ -16,13 +16,6 @@ enum LogLevels
 };
 
 
-enum RunModel
-{
-    kSync,                   // 同步输出日志
-    kAsync,                  // 异步输出日志
-};
-
-
 enum LogColumns
 {
     kDateTime = 0x01,        // 全等级有效

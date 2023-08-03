@@ -1,5 +1,7 @@
 ﻿#include "logger.h"
+#include "codeblockperformancecounter.h"
 
+using namespace CodeBlockPerformanceCounter;
 
 int main()
 {
@@ -9,6 +11,7 @@ int main()
     // fread(a, 1, 256, fp);
     // fclose(fp);
 
+    BlockMonitorBegin(test);
     //LOG_InitAsConsoleMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
     LOG_InitAsFileMode(TEXT("logtest"), TEXT("1.0"), TEXT("./"));
 
@@ -23,7 +26,7 @@ int main()
     LOG_FREE(4, TC_Purple, TEXT("四级紫色日志"));
     LOG_FREE(5, TC_Green, TEXT("五级绿色日志"));
     LOG_FREE(3, TC_Blue, TEXT("三级蓝色日志"));
-
+    BlockMonitorEnd(test);
     // LOG_Uninit();
 
     getchar();

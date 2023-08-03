@@ -20,7 +20,6 @@ static const CptChar* g_log_start = TEXT("\n\
 **** Logger Startup Header                             \n\
 **** Time:      %4d-%02d-%02d %02d:%02d:%02d           \n\
 **** LogLevel:  %s                                     \n\
-**** RunModel:  %s                                     \n\
 **********************************************************\n\
 ");
 
@@ -59,13 +58,7 @@ void Logger::Init(const LogInitInfo& info, const CptString& version, const CptSt
     }
     
     // init printer
-    if (info.runModel == RunModel::kAsync) { 
-        printer_.reset(new ThreadPrinter(info.outputModel));
-    }
-    else
-    {
-        printer_.reset(new SyncPrinter(info.outputModel));
-    }
+    printer_.reset(new SyncPrinter(info.outputModel));
 
     fmt_ = std::make_shared<Formatter>(info.columns, version);
 
@@ -107,8 +100,7 @@ void Logger::SetLoggerHeader()
     tm* tp = localtime(&timestamp);
     CptStringPrintf(buf, g_log_start, tp->tm_year + 1900, tp->tm_mon + 1, tp->tm_mday,
         tp->tm_hour, tp->tm_min, tp->tm_sec, 
-        g_loglevel_str.find(loginfo_.level)->second.c_str(), 
-        g_runmodel_str.find(loginfo_.runModel)->second.c_str()
+        g_loglevel_str.find(loginfo_.level)->second.c_str()
     );
 
     _LOGPROPERTY log;

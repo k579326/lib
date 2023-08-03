@@ -168,7 +168,7 @@ int FileIO::Open(const CptString& path)
     return 0;
 }
 
-int FileIO::Write(const CptString& content, __LogTextColor textcolor)
+int FileIO::Write(const CptString& content)
 {
     if (!pointer_) {
         return -1;
@@ -197,11 +197,6 @@ void FileIO::Close()
 
 
 /* console io */
-
-ConsoleIO::ConsoleIO()
-{
-}
-
 ConsoleIO::~ConsoleIO()
 {
 }
@@ -212,13 +207,13 @@ int ConsoleIO::Open(const CptString& path)
     return (int)console_ == -1 ? -1 : 0;
 }
 
-int ConsoleIO::Write(const CptString& content, __LogTextColor textcolor)
+int ConsoleIO::Write(const CptString& content)
 {
     int ret;
     if ((int)console_ == -1)
         return -1;
 
-    SetConsoleTextColor(console_, textcolor, true);
+    SetConsoleTextColor(console_, _GetColor(), true);
 #if defined _UNICODE || defined UNICODE
     std::string localstring = U16StringToAnsiString(content);
     ret = WriteConsole_(console_, localstring.c_str(), localstring.size());

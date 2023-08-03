@@ -17,15 +17,21 @@ namespace filemap
 class IOInterface
 {
 public:    
-    IOInterface() {}
+    IOInterface() : level_(kLevelEnd) {}
     virtual ~IOInterface() {}
     
     virtual int Open(const CptString& path) = 0;
-    
-    virtual int Write(const CptString& content, __LogTextColor textcolor) = 0;
-    
+    virtual int Write(const CptString& content) = 0;
     virtual void Close() = 0;
-    
+
+    void SetLevel(LogLevels l) { level_ = l; }
+    void SetColor(TextColor c) { color_ = c; }
+
+    LogLevels GetLevel() { return level_; }
+    TextColor GetColor() { return color_; }
+private:
+    LogLevels level_;
+    TextColor color_;
 };
 
 class FileIO : public IOInterface
@@ -35,7 +41,7 @@ public:
     ~FileIO() {}
 
     virtual int Open(const CptString& path) override;
-    virtual int Write(const CptString& content, __LogTextColor textcolor) override;
+    virtual int Write(const CptString& content) override;
     virtual void Close() override;
 private:
     bool Prepare(const CptString& path) const;
@@ -56,16 +62,59 @@ private:
 
 class ConsoleIO : public IOInterface
 {
+    using LogColorMap = std::map<LogLevels, __LogTextColor>;
+    using LogColorMapFormOut = std::map<TextColor, __LogTextColor>;
+
 public:
-    ConsoleIO();
+    ConsoleIO()
+    {
+        color_map_.insert(std::make_pair(kDebugLevel, White));
+        color_map_.insert(std::make_pair(kInforLevel, Green));
+        color_map_.insert(std::make_pair(kWarningLevel, Yellow));
+        color_map_.insert(std::make_pair(kErrorLevel, Purple));
+        color_map_.insert(std::make_pair(kFatalLevel, Red));
+
+        out_color_map_.insert(std::make_pair(TC_White, White));
+        out_color_map_.insert(std::make_pair(TC_Green, Green));
+        out_color_map_.insert(std::make_pair(TC_Yellow, Yellow));
+        out_color_map_.insert(std::make_pair(TC_Purple, Purple));
+        out_color_map_.insert(std::make_pair(TC_Black, Black));
+        out_color_map_.insert(std::make_pair(TC_Red, Red));
+        out_color_map_.insert(std::make_pair(TC_Cyan, Cyan));
+        out_color_map_.insert(std::make_pair(TC_Blue, Blue));
+    }
     ~ConsoleIO();
 
     virtual int Open(const CptString& path) override;
-    virtual int Write(const CptString& content, __LogTextColor textcolor) override;
+    virtual int Write(const CptString& content) override;
     virtual void Close() override;
 
 private:
+    __LogTextColor _GetColor()
+    {
+        __LogTextColor c;
+        if (GetLevel() == kLevelEnd) {
+            auto it = out_color_map_.find(GetColor());
+            if (it == out_color_map_.end()) {
+                return InvalidColor;
+            }
+            c = it->second;
+        }
+        else {
+            auto it = color_map_.find(GetLevel());
+            if (it == color_map_.end()) {
+                return InvalidColor;
+            }
+            c = it->second;
+        }
+
+        return c;
+    }
+
+private:
     ConsoleID console_ = (ConsoleID)-1;
+    LogColorMap color_map_;
+    LogColorMapFormOut out_color_map_;
 };
 
 
