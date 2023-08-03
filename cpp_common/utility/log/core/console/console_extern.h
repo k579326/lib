@@ -2,14 +2,16 @@
 #ifndef _CONSOLE_EXTERN_H_
 #define _CONSOLE_EXTERN_H_
 
+#include "logger_define.h"
+
 #ifdef _WIN32
     #include <windows.h>
     typedef HANDLE ConsoleID;
-    
 #else
     #include <unistd.h>
     typedef int ConsoleID;
 #endif
+
 
 enum __LogTextColor
 {
@@ -33,7 +35,7 @@ ConsoleID GetConsole();
 
 bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity);
 
-int WriteConsole_(ConsoleID console, const void* ptr, int len);
+int WriteConsole_(ConsoleID console, LogLevels level, const void* ptr, int len);
 
 void RestoreConsole(ConsoleID console);
 

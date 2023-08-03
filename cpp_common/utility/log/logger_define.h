@@ -2,7 +2,7 @@
 #ifndef _LOGGER_DEFINE_H_
 #define _LOGGER_DEFINE_H_
 
-
+#include <stdint.h>
 // 小于当前日志等级的打印不会输出到日志
 enum LogLevels
 {

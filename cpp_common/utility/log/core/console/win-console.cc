@@ -81,7 +81,7 @@ bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity
     return true;
 }
 
-int WriteConsole_(ConsoleID console, const void* ptr, int len)
+int WriteConsole_(ConsoleID console, LogLevels level, const void* ptr, int len)
 {
     DWORD dwSizeWriten = 0;
     // don't use WriteConsole

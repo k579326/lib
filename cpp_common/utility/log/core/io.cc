@@ -216,9 +216,9 @@ int ConsoleIO::Write(const CptString& content)
     SetConsoleTextColor(console_, _GetColor(), true);
 #if defined _UNICODE || defined UNICODE
     std::string localstring = U16StringToAnsiString(content);
-    ret = WriteConsole_(console_, localstring.c_str(), localstring.size());
+    ret = WriteConsole_(console_, GetLevel(), localstring.c_str(), localstring.size());
 #else
-    ret = WriteConsole_(console_, content.c_str(), content.size());
+    ret = WriteConsole_(console_, GetLevel(), content.c_str(), content.size());
 #endif
     RestoreConsole(console_);
     return ret;

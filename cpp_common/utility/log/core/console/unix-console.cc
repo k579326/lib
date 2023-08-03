@@ -8,10 +8,6 @@
 #include <string>
 #include <map>
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#endif
-
 #define unused(x) ((void*)&x)
 
 static std::string s_color = "\e[0m";
@@ -57,13 +53,10 @@ bool SetConsoleTextColor(ConsoleID console, __LogTextColor color, bool intensity
     return true;
 }
 
-#ifndef __ANDROID__
-int WriteConsole_(ConsoleID console, const void* ptr, int len)
+int WriteConsole_(ConsoleID console, LogLevels level, const void* ptr, int len)
 {
     unused(console);
-    
     const char* term = getenv("TERM");
-    
     bool term_supported = term != nullptr &&
         (strcmp(term, "xterm") == 0 ||
         strcmp(term, "xterm-color") == 0 ||
@@ -82,7 +75,6 @@ int WriteConsole_(ConsoleID console, const void* ptr, int len)
     write(STDOUT_FILENO, s_color.c_str(), s_color.size());
     write(STDOUT_FILENO, ptr, len);
     write(STDOUT_FILENO, "\e[0m", strlen("\e[0m"));
-    
     return 0;
 }
 
