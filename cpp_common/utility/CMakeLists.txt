@@ -21,7 +21,7 @@ add_subdirectory(threadpool)
 add_subdirectory(aes)
 add_subdirectory(mmap)
 add_subdirectory(crc)
-
+add_subdirectory(xdata)
 
 add_subdirectory(test)
 
