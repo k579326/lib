@@ -135,7 +135,7 @@ bool PhyFileMap::InitFromFile(FHandle filehandle, Permission pms)
     // get filepath
     std::unique_ptr<wchar_t[]> pathbuf = std::make_unique<wchar_t[]>(1024);
 
-    HMODULE h = LoadLibraryA("kernal32.dll");
+    HMODULE h = LoadLibraryA("kernel32.dll");
     FARPROC f = GetProcAddress(h, "GetFinalPathNameByHandleW");
 
     DWORD size = 0;
@@ -143,7 +143,7 @@ bool PhyFileMap::InitFromFile(FHandle filehandle, Permission pms)
     if (f) 
     {
         __Local_FuncPtr __GetFinalPathNameByHandleW = (__Local_FuncPtr)f;
-        size = __GetFinalPathNameByHandleW((HANDLE)filehandle, pathbuf.get(), 1024, 0);
+        size = __GetFinalPathNameByHandleW((HANDLE)filehandle, pathbuf.get(), 1024, FILE_NAME_OPENED);
     }
     if (size != 0) {
         filepath_ = pathbuf.release();
