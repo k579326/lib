@@ -17,7 +17,7 @@ public:
     FileSource();
     virtual ~FileSource();
 
-    bool Init(const CptString& path);
+    bool Init(const CptString& path, bool create);
 
     virtual bool Open() override;
     virtual bool PrepareHeader() override;

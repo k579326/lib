@@ -26,10 +26,12 @@ FileSource::FileSource()
 
 FileSource::~FileSource() { delete fmap_; }
 
-bool FileSource::Init(const CptString& path)
+bool FileSource::Init(const CptString& path, bool create)
 {
     if (!fileutil::File::IsExist(path))
     {
+        if (!create) return false;
+
         fileutil::File f(path.c_str());
         f.Open(OpenModel::kCreate, AccessModel::kRdWr);
         f.Close();
