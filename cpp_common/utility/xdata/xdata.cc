@@ -648,16 +648,15 @@ bool XData::AttachToFile(XData& data, const CptString& source, SerializeOperatio
 {
     if (data.source()) return false;
 
-    auto s = new FileSource();
+    std::shared_ptr<FileSource> s(new FileSource());
     
     if (!s->Init(source, so == XData::SerializeOperation::R ? false : true))
     {
-        delete s;
         return false;
     }
 
     if (!s->Open()) return false;
-    if (!data.attach(std::shared_ptr<IDataSource>(s))) return false;
+    if (!data.attach(s)) return false;
 
     if (so == W)
     {
