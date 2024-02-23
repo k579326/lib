@@ -97,13 +97,12 @@ bool FileSource::Write(size_t pos, size_t offset, const void* data, size_t size)
 }
 bool FileSource::MoveData(size_t dst, size_t src, size_t bytes)
 {
-    size_t distance = src > dst ? (src - dst) : (dst - src);
     if (bytes == (size_t)-1)
     {
         bytes = cur_offset_ - src;
     }
-    memmove(content_ + dst, content_ + src, distance);
-    cur_offset_ += distance;
+    memmove(content_ + dst, content_ + src, bytes);
+    cur_offset_ = cur_offset_ + dst - src;
     UpdateHeader();
     return true;
 }
