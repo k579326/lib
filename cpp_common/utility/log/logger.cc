@@ -38,7 +38,7 @@ Logger* Logger::GetInstance()
 
 Logger::Logger()
 {
-    memset(&loginfo_, 0, sizeof(loginfo_));
+    //memset(&loginfo_, 0, sizeof(loginfo_));
 }
 Logger::~Logger()
 {
